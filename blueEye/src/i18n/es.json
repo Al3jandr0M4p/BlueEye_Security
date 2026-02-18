@@ -1,0 +1,15 @@
+{
+    "businessName": "BlueEye Security",
+    "signInYourAccount": "Iniciar sesion en tu cuenta",
+    "signUpYourAccount": "Registra tu cuenta",
+    "signIn": "Iniciar sesion",
+    "signUp": "Regístrate",
+    "forgotYourPassword": "¿Olvidaste tu contraseña?",
+    "email": "Email",
+    "name": "Usuario",
+    "password": "Contraseña",
+    "dontHaveAnAccount": "¿Aun no tienes una cuenta?",
+    "doHaveAnAccount": "¿Ya tienes una cuenta?",
+    "emailOrUsername": "Email o usuario",
+    "OrContinueWithSocial": "O continua con"
+}
