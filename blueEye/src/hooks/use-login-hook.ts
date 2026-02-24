@@ -1,55 +1,46 @@
 import React, { useState } from "react";
-import { useTranslation } from "../../node_modules/react-i18next";
-import api from "../api/api";
 import { useNavigate } from "react-router-dom";
-import type { SignInResponse } from "../types/types";
+import { loginUser } from "../service/auth.service";
 
 export function useLoginHook() {
-  const { t } = useTranslation();
   const [identifier, setIdentier] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const isDisabled = identifier === "" || password === "" ? true : false;
+
   const navigate = useNavigate();
+  const isDisabled = !identifier || !password;
 
   const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
+    setIsLoading(true);
 
-    const isEmail = identifier.includes("@");
+    try {
+      const result = await loginUser({ identifier, password });
 
-    const payload = isEmail
-      ? { identifier: identifier, password } // identifier is Email
-      : { identifier: identifier, password }; // identifier is username
+      const roleName = result.data.profile?.rolename;
 
-    console.log("Submitting login with payload:", payload);
+      console.log(`Login ${result.data.user}`);
+      console.log(`Rolename: ${roleName}`);
 
-    const result = await api.post<SignInResponse>("/api/auth/login", payload);
-
-    console.log(`Payload backend data: ${result.data}`);
-
-    const roleName = result.data.data.profile?.rolename;
-
-    console.log(`Login ${result.data.data.user}`);
-    console.log(`Rolename: ${roleName}`);
-
-    setTimeout(() => {
-      if (roleName === "usuario") {
-        navigate("/clientDashbord");
-      } else if (roleName === "tecnico") {
-        navigate("/techDashboard");
-      } else {
-        navigate("/");
+      setTimeout(() => {
+        if (roleName === "usuario") navigate("/clientDashbord");
+        else if (roleName === "tecnico") navigate("/techDashboard");
+        else navigate("/login");
+      }, 2000);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        console.log(err);
       }
-    }, 2000);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return {
     identifier,
     password,
-    t,
     isLoading,
     isDisabled,
-    setIsLoading,
     setPassword,
     setIdentier,
     handleSubmit,
