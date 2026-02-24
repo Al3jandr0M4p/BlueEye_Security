@@ -1,25 +1,27 @@
-import type React from "react";
 import { Link } from "react-router-dom";
-import { useRegisterHook } from "../../hooks/use-register-hook";
 import Input from "../../components/Input/Input";
+import { useRegisterBusinessHook } from "../../hooks/use-register-business";
 
-const RegisterScreen: React.FC = () => {
+const RegisterBusiness: React.FC = () => {
   const {
-    userName,
-    email,
     password,
-    isDisabled,
+    email,
+    userName,
     isLoading,
+    rnc,
+    rncError,
+    isDisabled,
     handleSubmit,
-    setEmail,
     setPassword,
+    setEmail,
     setUserName,
-  } = useRegisterHook();
+    setRnc,
+  } = useRegisterBusinessHook();
 
   return (
     <>
       <section className="flex flex-col w-full min-h-screen">
-        <div className="flex flex-1 justify-center items-center pt-30">
+        <div className="flex flex-1 justify-center items-center">
           <div className="w-full max-w-md bg-white rounded-lg">
             <nav
               className="text-gray-600 text-sm mb-10"
@@ -27,15 +29,15 @@ const RegisterScreen: React.FC = () => {
             >
               <ol className="inline-flex items-center space-x-1">
                 <li className="inline-flex items-center text-lg">
-                  <Link to="/" className="text-gray-700 hover:text-primary-600">
-                    Home
+                  <Link to="/register" className="text-gray-700 hover:text-primary-600">
+                    Register
                   </Link>
                 </li>
                 <li>
                   <span className="mx-2 text-gray-400">{"/"}</span>
                 </li>
                 <li className="inline-flex items-center text-gray-500">
-                  Register
+                  Register Business
                 </li>
               </ol>
             </nav>
@@ -45,8 +47,8 @@ const RegisterScreen: React.FC = () => {
             </h1>
 
             <div className="py-3 space-y-4">
-              <h2 className="text-xl font-medium tracking-tight text-gray-900 md:text-2xl">
-                Registra tu cuenta
+              <h2 className="text-xl font-medium tracking-tight text-gray-900 md:text-xl">
+                Registra tu Empresa, Institución o Equipo
               </h2>
             </div>
 
@@ -56,7 +58,7 @@ const RegisterScreen: React.FC = () => {
                 text="email"
                 value={email}
                 onValueChange={setEmail}
-                translationKey={"email"}
+                translationKey="Email"
               />
 
               <Input
@@ -64,7 +66,16 @@ const RegisterScreen: React.FC = () => {
                 text="usuario"
                 value={userName}
                 onValueChange={setUserName}
-                translationKey={"usuario"}
+                translationKey="Usuario"
+              />
+
+              <Input
+                type="text"
+                text="rnc"
+                value={rnc}
+                onValueChange={setRnc}
+                translationKey="Rnc"
+                error={rncError}
               />
 
               <Input
@@ -72,7 +83,7 @@ const RegisterScreen: React.FC = () => {
                 text="password"
                 value={password}
                 onValueChange={setPassword}
-                translationKey={"contraseña"}
+                translationKey="Contraseña"
               />
 
               <button
@@ -89,48 +100,15 @@ const RegisterScreen: React.FC = () => {
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                   </>
                 ) : (
-                  "Registrarse"
+                  "Registrate"
                 )}
               </button>
-
-              <p
-                className="text-sm text-center font-light text-gray-500"
-                style={{ fontFamily: "Google Sans" }}
-              >
-                ¿Ya tienes una cuenta?{" "}
-                <Link
-                  to="/login"
-                  className="font-medium text-gray-600 hover:underline"
-                >
-                  Iniciar Sesión
-                </Link>
-              </p>
             </form>
           </div>
         </div>
-        <footer className="mt-10 py-10 text-center text-gray-500 text-sm">
-          {" "}
-          <p>¿Tienes una empresa, institución o equipo?</p>{" "}
-          <p>
-            {" "}
-            <Link
-              to="/register/business"
-              className="font-medium text-gray-700 hover:underline"
-            >
-              {" "}
-              Regístrala y administra usuarios, cámaras, roles y permisos desde
-              un solo panel.{" "}
-            </Link>{" "}
-          </p>{" "}
-          <p className="text-xs text-gray-400">
-            {" "}
-            Diseñado para empresas de seguridad, negocios, residenciales y
-            corporativos.{" "}
-          </p>{" "}
-        </footer>
       </section>
     </>
   );
 };
 
-export default RegisterScreen;
+export default RegisterBusiness;

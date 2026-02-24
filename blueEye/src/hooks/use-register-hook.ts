@@ -1,43 +1,40 @@
-import type React from "react";
-import { useState } from "react";
+import React, { useState } from "react";
 import { useTranslation } from "../../node_modules/react-i18next";
-import api from "../api/api";
 import { useNavigate } from "react-router-dom";
+import { registerUser } from "../service/auth.service";
 
 export function useRegisterHook() {
   const [userName, setUserName] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const { t } = useTranslation();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const isDisabled =
-    email === "" || password === "" || userName === "" ? true : false;
   const navigate = useNavigate();
 
-  const handleSubmit = async (e: React.SubmitEvent) => {
+  const isDisabled = !email || !password || !userName;
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const newUser = {
-      email: email,
-      username: userName,
-      password: password,
-    };
-
-    console.log("new user:", newUser);
+    setIsLoading(true);
 
     try {
-      const result = await api.post("/api/auth/register", newUser);
+      const result = await registerUser({
+        email,
+        username: userName,
+        password,
+      });
 
       console.log(`Result ${result.data}`);
 
-      setTimeout(() => {
-        navigate("/login");
-      }, 1000);
+      navigate("/login");
     } catch (err: unknown) {
       if (err instanceof Error) {
-        console.log(`Error ${err.message} ${err.cause}`);
+        console.log(err);
       }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -48,7 +45,6 @@ export function useRegisterHook() {
     t,
     isLoading,
     isDisabled,
-    setIsLoading,
     handleSubmit,
     setEmail,
     setPassword,

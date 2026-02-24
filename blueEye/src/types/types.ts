@@ -3,7 +3,7 @@ export type UserProfile = {
   username: string;
 };
 
-export type SignInResponse = {
+export interface SignInResponse {
   data: {
     user: unknown;
     session: unknown;
@@ -11,3 +11,34 @@ export type SignInResponse = {
   };
   error: string | null;
 };
+
+export interface ButtonProps {
+  children: React.ReactNode;
+  variant?: "default" | "outline";
+  className: string;
+}
+
+export interface LandingCardProps {
+  children: React.ReactNode;
+  className: string;
+}
+
+export interface RegisterPayload {
+  email: string;
+  username: string;
+  password: string;
+}
+
+export interface LoginPayload {
+  identifier: string;
+  password: string;
+}
+
+export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  value: string;
+  onValueChange: React.Dispatch<React.SetStateAction<string>>;
+  text: string;
+  type: string;
+  translationKey: string;
+  error?: string;
+}
