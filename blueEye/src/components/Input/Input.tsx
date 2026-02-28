@@ -8,6 +8,7 @@ const Input: React.FC<InputProps> = ({
   type,
   translationKey,
   error,
+  variant,
 }) => {
   return (
     <div className="relative w-full">
@@ -21,10 +22,14 @@ const Input: React.FC<InputProps> = ({
           onValueChange(v);
         }}
         placeholder=""
-        className={`peer w-full border rounded-lg px-2 py-2 outline-none text-gray-900 transition-all ${
-          error
-            ? "border-red-500 focus:border-red-500"
-            : "border-gray-300 focus:border-indigo-600"
+        className={`peer w-full outline-none transition-all ${
+          variant === "unstyled"
+            ? "px-3 py-2 border-none rounded-none"
+            : `border rounded-lg px-2 py-2 ${
+                error
+                  ? "border-red-500 focus:border-red-500"
+                  : "border-gray-300 focus:border-indigo-600"
+              }`
         }`}
         autoComplete={type === "password" ? "new-password" : "off"}
         required
