@@ -1,27 +1,21 @@
+import React from "react";
 import { Link } from "react-router-dom";
 import Input from "../../components/Input/Input";
-import { useRegisterBusinessHook } from "../../hooks/use-register-business";
+import { useForgotPassword } from "../../hooks/use-forgot-password";
 
-const RegisterBusiness: React.FC = () => {
+const ForgotYourPassword: React.FC = () => {
   const {
-    password,
     email,
-    userName,
-    isLoading,
-    rnc,
-    rncError,
     isDisabled,
-    handleSubmit,
-    setPassword,
+    isLoading,
     setEmail,
-    setUserName,
-    setRnc,
-  } = useRegisterBusinessHook();
+    handleSubmit,
+  } = useForgotPassword();
 
   return (
     <>
-      <section className="flex flex-col w-full min-h-screen">
-        <div className="flex flex-1 justify-center items-center">
+      <section className="flex w-full h-screen">
+        <div className="w-full flex justify-center items-center">
           <div className="w-full max-w-md bg-white rounded-lg">
             <nav
               className="text-gray-600 text-sm mb-10"
@@ -29,26 +23,27 @@ const RegisterBusiness: React.FC = () => {
             >
               <ol className="inline-flex items-center space-x-1">
                 <li className="inline-flex items-center text-lg">
-                  <Link to="/register" className="text-gray-700 hover:text-primary-600">
-                    Register
+                  <Link
+                    to="/login"
+                    className="text-gray-700 hover:text-primary-600"
+                  >
+                    Login
                   </Link>
                 </li>
                 <li>
                   <span className="mx-2 text-gray-400">{"/"}</span>
                 </li>
                 <li className="inline-flex items-center text-gray-500">
-                  Register Business
+                  Recuperar Contraseña
                 </li>
               </ol>
             </nav>
-
             <h1 className="text-xl pb-1.5 text-gray-600 md:text-2xl">
               BlueEye Security
             </h1>
-
             <div className="py-3 space-y-4">
-              <h2 className="text-xl font-medium tracking-tight text-gray-900 md:text-xl">
-                Registra tu Empresa, Institución o Equipo
+              <h2 className="text-xl font-medium tracking-tight text-gray-900 md:text-2xl">
+                Olvidaste tu Contraseña
               </h2>
             </div>
 
@@ -58,32 +53,7 @@ const RegisterBusiness: React.FC = () => {
                 text="email"
                 value={email}
                 onValueChange={setEmail}
-                translationKey="Email"
-              />
-
-              <Input
-                type="text"
-                text="usuario"
-                value={userName}
-                onValueChange={setUserName}
-                translationKey="Usuario"
-              />
-
-              <Input
-                type="text"
-                text="rnc"
-                value={rnc}
-                onValueChange={setRnc}
-                translationKey="Rnc"
-                error={rncError}
-              />
-
-              <Input
-                type="password"
-                text="password"
-                value={password}
-                onValueChange={setPassword}
-                translationKey="Contraseña"
+                translationKey={"email"}
               />
 
               <button
@@ -100,7 +70,7 @@ const RegisterBusiness: React.FC = () => {
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                   </>
                 ) : (
-                  "Registrate"
+                  "Recuperar Contraseña"
                 )}
               </button>
             </form>
@@ -111,4 +81,4 @@ const RegisterBusiness: React.FC = () => {
   );
 };
 
-export default RegisterBusiness;
+export default ForgotYourPassword;
