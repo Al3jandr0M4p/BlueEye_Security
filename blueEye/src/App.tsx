@@ -14,6 +14,7 @@ import React from "react";
 import RegisterBusiness from "./screens/registerBusiness/RegisterBusiness";
 
 import "./styles/output.css";
+import SuperAdminDashboard from "./screens/Superadmindashboard/SuperAdminDashboard";
 
 const App: React.FC = () => {
   // TODO: Implement authentication logic to protect routes and manage user sessions
@@ -28,6 +29,8 @@ const App: React.FC = () => {
         {/* hacer el dashboard del cliente rederizar la pantalla */}
         {/* ClientDashboard by Ryan, Sebastian, Alejandro */}
         <Route path="/clientDashbord" element={<div>Client Dashbord</div>} />
+
+        <Route path="/super/admin/dashboard" element={<SuperAdminDashboard />}/>
 
         {/* TechDashboard by Alejandro */}
         <Route path="/techDashboard" element={<TechDashboardMenu />}>
