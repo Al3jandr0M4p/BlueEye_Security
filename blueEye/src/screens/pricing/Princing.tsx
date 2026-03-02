@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { PricingCard } from "../../components/PricingCard/Card";
-import { ComingSoonModal } from "../../components/CommingSoonModal/Modal";
+import { ComingSoonModal } from "../../modals/CommingSoonModal/Modal";
 
 const PricingScreen: React.FC = () => {
   const [openModal, setOpenModal] = useState<boolean>(false);
@@ -8,18 +8,18 @@ const PricingScreen: React.FC = () => {
   return (
     <>
       {openModal && <ComingSoonModal setOpenModal={setOpenModal} />}
-      <section className="flex flex-col max-w-5xl w-full items-center px-4 sm:px-6 lg:px-8 text-center">
-      {/* <section className="flex flex-col max-w-5xl mx-auto items-center px-4 sm:px-6 lg:px-2 text-center w-full"> */}
-        <div className="max-w-4xl">
+
+      <section className="w-full">
+        <div className="mx-auto max-w-6xl text-center">
           <h1
-            className="text-5xl font-medium"
+            className="text-4xl font-medium md:text-5xl"
             style={{ fontFamily: "Google Sans" }}
           >
             Diseñado para mejorar el trabajo de las Empresas
           </h1>
 
           <p
-            className="text-xl mt-3 w3xl"
+            className="mx-auto mt-3 max-w-4xl text-lg md:text-xl"
             style={{ fontFamily: "Google Sans" }}
           >
             Aqui en BluEye Security nos centramos en la mejoras y automatizacion
@@ -28,9 +28,8 @@ const PricingScreen: React.FC = () => {
           </p>
         </div>
 
-        {/* Cards */}
-        <section className="min-h-screen flex items-center justify-center py-20 text-black">
-          <div className="max-w-full mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 place-items-stretch">
+        <section className="mx-auto mt-10 max-w-7xl pb-8 text-black md:mt-12">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 2xl:grid-cols-3">
             <PricingCard
               titleCard="Inicial"
               description="La mejor opción para uso personal y para su próximo proyecto."
@@ -58,7 +57,7 @@ const PricingScreen: React.FC = () => {
               setOpenModal={setOpenModal}
             />
             <PricingCard
-              titleCard="Enterprice"
+              titleCard="Enterprise"
               description="Ideal para usos a gran escala y derechos de redistribución ampliados."
               pricingByMonth={299}
               checkList={[

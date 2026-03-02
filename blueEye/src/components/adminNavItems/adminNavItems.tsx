@@ -3,7 +3,6 @@ import {
   Bell,
   CircleHelp,
   Coins,
-  Globe,
   LayoutDashboard,
   Lightbulb,
   Monitor,
@@ -50,7 +49,7 @@ export const adminNavItems: NavItem[] = [
     hasArrow: true,
   },
   {
-    label: "Audience",
+    label: "Usuarios",
     to: "employees",
     icon: <Users size={16} />,
     hasArrow: true,
@@ -68,7 +67,7 @@ export const adminNavItems: NavItem[] = [
     hasArrow: true,
   },
   {
-    label: "Wallet",
+    label: "Planes",
     to: "pricing",
     icon: <Wallet size={16} />,
   },
@@ -76,6 +75,5 @@ export const adminNavItems: NavItem[] = [
 
 export const utilityItems = [
   { label: "Settings", icon: <Settings size={16} />, to: "/perfil" },
-  { label: "View Site", icon: <Globe size={16} />, to: "/" },
   { label: "Help", icon: <CircleHelp size={16} />, to: "suport" },
 ];

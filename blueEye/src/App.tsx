@@ -19,6 +19,8 @@ import TechDashboardMenu from "./components/techDashboardMenu/TechDashboardMenu"
 import ForgotYourPassword from "./screens/forgotPassword/ForgotPassword";
 import AdminDashboardMenu from "./components/adminDashboardMenu/AdminDashboardMenu";
 import { useAppSessionAsyncHooks } from "./hooks/use-app-hooks";
+import AdminUsersScreen from "./screens/adminUsers/AdminUsers";
+import InfoCrud from "./components/infoCrudUsers/InfoCrud";
 
 const App: React.FC = () => {
   useAppSessionAsyncHooks();
@@ -66,6 +68,15 @@ const App: React.FC = () => {
 
         {/* AdminDashboard by Alejandro */}
         <Route
+          path="/adminDashboard/employees/info/:userType/:id"
+          element={
+            <ProtectedRoute allowedRoles={["admin"]}>
+              <InfoCrud />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
           path="/adminDashboard"
           element={
             <ProtectedRoute allowedRoles={["admin"]}>
@@ -84,7 +95,7 @@ const App: React.FC = () => {
           <Route path="suport" />
           <Route path="orders-payments" />
           <Route path="reports" />
-          <Route path="employees" />
+          <Route path="employees" element={<AdminUsersScreen />} />
           <Route path="pricing" element={<PricingScreen />} />
         </Route>
       </Routes>

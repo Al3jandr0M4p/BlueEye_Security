@@ -181,3 +181,23 @@ export interface NavItem {
   icon: React.ReactNode;
   hasArrow?: boolean;
 };
+
+export interface ActivityItem {
+  id: number;
+  title: string;
+  highlight: string;
+  date: string;
+};
+
+export type UserRoleTab = "clientes" | "tecnicos";
+
+export interface UserCard {
+  id: number;
+  name: string;
+  email: string;
+  phone: string;
+  company: string;
+  city: string;
+  image: string;
+};
+
