@@ -6,6 +6,11 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
+
+// ── Client Dashboard ──────────────────────────────────────────────────────────
+import ClientDashboardMenu from "./screens/ClientDashboard/types/ClientDashboardMenu";
+import ClientDashboard from "./screens/ClientDashboard/types/Dashboard";
+
 import React from "react";
 import SuperAdminDashboard from "./screens/Superadmindashboard/SuperAdminDashboard";
 import LoginScreen from "./screens/login/LoginScreen";
@@ -36,9 +41,16 @@ const App: React.FC = () => {
 
         <Route path="/unauthorized" element={<h1>No autorizado</h1>} />
 
-        {/* hacer el dashboard del cliente rederizar la pantalla */}
-        {/* ClientDashboard by Ryan, Sebastian, Alejandro */}
-        <Route path="/clientDashbord" element={<div>Client Dashbord</div>} />
+        {/* ── Client Dashboard — Ryan, Sebastian, Alejandro ── */}
+        <Route path="/clientDashboard" element={<ClientDashboardMenu />}>
+          <Route index element={<Navigate to="overview" replace />} />
+          <Route path="overview" element={<ClientDashboard />} />
+          <Route path="tickets" element={<div>Tickets</div>} />
+          <Route path="facturas" element={<div>Facturas</div>} />
+          <Route path="documentos" element={<div>Documentos</div>} />
+          <Route path="notificaciones" element={<div>Notificaciones</div>} />
+          <Route path="mantenimiento" element={<div>Mantenimiento</div>} />
+        </Route>
 
         <Route path="/super/admin/dashboard" element={<SuperAdminDashboard />}/>
 
