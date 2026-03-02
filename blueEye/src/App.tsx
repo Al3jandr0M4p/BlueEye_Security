@@ -8,6 +8,11 @@ import LoginScreen from "./screens/login/LoginScreen";
 import RegisterScreen from "./screens/register/Registerscreen";
 import TechDashboardMenu from "./screens/techDashboardMenu/TechDashboardMenu";
 import TechDashboard from "./screens/techDashboard/Dashboard";
+
+// ── Client Dashboard ──────────────────────────────────────────────────────────
+import ClientDashboardMenu from "./screens/ClientDashboard/types/ClientDashboardMenu";
+import ClientDashboard from "./screens/ClientDashboard/types/Dashboard";
+
 import PricingScreen from "./screens/pricingTech/PrincingTech";
 import LandingHome from "./screens/landingHome/LandingPage";
 import React from "react";
@@ -25,11 +30,18 @@ const App: React.FC = () => {
         <Route path="/register" element={<RegisterScreen />} />
         <Route path="/register/business" element={<RegisterBusiness />} />
 
-        {/* hacer el dashboard del cliente rederizar la pantalla */}
-        {/* ClientDashboard by Ryan, Sebastian, Alejandro */}
-        <Route path="/clientDashbord" element={<div>Client Dashbord</div>} />
+        {/* ── Client Dashboard — Ryan, Sebastian, Alejandro ── */}
+        <Route path="/clientDashboard" element={<ClientDashboardMenu />}>
+          <Route index element={<Navigate to="overview" replace />} />
+          <Route path="overview" element={<ClientDashboard />} />
+          <Route path="tickets" element={<div>Tickets</div>} />
+          <Route path="facturas" element={<div>Facturas</div>} />
+          <Route path="documentos" element={<div>Documentos</div>} />
+          <Route path="notificaciones" element={<div>Notificaciones</div>} />
+          <Route path="mantenimiento" element={<div>Mantenimiento</div>} />
+        </Route>
 
-        {/* TechDashboard by Alejandro */}
+        {/* ── Tech Dashboard — Alejandro ───────────────────── */}
         <Route path="/techDashboard" element={<TechDashboardMenu />}>
           <Route index element={<Navigate to="dashboard" />} />
           <Route path="dashboard" element={<TechDashboard />} />

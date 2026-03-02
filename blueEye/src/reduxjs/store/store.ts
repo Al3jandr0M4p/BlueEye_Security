@@ -1,7 +1,18 @@
-import { configureStore } from "@reduxjs/toolkit";
+import { configureStore, createSlice } from "@reduxjs/toolkit";
 
+// ─── Placeholder slice ────────────────────────────────────────────────────────
+// TODO: Reemplazar con los slices reales cuando se implementen
+const appSlice = createSlice({
+  name: "app",
+  initialState: { initialized: true },
+  reducers: {},
+});
+
+// ─── Store ────────────────────────────────────────────────────────────────────
 export const store = configureStore({
-  reducer: {},
+  reducer: {
+    app: appSlice.reducer,
+  },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: false,
