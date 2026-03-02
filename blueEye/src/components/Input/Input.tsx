@@ -1,33 +1,55 @@
-import type React from "react";
+import React from "react";
+import type { InputProps } from "../../types/types";
 
-interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  value: string;
-  onValueChange: React.Dispatch<React.SetStateAction<string>>
-  text: string;
-  type: string;
-  translationKey: string;
-}
-
-const Input: React.FC<InputProps> = ({ value, onValueChange, text, type, translationKey }) => {
+const Input: React.FC<InputProps> = ({
+  value,
+  onValueChange,
+  text,
+  type,
+  translationKey,
+  error,
+  variant,
+}) => {
   return (
     <div className="relative w-full">
       <input
         id={text}
         type={type}
         value={value}
-        onChange={(e) => onValueChange(e.target.value)}
+        onChange={(e) => {
+          let v = e.target.value;
+          if (text === "rnc") v = v.replace(/\D/g, "");
+          onValueChange(v);
+        }}
         placeholder=""
-        className="peer w-full border border-gray-300 rounded-lg px-3 pt-4 pb-2 text-gray-900 focus:border-indigo-600 focus:ring-0 transition-all"
-        autoComplete="off"
+        className={`peer w-full outline-none transition-all ${
+          variant === "unstyled"
+            ? "px-3 py-2 border-none rounded-none"
+            : `border rounded-lg px-2 py-2 ${
+                error
+                  ? "border-red-500 focus:border-red-500"
+                  : "border-gray-300 focus:border-indigo-600"
+              }`
+        }`}
+        autoComplete={type === "password" ? "new-password" : "off"}
         required
       />
 
-      <label
-        htmlFor={text}
-        className="absolute left-3 -top-2 bg-white px-1 text-sm transition-all text-black peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2 peer-focus:text-sm peer-focus:text-indigo-600"
-      >
-        {translationKey}
-      </label>
+      {!value && (
+        <label
+          htmlFor={text}
+          className={`absolute left-1 -top-1 bg-white px-1 transition-all peer-placeholder-shown:top-2 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2 peer-focus:text-xs ${
+            error
+              ? "text-red-500 peer-focus:text-red-600"
+              : "text-black peer-focus:text-indigo-600"
+          }`}
+          style={{ fontSize: 13 }}
+        >
+          {translationKey}
+        </label>
+      )}
+
+      {error && <p className="mt-1 text-sm text-red-500">{error}</p>}
     </div>
   );
 };

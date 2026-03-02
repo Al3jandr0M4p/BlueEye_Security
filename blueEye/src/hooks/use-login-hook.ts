@@ -1,57 +1,46 @@
 import React, { useState } from "react";
-import { useTranslation } from "../../node_modules/react-i18next";
-import api from "../api/api";
 import { useNavigate } from "react-router-dom";
-import type { SignInResponse } from "../types/types";
+import { useAppDispatch, useAppSelector } from "./use-store-hook";
+import { loginThunk } from "../reduxjs/store/thunks/thunks";
 
 export function useLoginHook() {
-  const { t } = useTranslation();
-  const [identifier, setIdentier] = useState<string>("");
+  const dispatch = useAppDispatch();
+  const { loading, error, profile } = useAppSelector((state) => state.auth);
+
+  const [identifier, setIdentifier] = useState<string>("");
   const [password, setPassword] = useState<string>("");
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const isDisabled = identifier === "" || password === "" ? true : false;
+
   const navigate = useNavigate();
+  const isDisabled = !identifier || !password;
 
   const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
 
-    const isEmail = identifier.includes("@");
+    const resultAction = await dispatch(loginThunk({ identifier, password }));
 
-    const payload = isEmail
-      ? { identifier: identifier, password } // identifier is Email
-      : { identifier: identifier, password }; // identifier is username
+    console.log(`Loading: ${loading} Error: ${error} Profile: ${profile}`);
 
-    console.log("Submitting login with payload:", payload);
+    if (loginThunk.fulfilled.match(resultAction)) {
+      const rolename = resultAction.payload?.profile?.rolename;
 
-    const result = await api.post<SignInResponse>("/api/auth/login", payload);
-
-    console.log(`Payload backend data: ${result.data}`);
-
-    const roleName = result.data.data.profile?.rolename;
-
-    console.log(`Login ${result.data.data.user}`);
-    console.log(`Rolename: ${roleName}`);
-
-    setTimeout(() => {
-      if (roleName === "usuario") {
-        navigate("/clientDashbord");
-      } else if (roleName === "tecnico") {
-        navigate("/techDashboard");
-      } else {
-        navigate("/");
-      }
-    }, 2000);
+      if (rolename === "usuario") navigate("/clientDashbord");
+      else if (rolename === "tecnico") navigate("/techDashboard");
+      else if (rolename === "admin") navigate("/adminDashboard");
+      else if (rolename === "superAdmin") navigate("/super/admin/dashboard");
+      else navigate("/login");
+    } else {
+      console.log("Login failed:", resultAction.payload);
+    }
   };
 
   return {
     identifier,
     password,
-    t,
-    isLoading,
     isDisabled,
-    setIsLoading,
+    loading,
+    error,
     setPassword,
-    setIdentier,
+    setIdentifier,
     handleSubmit,
   };
 }
