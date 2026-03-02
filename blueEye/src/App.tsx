@@ -12,6 +12,7 @@ import ClientDashboardMenu from "./screens/ClientDashboard/types/ClientDashboard
 import ClientDashboard from "./screens/ClientDashboard/types/Dashboard";
 
 import React from "react";
+import SuperAdminDashboard from "./screens/Superadmindashboard/SuperAdminDashboard";
 import LoginScreen from "./screens/login/LoginScreen";
 import LandingHome from "./screens/landingHome/LandingPage";
 import ProfilePage from "./components/ProfileContainer/ProfileContainer";
@@ -50,6 +51,8 @@ const App: React.FC = () => {
           <Route path="notificaciones" element={<div>Notificaciones</div>} />
           <Route path="mantenimiento" element={<div>Mantenimiento</div>} />
         </Route>
+
+        <Route path="/super/admin/dashboard" element={<SuperAdminDashboard />}/>
 
         {/* TechDashboard by Alejandro */}
         <Route
