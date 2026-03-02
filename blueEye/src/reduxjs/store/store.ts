@@ -40,6 +40,7 @@ const persistConfig: PersistConfig<ReturnType<typeof rootReducer>> = {
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
 
+// ─── Store ────────────────────────────────────────────────────────────────────
 export const store = configureStore({
   reducer: persistedReducer,
   middleware: (getDefaultMiddleware) =>
