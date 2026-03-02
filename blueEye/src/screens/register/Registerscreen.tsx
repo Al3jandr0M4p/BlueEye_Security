@@ -1,25 +1,47 @@
 import type React from "react";
 import { Link } from "react-router-dom";
 import { useRegisterHook } from "../../hooks/use-register-hook";
-import Input from "../../components/Input/Input";
+import { FormComponent } from "../../components/FormComponent/FormComponent";
+import { FormComponentFirst } from "../../components/FormComponent/FormComponentFirst";
 
 const RegisterScreen: React.FC = () => {
   const {
-    userName,
     email,
     password,
-    isDisabled,
+    businessName,
+    currency,
+    username,
+    country,
+    taxId,
+    phone,
     isLoading,
-    handleSubmit,
+    isDisabledFirst,
+    isDisabledSubmit,
+    dialCode,
+    taxIdError,
+    currencyOptions,
+    countryOptions,
+    dialCodeOptions,
+    logoPreview,
+    step,
+    setStep,
+    handleLogoChange,
     setEmail,
     setPassword,
-    setUserName,
+    setBusinessName,
+    setCountry,
+    setCurrency,
+    setUsername,
+    setTaxId,
+    setDialCode,
+    handleSubmit,
+    handlePhoneChange,
   } = useRegisterHook();
 
   return (
     <>
       <section className="flex flex-col w-full min-h-screen">
-        <div className="flex flex-1 justify-center items-center pt-30">
+        <div className="flex flex-1 justify-center items-center">
           <div className="w-full max-w-md bg-white rounded-lg">
             <nav
               className="text-gray-600 text-sm mb-10"
@@ -46,88 +68,51 @@ const RegisterScreen: React.FC = () => {
 
             <div className="py-3 space-y-4">
               <h2 className="text-xl font-medium tracking-tight text-gray-900 md:text-2xl">
-                Registra tu cuenta
+                Registra tu Empresa
               </h2>
             </div>
 
-            <form className="space-y-3 md:space-y-5" onSubmit={handleSubmit}>
-              <Input
-                type="email"
-                text="email"
-                value={email}
-                onValueChange={setEmail}
-                translationKey={"email"}
+            {step === 1 && (
+              <FormComponentFirst
+                email={email}
+                password={password}
+                username={username}
+                businessName={businessName}
+                currencyOptions={currencyOptions}
+                dialCodeOptions={dialCodeOptions}
+                countryOptions={countryOptions}
+                phone={phone}
+                taxId={taxId}
+                isDisabledFirst={isDisabledFirst}
+                currency={currency}
+                country={country}
+                dialCode={dialCode}
+                taxIdError={taxIdError}
+                setStep={setStep}
+                setEmail={setEmail}
+                setPassword={setPassword}
+                setBusinessName={setBusinessName}
+                setCountry={setCountry}
+                setCurrency={setCurrency}
+                setUsername={setUsername}
+                setDialCode={setDialCode}
+                setTaxId={setTaxId}
+                handlePhoneChange={handlePhoneChange}
               />
+            )}
 
-              <Input
-                type="text"
-                text="usuario"
-                value={userName}
-                onValueChange={setUserName}
-                translationKey={"usuario"}
+            {step === 2 && (
+              <FormComponent
+                setStep={setStep}
+                handleLogoChange={handleLogoChange}
+                handleSubmit={handleSubmit}
+                logoPreview={logoPreview}
+                isLoading={isLoading}
+                isDisabledSubmit={isDisabledSubmit}
               />
-
-              <Input
-                type="password"
-                text="password"
-                value={password}
-                onValueChange={setPassword}
-                translationKey={"contraseña"}
-              />
-
-              <button
-                disabled={isDisabled || isLoading}
-                type="submit"
-                className={`w-full bg-black text-white font-medium rounded-lg text-sm px-5 py-2.5 flex justify-center items-center gap-2 ${
-                  isDisabled || isLoading
-                    ? "cursor-not-allowed"
-                    : "cursor-pointer"
-                }`}
-              >
-                {isLoading ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  </>
-                ) : (
-                  "Registrarse"
-                )}
-              </button>
-
-              <p
-                className="text-sm text-center font-light text-gray-500"
-                style={{ fontFamily: "Google Sans" }}
-              >
-                ¿Ya tienes una cuenta?{" "}
-                <Link
-                  to="/login"
-                  className="font-medium text-gray-600 hover:underline"
-                >
-                  Iniciar Sesión
-                </Link>
-              </p>
-            </form>
+            )}
           </div>
         </div>
-        <footer className="mt-10 py-10 text-center text-gray-500 text-sm">
-          {" "}
-          <p>¿Tienes una empresa, institución o equipo?</p>{" "}
-          <p>
-            {" "}
-            <Link
-              to="/register/business"
-              className="font-medium text-gray-700 hover:underline"
-            >
-              {" "}
-              Regístrala y administra usuarios, cámaras, roles y permisos desde
-              un solo panel.{" "}
-            </Link>{" "}
-          </p>{" "}
-          <p className="text-xs text-gray-400">
-            {" "}
-            Diseñado para empresas de seguridad, negocios, residenciales y
-            corporativos.{" "}
-          </p>{" "}
-        </footer>
       </section>
     </>
   );

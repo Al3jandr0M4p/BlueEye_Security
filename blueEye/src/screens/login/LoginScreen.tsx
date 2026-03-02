@@ -8,9 +8,10 @@ const LoginScreen: React.FC = () => {
   const {
     identifier,
     password,
-    isLoading,
+    loading,
+    error,
     isDisabled,
-    setIdentier,
+    setIdentifier,
     setPassword,
     handleSubmit,
   } = useLoginHook();
@@ -46,8 +47,9 @@ const LoginScreen: React.FC = () => {
               type="text"
               text="identifier"
               value={identifier}
-              onValueChange={setIdentier}
+              onValueChange={setIdentifier}
               translationKey={"email o usuario"}
+              variant="default"
             />
 
             <Input
@@ -56,20 +58,19 @@ const LoginScreen: React.FC = () => {
               value={password}
               onValueChange={setPassword}
               translationKey={"contraseña"}
+              variant="default"
             />
 
             <div className="flex gap-4 items-center">
               <span className="flex-1 border-t border-gray-300"></span>
-              <span className="text-sm text-gray-700 whitespace-nowrap">
-                O
-              </span>
+              <span className="text-sm text-gray-700 whitespace-nowrap">O</span>
               <span className="flex-1 border-t border-gray-300"></span>
             </div>
             <GoogleBtn />
 
             <div className="flex justify-center">
               <Link
-                to="#"
+                to="/forgot-your-password"
                 className="text-sm font-medium text-primary-600 hover:underline"
               >
                 ¿Olvidaste tu contraseña?
@@ -77,15 +78,13 @@ const LoginScreen: React.FC = () => {
             </div>
 
             <button
-              disabled={isDisabled || isLoading}
+              disabled={isDisabled || loading}
               type="submit"
               className={`w-full bg-black text-white font-medium rounded-lg text-sm px-5 py-2.5 flex justify-center items-center gap-2 ${
-                isDisabled || isLoading
-                  ? "cursor-not-allowed"
-                  : "cursor-pointer"
+                isDisabled || loading ? "cursor-not-allowed" : "cursor-pointer"
               }`}
             >
-              {isLoading ? (
+              {loading ? (
                 <>
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                 </>
@@ -93,6 +92,7 @@ const LoginScreen: React.FC = () => {
                 "Iniciar Sesión"
               )}
             </button>
+            {error && <p className="text-red-500 text-sm">{error}</p>}
 
             <p className="text-sm text-center font-light text-gray-500">
               ¿No tienes una cuenta?{" "}

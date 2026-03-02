@@ -1,44 +1,69 @@
-import type React from "react";
+import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes } from "@fortawesome/free-solid-svg-icons";
 import { useEffect } from "react";
 import ComingSoon from "../../assets/coming_soon.svg";
-
-interface ComingSoonModalProps {
-  setOpenModal: (v: boolean) => void;
-}
+import ReactDOM from "react-dom";
+import type { ComingSoonModalProps } from "../../types/types";
 
 export const ComingSoonModal: React.FC<ComingSoonModalProps> = ({
   setOpenModal,
 }) => {
   useEffect(() => {
-    const esc = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpenModal(false);
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setOpenModal(false);
+      }
     };
-    window.addEventListener("keydown", esc as EventListener);
-    return () => window.removeEventListener("keydown", esc as EventListener);
+
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
   }, [setOpenModal]);
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, []);
+
+  const modal = (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center"
+      aria-modal="true"
+      role="dialog"
+    >
       <div
-        className="relative bg-white w-full max-w-xl rounded-xl shadow-xl p-6 animate-fadeIn"
-        onClick={(e) => e.stopPropagation()}
-      >
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm opacity-0 animate-fadeIn"
+        onClick={() => setOpenModal(false)}
+      />
+
+      <div className="relative bg-white w-full max-w-xl mx-4 rounded-2xl shadow-2xl p-8 transform scale-95 opacity-0 animate-modalIn">
         <button
-          className="absolute top-2 right-2 w-9 h-9 flex items-center justify-center bg-red-600 hover:bg-red-500 text-white rounded-full transition cursor-pointer"
+          className="absolute top-3 right-3 w-9 h-9 flex items-center justify-center bg-red-600 hover:bg-red-500 text-white rounded-full transition cursor-pointer"
           onClick={() => setOpenModal(false)}
         >
           <FontAwesomeIcon icon={faTimes} />
         </button>
 
-        <h3 className="text-xl font-bold text-center">Coming Soon</h3>
-        <p className="text-gray-700 text-lg text-center">
+        <h3 className="text-2xl font-bold text-center">Coming Soon</h3>
+
+        <p className="text-gray-600 text-lg text-center mt-3">
           Esta funcionalidad estará disponible pronto.
         </p>
 
-        <img src={ComingSoon} alt="coming soon image" className="w-xl pt-10" />
+        <img
+          src={ComingSoon}
+          alt="Coming soon"
+          className="w-full max-w-sm mx-auto pt-10"
+        />
       </div>
     </div>
   );
+
+  return ReactDOM.createPortal(modal, document.body);
 };
