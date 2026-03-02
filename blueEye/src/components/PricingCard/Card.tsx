@@ -12,7 +12,7 @@ interface PricingCardProps {
 export const PricingCard: React.FC<PricingCardProps> = ({ ...props }) => {
   return (
     <>
-      <div className="bg-white p-8 rounded-xl border border-gray-800 flex flex-col h-full cursor-pointer transform transition-all duration-300 ease-out hover:scale-105 hover:shadow-2xl hover:z-10">
+      <div className="bg-white p-4 rounded-xl border border-gray-800 flex flex-col h-full cursor-pointer transform transition-all duration-700 ease-out hover:scale-105 hover:shadow-2xl hover:z-20">
         <h3
           className="text-3xl font-semibold"
           style={{ fontFamily: "Google Sans" }}

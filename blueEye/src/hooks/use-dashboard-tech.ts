@@ -1,13 +1,18 @@
 import { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useAppDispatch } from "./use-store-hook";
+import { logout } from "../reduxjs/store/slices/auth.slice";
+import { persistor } from "../reduxjs/store/store";
 
 export function useDashboardTech() {
+  const dispatch = useAppDispatch();
   const [openSideBar, setOpenSideBar] = useState<boolean>(false);
   const [showNav, setShowNav] = useState<boolean>(true);
   const [lastScroll, setLastScroll] = useState<number>(0);
   const [showNotificationsPanel, setShowNotificationsPanel] = useState(false);
   const location = useLocation();
   const isPricing = location.pathname.includes("/pricing");
+  const navigate = useNavigate();
 
   useEffect(() => {
     const onScroll = () => {
@@ -26,6 +31,12 @@ export function useDashboardTech() {
     return () => window.removeEventListener("scroll", onScroll);
   }, [lastScroll]);
 
+  const handleLogOut = async () => {
+    dispatch(logout());
+    await persistor.purge();
+    navigate("/login", { replace: true });
+  }
+
   return {
     openSideBar,
     showNav,
@@ -33,5 +44,6 @@ export function useDashboardTech() {
     showNotificationsPanel,
     setShowNotificationsPanel,
     setOpenSideBar,
+    handleLogOut
   };
 }

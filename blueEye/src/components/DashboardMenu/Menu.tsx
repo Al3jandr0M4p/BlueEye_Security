@@ -17,6 +17,7 @@ export const Menu: React.FC = () => {
     showNotificationsPanel,
     setShowNotificationsPanel,
     setOpenSideBar,
+    handleLogOut,
   } = useDashboardTech();
 
   return (
@@ -75,17 +76,19 @@ export const Menu: React.FC = () => {
               arrowIcon
               label={
                 <img
-                  src="https://flowbite.com/docs/images/people/profile-picture-5.jpg"
+                  src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
                   alt="Avatar"
                   className="size-10 rounded-full object-cover cursor-pointer"
                 />
               }
               className="border-0 p-2 shadow-xl"
             >
-              <DropdownItem href="/perfil">Perfil</DropdownItem>
+              <DropdownItem as={Link} to="/perfil">
+                Perfil
+              </DropdownItem>
               <DropdownItem>Mensajes</DropdownItem>
               <DropdownDivider />
-              <DropdownItem className="text-red-600">
+              <DropdownItem onClick={handleLogOut} className="text-red-600">
                 Cerrar sesión
               </DropdownItem>
             </Dropdown>
@@ -139,6 +142,8 @@ export const Menu: React.FC = () => {
           >
             Tickets
           </AnimatedLink>
+
+          <button onClick={handleLogOut}>Cerrar sesion</button>
         </nav>
       </aside>
     </>
