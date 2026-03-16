@@ -1,6 +1,6 @@
 import type React from "react";
 import { Outlet } from "react-router-dom";
-import { ClientSidebar } from "../components/Clientsidebar";
+import { ClientSidebar } from "../../../features/client/components/Clientsidebar";
 
 /**
  * ClientDashboardMenu
