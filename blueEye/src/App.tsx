@@ -6,7 +6,15 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
+
+import ClientDashboardMenu from "./screens/ClientDashboard/types/ClientDashboardMenu";
+import ClientDashboard from "./features/client/pages/ClientDashboard";
+import ClientTickets from "./features/client/pages/ClientTickets";
+import ClientInvoices from "./features/client/pages/ClientInvoices";
+import ClientMaintenance from "./features/client/pages/ClientMaintenance";
+
 import React from "react";
+import SuperAdminDashboard from "./screens/Superadmindashboard/SuperAdminDashboard";
 import LoginScreen from "./screens/login/LoginScreen";
 import LandingHome from "./screens/landingHome/LandingPage";
 import ProfilePage from "./components/ProfileContainer/ProfileContainer";
@@ -45,9 +53,18 @@ const App: React.FC = () => {
         <Route path="/400" element={<BadRequest />} />
         <Route path="/404" element={<NotFound />} />
 
-        {/* hacer el dashboard del cliente rederizar la pantalla */}
-        {/* ClientDashboard by Ryan, Sebastian, Alejandro */}
-        <Route path="/clientDashbord" element={<div>Client Dashbord</div>} />
+        {/* ── Client Dashboard — Sebastian ── */}
+        <Route path="/clientDashboard" element={<ClientDashboardMenu />}>
+          <Route index element={<Navigate to="overview" replace />} />
+          <Route path="overview" element={<ClientDashboard />} />
+          <Route path="tickets" element={<ClientTickets />} />
+          <Route path="facturas" element={<ClientInvoices />} />
+          <Route path="documentos" element={<ClientInvoices />} />
+          <Route path="notificaciones" element={<ClientDashboard />} />
+          <Route path="mantenimiento" element={<ClientMaintenance />} />
+        </Route>
+
+        <Route path="/super/admin/dashboard" element={<SuperAdminDashboard />}/>
 
         {/* TechDashboard by Alejandro */}
         <Route
