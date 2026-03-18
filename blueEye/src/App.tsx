@@ -7,9 +7,11 @@ import {
   Navigate,
 } from "react-router-dom";
 
-// ── Client Dashboard ──────────────────────────────────────────────────────────
 import ClientDashboardMenu from "./screens/ClientDashboard/types/ClientDashboardMenu";
-import ClientDashboard from "./screens/ClientDashboard/types/Dashboard";
+import ClientDashboard from "./features/client/pages/ClientDashboard";
+import ClientTickets from "./features/client/pages/ClientTickets";
+import ClientInvoices from "./features/client/pages/ClientInvoices";
+import ClientMaintenance from "./features/client/pages/ClientMaintenance";
 
 import React from "react";
 import SuperAdminDashboard from "./screens/Superadmindashboard/SuperAdminDashboard";
@@ -45,11 +47,11 @@ const App: React.FC = () => {
         <Route path="/clientDashboard" element={<ClientDashboardMenu />}>
           <Route index element={<Navigate to="overview" replace />} />
           <Route path="overview" element={<ClientDashboard />} />
-          <Route path="tickets" element={<div>Tickets</div>} />
-          <Route path="facturas" element={<div>Facturas</div>} />
-          <Route path="documentos" element={<div>Documentos</div>} />
-          <Route path="notificaciones" element={<div>Notificaciones</div>} />
-          <Route path="mantenimiento" element={<div>Mantenimiento</div>} />
+          <Route path="tickets" element={<ClientTickets />} />
+          <Route path="facturas" element={<ClientInvoices />} />
+          <Route path="documentos" element={<ClientInvoices />} />
+          <Route path="notificaciones" element={<ClientDashboard />} />
+          <Route path="mantenimiento" element={<ClientMaintenance />} />
         </Route>
 
         <Route path="/super/admin/dashboard" element={<SuperAdminDashboard />}/>

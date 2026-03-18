@@ -41,12 +41,12 @@ const C = {
 
 // ─── Nav ──────────────────────────────────────────────────────────────────────
 const NAV = [
-  { label: "Salpicadero",   path: "overview",  Icon: SalpicaderoIcon },
-  { label: "Cámaras",       path: "cameras",   Icon: CamarasIcon     },
-  { label: "NVR",           path: "nvr",       Icon: NVRIcon         },
-  { label: "Alertas",       path: "alerts",    Icon: AlertasIcon     },
-  { label: "Informes",      path: "reports",   Icon: InformesIcon    },
-  { label: "Configuración.", path: "settings", Icon: ConfigIcon      },
+  { label: "Salpicadero",    path: "overview",       Icon: SalpicaderoIcon },
+  { label: "Tickets",        path: "tickets",        Icon: CamarasIcon     },
+  { label: "Facturas",       path: "facturas",       Icon: NVRIcon         },
+  { label: "Documentos",     path: "documentos",     Icon: InformesIcon    },
+  { label: "Notificaciones", path: "notificaciones", Icon: AlertasIcon     },
+  { label: "Mantenimiento",  path: "mantenimiento",  Icon: ConfigIcon      },
 ];
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
@@ -267,8 +267,8 @@ export const ClientSidebar: React.FC<ClientSidebarProps> = ({
               </span>
               <span style={{ flex: 1 }}>{label}</span>
 
-              {/* Danger badge on Alertas */}
-              {label === "Alertas" && alertCount > 0 && (
+              {/* Danger badge on Notificaciones */}
+              {label === "Notificaciones" && alertCount > 0 && (
                 <span style={{
                   fontSize:     9,
                   fontFamily:   C.m,
