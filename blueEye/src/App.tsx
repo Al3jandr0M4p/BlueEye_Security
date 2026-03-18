@@ -18,24 +18,32 @@ import RegisterScreen from "./screens/register/Registerscreen";
 import TechDashboardMenu from "./components/techDashboardMenu/TechDashboardMenu";
 import ForgotYourPassword from "./screens/forgotPassword/ForgotPassword";
 import AdminDashboardMenu from "./components/adminDashboardMenu/AdminDashboardMenu";
-import { useAppSessionAsyncHooks } from "./hooks/use-app-hooks";
 import AdminUsersScreen from "./screens/adminUsers/AdminUsers";
 import InfoCrud from "./components/infoCrudUsers/InfoCrud";
+import NotFound from "./screens/notFound/NotFound";
+import Forbidden from "./screens/errors/Forbidden";
+import BadRequest from "./screens/errors/BadRequest";
+import DashboardAdminScreen from "./screens/adminDashboard/Dashboard";
 
 const App: React.FC = () => {
-  useAppSessionAsyncHooks();
-
   return (
     <Router>
       <Routes>
         <Route path="/" element={<LandingHome />} />
         <Route path="/login" element={<LoginScreen />} />
         <Route path="/register" element={<RegisterScreen />} />
+        <Route
+          path="/invite/user/config/accounts"
+          element={<h1>Crea tu cuenta</h1>}
+        />
 
         <Route path="/forgot-your-password" element={<ForgotYourPassword />} />
         <Route path="/reset-your-password" element={<ResetPassword />} />
 
-        <Route path="/unauthorized" element={<h1>No autorizado</h1>} />
+        <Route path="/unauthorized" element={<Forbidden />} />
+        <Route path="/403" element={<Forbidden />} />
+        <Route path="/400" element={<BadRequest />} />
+        <Route path="/404" element={<NotFound />} />
 
         {/* hacer el dashboard del cliente rederizar la pantalla */}
         {/* ClientDashboard by Ryan, Sebastian, Alejandro */}
@@ -54,6 +62,11 @@ const App: React.FC = () => {
           <Route path="dashboard" element={<TechDashboard />} />
           <Route path="tickets" element={<h1>Tickets Screen</h1>} />
         </Route>
+
+        <Route
+          path="/invite/user/config/accounts"
+          element={<h1>Configura tu cuenta</h1>}
+        />
 
         <Route
           path="/perfil"
@@ -85,7 +98,7 @@ const App: React.FC = () => {
           }
         >
           <Route index element={<Navigate to="dashboard" />} />
-          <Route path="dashboard" />
+          <Route path="dashboard" element={<DashboardAdminScreen />} />
           <Route path="clients" />
           <Route path="business" />
           <Route path="proyects" />
@@ -98,6 +111,8 @@ const App: React.FC = () => {
           <Route path="employees" element={<AdminUsersScreen />} />
           <Route path="pricing" element={<PricingScreen />} />
         </Route>
+
+        <Route path="*" element={<Navigate to="/404" replace />} />
       </Routes>
     </Router>
   );

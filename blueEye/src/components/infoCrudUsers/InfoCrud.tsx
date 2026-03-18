@@ -9,66 +9,8 @@ import {
   UserCircle2,
 } from "lucide-react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-
-type UserRoleTab = "clientes" | "tecnicos";
-
-type UserCard = {
-  id: number;
-  name: string;
-  email: string;
-  phone: string;
-  company: string;
-  city: string;
-  image: string;
-};
-
-type LocationState = {
-  user?: UserCard;
-  userType?: UserRoleTab;
-};
-
-const usersFallback: Record<UserRoleTab, UserCard[]> = {
-  clientes: [
-    {
-      id: 1,
-      name: "Mariana Cruz",
-      email: "mariana.cruz@novatek.com",
-      phone: "+1 (809) 555-1212",
-      company: "NovaTek",
-      city: "Santo Domingo",
-      image: "https://i.pravatar.cc/320?img=5",
-    },
-    {
-      id: 2,
-      name: "Ricardo Gomez",
-      email: "ricardo.gomez@alfaindustrial.com",
-      phone: "+1 (809) 555-8891",
-      company: "Alfa Industrial",
-      city: "Santiago",
-      image: "https://i.pravatar.cc/320?img=12",
-    },
-  ],
-  tecnicos: [
-    {
-      id: 11,
-      name: "Luis Santana",
-      email: "l.santana@blueeye.com",
-      phone: "+1 (829) 555-0199",
-      company: "BlueEye Security",
-      city: "Santo Domingo",
-      image: "https://i.pravatar.cc/320?img=68",
-    },
-    {
-      id: 12,
-      name: "Keila Martinez",
-      email: "k.martinez@blueeye.com",
-      phone: "+1 (829) 555-7462",
-      company: "BlueEye Security",
-      city: "Santiago",
-      image: "https://i.pravatar.cc/320?img=45",
-    },
-  ],
-};
+import { usersFallback } from "../../constants/constants";
+import type { LocationState, UserRoleTab } from "../../types/types";
 
 const InfoCrud: React.FC = () => {
   const navigate = useNavigate();

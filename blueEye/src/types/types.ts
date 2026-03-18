@@ -132,6 +132,7 @@ export interface FormComponentFirstProps {
   password: string;
   username: string;
   businessName: string;
+  isOnline: boolean;
   currencyOptions: {
     value: string;
     label: string;
@@ -168,7 +169,7 @@ export interface RegisterResponse {
   data: {
     userId: string | null;
     businessId: string | null;
-  }
+  };
 }
 
 export interface ComingSoonModalProps {
@@ -180,18 +181,27 @@ export interface NavItem {
   to: string;
   icon: React.ReactNode;
   hasArrow?: boolean;
-};
+}
 
 export interface ActivityItem {
   id: number;
   title: string;
   highlight: string;
   date: string;
-};
+}
+
+export interface AdminAddUsersModalProps {
+  setIsAddUserModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+export interface CreateAdminPayload {
+  email: string;
+  rolename: string;
+}
 
 export type UserRoleTab = "clientes" | "tecnicos";
 
-export interface UserCard {
+export type UserCard = {
   id: number;
   name: string;
   email: string;
@@ -201,3 +211,15 @@ export interface UserCard {
   image: string;
 };
 
+export type LocationState = {
+  user?: UserCard;
+  userType?: UserRoleTab;
+};
+
+export interface AdminDashboardStats {
+  message: string;
+  data: {
+    totalClients: number;
+    totalTechnicians: number;
+  };
+}

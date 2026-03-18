@@ -1,6 +1,6 @@
 import React from "react";
 import { ChevronDown, LogOut, UserCircle2 } from "lucide-react";
-import { NavLink, Outlet } from "react-router-dom";
+import { Link, NavLink, Outlet } from "react-router-dom";
 import { adminNavItems, utilityItems } from "../adminNavItems/adminNavItems";
 import { activityItems } from "../../constants/constants";
 import { useAdminHook } from "../../hooks/use-admin-hook";
@@ -51,7 +51,7 @@ const AdminDashboardMenu: React.FC = () => {
 
           <button
             onClick={handleLogout}
-            className="flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-left text-sm font-medium text-[#5f6672] transition hover:bg-[#eceef1]"
+            className="flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-left text-sm font-medium text-[#5f6672] transition hover:bg-[#eceef1] cursor-pointer"
           >
             <LogOut size={16} />
             Sign Out
@@ -63,7 +63,10 @@ const AdminDashboardMenu: React.FC = () => {
             BlueEye Security
           </div>
 
-          <div className="flex items-center gap-2.5 rounded-md bg-[#eceef1] p-2">
+          <Link
+            to="/perfil"
+            className="flex items-center gap-2.5 rounded-md bg-[#eceef1] p-2 cursor-pointer"
+          >
             <UserCircle2 className="text-[#717783]" size={32} />
             <div className="min-w-0">
               <p className="truncate text-sm font-semibold text-[#2a2f39]">
@@ -73,7 +76,7 @@ const AdminDashboardMenu: React.FC = () => {
                 jonsmith.mobbin@gmail.com
               </p>
             </div>
-          </div>
+          </Link>
         </div>
       </aside>
 

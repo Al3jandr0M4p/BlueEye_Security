@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { logout } from "../reduxjs/store/slices/auth.slice";
-import { signOut } from "../service/auth.service";
+import { signOut } from "../service/services";
 import { useAppDispatch, useAppSelector } from "./use-store-hook";
 import { persistor } from "../reduxjs/store/store";
 
@@ -25,5 +25,5 @@ export const useAdminHook = () => {
   return {
     profile,
     handleLogout,
-  }
+  };
 };

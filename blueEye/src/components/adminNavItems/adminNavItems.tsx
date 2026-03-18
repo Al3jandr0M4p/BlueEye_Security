@@ -1,13 +1,11 @@
 import {
   BarChart3,
-  Bell,
   CircleHelp,
   Coins,
   LayoutDashboard,
   Lightbulb,
   Monitor,
   Pencil,
-  Settings,
   TrendingUp,
   Users,
   Wallet,
@@ -21,29 +19,24 @@ export const adminNavItems: NavItem[] = [
     icon: <LayoutDashboard size={16} />,
   },
   {
-    label: "Notifications",
-    to: "clients",
-    icon: <Bell size={16} />,
-  },
-  {
-    label: "Website Builder",
+    label: "Empresas",
     to: "business",
     icon: <Monitor size={16} />,
   },
   {
-    label: "Write",
+    label: "Proyectos",
     to: "proyects",
     icon: <Pencil size={16} />,
     hasArrow: true,
   },
   {
-    label: "Grow",
+    label: "Planificacion",
     to: "tech-pre-proyect",
     icon: <TrendingUp size={16} />,
     hasArrow: true,
   },
   {
-    label: "Monetization",
+    label: "Tickets",
     to: "orders-payments",
     icon: <Coins size={16} />,
     hasArrow: true,
@@ -55,13 +48,13 @@ export const adminNavItems: NavItem[] = [
     hasArrow: true,
   },
   {
-    label: "Analyze",
+    label: "Reportes",
     to: "reports",
     icon: <BarChart3 size={16} />,
     hasArrow: true,
   },
   {
-    label: "Learn",
+    label: "Stock",
     to: "devices",
     icon: <Lightbulb size={16} />,
     hasArrow: true,
@@ -74,6 +67,5 @@ export const adminNavItems: NavItem[] = [
 ];
 
 export const utilityItems = [
-  { label: "Settings", icon: <Settings size={16} />, to: "/perfil" },
-  { label: "Help", icon: <CircleHelp size={16} />, to: "suport" },
+  { label: "Soporte", icon: <CircleHelp size={16} />, to: "suport" },
 ];
