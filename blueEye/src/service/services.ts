@@ -6,6 +6,8 @@ import type {
   ForgotPasswordPayload,
   ResetPasswordPayload,
   RegisterResponse,
+  CreateAdminPayload,
+  AdminDashboardStats,
 } from "../types/types";
 
 export const registerUserService = async (payload: RegisterPayload) => {
@@ -33,6 +35,7 @@ export const registerUserService = async (payload: RegisterPayload) => {
       },
     },
   );
+
   return data;
 };
 
@@ -41,7 +44,12 @@ export const loginUser = async (payload: LoginPayload) => {
     "/api/authentication/v1/users/sign-in",
     payload,
   );
+
   return data;
+};
+
+export const signOut = async () => {
+  await api.post("/api/authentication/v1/accounts/sign-out");
 };
 
 export const forgotPassword = async (payload: ForgotPasswordPayload) => {
@@ -57,6 +65,7 @@ export const resetPasswordService = async (payload: ResetPasswordPayload) => {
     "/api/authentication/v1/password/reset/confirm",
     payload,
   );
+
   return data;
 };
 
@@ -65,5 +74,20 @@ export const loginWithGoogleService = async (credential: string) => {
     "/api/authentication/v1/oauth/google/session/sign-in",
     { credential },
   );
+
   return data;
 };
+
+export const createUserAdminService = async (payload: CreateAdminPayload) => {
+  const { data } = await api.post("/api/users/v1/invite/users", payload);
+
+  return data;
+};
+
+export async function fetchAdminDashboardStats() {
+  const { data } = await api.get<AdminDashboardStats>(
+    "/api/admin/v1/dashboard/stats",
+  );
+
+  return data.data;
+}
