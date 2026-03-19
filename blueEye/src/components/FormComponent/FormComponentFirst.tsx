@@ -19,6 +19,7 @@ export const FormComponentFirst: React.FC<FormComponentFirstProps> = ({
   dialCode,
   taxIdError,
   isDisabledFirst,
+  isOnline,
   setStep,
   setEmail,
   setPassword,
@@ -125,7 +126,7 @@ export const FormComponentFirst: React.FC<FormComponentFirstProps> = ({
       </div>
 
       <button
-        disabled={isDisabledFirst}
+        disabled={isDisabledFirst || !isOnline}
         type="button"
         onClick={() => setStep(2)}
         className={`w-full bg-black text-white font-medium rounded-lg text-sm px-5 py-2.5 flex justify-center items-center gap-2 ${

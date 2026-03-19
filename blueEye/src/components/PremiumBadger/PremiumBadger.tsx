@@ -1,6 +1,16 @@
 import { faHeart, faTimes } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
+// ─── BlueEye brand tokens ──────────────────────────────────────────────────────
+const T = {
+  green:     "#4CAF82",
+  greenDark: "#2E8B5E",
+  greenSft:  "#EAF7F1",
+  greenMid:  "#A8DBBE",
+  navy:      "#1A2332",
+  sans:      "'Plus Jakarta Sans', 'DM Sans', system-ui, sans-serif",
+};
+
 interface PremiumBadgerProps {
   setIsVisible: React.Dispatch<React.SetStateAction<boolean>>;
 }
@@ -9,28 +19,70 @@ export const PremiumBadger: React.FC<PremiumBadgerProps> = ({
   setIsVisible,
 }) => {
   return (
-    <>
-      <div className="w-full bg-slate-50 flex sm:flex-row items-center justify-center px-4 sm:px-10 md:px-20 py-3 text-sm flex-wrap gap-10">
-        <div className="flex items-center gap-2 flex-wrap justify-center sm:justify-start">
-          <FontAwesomeIcon icon={faHeart} className="text-xl text-slate-800" />
-          <span className="text-slate-800 font-medium text-base sm:text-lg">
-            Vuelvete premiun.
-          </span>
-          <a
-            href="#"
-            className="underline font-medium text-base sm:text-lg text-slate-700 hover:text-slate-900"
-          >
-            Aqui
-          </a>
-        </div>
-
-        <button
-          onClick={() => setIsVisible(false)}
-          className="mt-2 sm:mt-0 text-slate-500 hover:text-slate-700"
+    <div
+      style={{
+        width: "100%",
+        background: T.greenSft,
+        borderBottom: `1px solid ${T.greenMid}`,
+        display: "flex",
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "10px 20px",
+        gap: 40,
+        flexWrap: "wrap",
+        fontFamily: T.sans,
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 10,
+          flexWrap: "wrap",
+          justifyContent: "center",
+        }}
+      >
+        <FontAwesomeIcon
+          icon={faHeart}
+          style={{ fontSize: 16, color: T.green }}
+        />
+        <span
+          style={{
+            color: T.navy,
+            fontWeight: 600,
+            fontSize: 14,
+          }}
         >
-          <FontAwesomeIcon icon={faTimes} className="cursor-pointer text-lg" />
-        </button>
+          Vuélvete premium.
+        </span>
+        <a
+          href="#"
+          style={{
+            fontWeight: 700,
+            fontSize: 14,
+            color: T.greenDark,
+            textDecoration: "underline",
+          }}
+        >
+          Aquí
+        </a>
       </div>
-    </>
+
+      <button
+        onClick={() => setIsVisible(false)}
+        style={{
+          background: "transparent",
+          border: "none",
+          cursor: "pointer",
+          color: T.greenDark,
+          padding: 4,
+          display: "flex",
+          alignItems: "center",
+        }}
+      >
+        <FontAwesomeIcon icon={faTimes} style={{ fontSize: 16 }} />
+      </button>
+    </div>
   );
 };

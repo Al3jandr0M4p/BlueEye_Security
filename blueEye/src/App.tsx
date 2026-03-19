@@ -7,9 +7,11 @@ import {
   Navigate,
 } from "react-router-dom";
 
-// ── Client Dashboard ──────────────────────────────────────────────────────────
 import ClientDashboardMenu from "./screens/ClientDashboard/types/ClientDashboardMenu";
-import ClientDashboard from "./screens/ClientDashboard/types/Dashboard";
+import ClientDashboard from "./features/client/pages/ClientDashboard";
+import ClientTickets from "./features/client/pages/ClientTickets";
+import ClientInvoices from "./features/client/pages/ClientInvoices";
+import ClientMaintenance from "./features/client/pages/ClientMaintenance";
 
 import React from "react";
 import SuperAdminLayout from "./screens/Superadmindashboard/SuperAdminLayout";
@@ -33,32 +35,42 @@ import RegisterScreen from "./screens/register/Registerscreen";
 import TechDashboardMenu from "./components/techDashboardMenu/TechDashboardMenu";
 import ForgotYourPassword from "./screens/forgotPassword/ForgotPassword";
 import AdminDashboardMenu from "./components/adminDashboardMenu/AdminDashboardMenu";
-import { useAppSessionAsyncHooks } from "./hooks/use-app-hooks";
+import AdminUsersScreen from "./screens/adminUsers/AdminUsers";
+import InfoCrud from "./components/infoCrudUsers/InfoCrud";
+import NotFound from "./screens/notFound/NotFound";
+import Forbidden from "./screens/errors/Forbidden";
+import BadRequest from "./screens/errors/BadRequest";
+import DashboardAdminScreen from "./screens/adminDashboard/Dashboard";
 
 const App: React.FC = () => {
-  useAppSessionAsyncHooks();
-
   return (
     <Router>
       <Routes>
         <Route path="/" element={<LandingHome />} />
         <Route path="/login" element={<LoginScreen />} />
         <Route path="/register" element={<RegisterScreen />} />
+        <Route
+          path="/invite/user/config/accounts"
+          element={<h1>Crea tu cuenta</h1>}
+        />
 
         <Route path="/forgot-your-password" element={<ForgotYourPassword />} />
         <Route path="/reset-your-password" element={<ResetPassword />} />
 
-        <Route path="/unauthorized" element={<h1>No autorizado</h1>} />
+        <Route path="/unauthorized" element={<Forbidden />} />
+        <Route path="/403" element={<Forbidden />} />
+        <Route path="/400" element={<BadRequest />} />
+        <Route path="/404" element={<NotFound />} />
 
-        {/* ── Client Dashboard — Ryan, Sebastian, Alejandro ── */}
+        {/* ── Client Dashboard — Sebastian ── */}
         <Route path="/clientDashboard" element={<ClientDashboardMenu />}>
           <Route index element={<Navigate to="overview" replace />} />
           <Route path="overview" element={<ClientDashboard />} />
-          <Route path="tickets" element={<div>Tickets</div>} />
-          <Route path="facturas" element={<div>Facturas</div>} />
-          <Route path="documentos" element={<div>Documentos</div>} />
-          <Route path="notificaciones" element={<div>Notificaciones</div>} />
-          <Route path="mantenimiento" element={<div>Mantenimiento</div>} />
+          <Route path="tickets" element={<ClientTickets />} />
+          <Route path="facturas" element={<ClientInvoices />} />
+          <Route path="documentos" element={<ClientInvoices />} />
+          <Route path="notificaciones" element={<ClientDashboard />} />
+          <Route path="mantenimiento" element={<ClientMaintenance />} />
         </Route>
 
         {/* ── Super Admin ── */}
@@ -90,6 +102,11 @@ const App: React.FC = () => {
         </Route>
 
         <Route
+          path="/invite/user/config/accounts"
+          element={<h1>Configura tu cuenta</h1>}
+        />
+
+        <Route
           path="/perfil"
           element={
             <ProtectedRoute
@@ -102,6 +119,15 @@ const App: React.FC = () => {
 
         {/* AdminDashboard by Alejandro */}
         <Route
+          path="/adminDashboard/employees/info/:userType/:id"
+          element={
+            <ProtectedRoute allowedRoles={["admin"]}>
+              <InfoCrud />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
           path="/adminDashboard"
           element={
             <ProtectedRoute allowedRoles={["admin"]}>
@@ -110,7 +136,7 @@ const App: React.FC = () => {
           }
         >
           <Route index element={<Navigate to="dashboard" />} />
-          <Route path="dashboard" />
+          <Route path="dashboard" element={<DashboardAdminScreen />} />
           <Route path="clients" />
           <Route path="business" />
           <Route path="proyects" />
@@ -120,9 +146,11 @@ const App: React.FC = () => {
           <Route path="suport" />
           <Route path="orders-payments" />
           <Route path="reports" />
-          <Route path="employees" />
+          <Route path="employees" element={<AdminUsersScreen />} />
           <Route path="pricing" element={<PricingScreen />} />
         </Route>
+
+        <Route path="*" element={<Navigate to="/404" replace />} />
       </Routes>
     </Router>
   );

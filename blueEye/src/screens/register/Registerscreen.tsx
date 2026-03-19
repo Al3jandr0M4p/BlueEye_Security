@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useRegisterHook } from "../../hooks/use-register-hook";
 import { FormComponent } from "../../components/FormComponent/FormComponent";
 import { FormComponentFirst } from "../../components/FormComponent/FormComponentFirst";
+import { ConnectionModal } from "../../modals/ConnectionModal/ConnectionModal";
 
 const RegisterScreen: React.FC = () => {
   const {
@@ -24,6 +25,9 @@ const RegisterScreen: React.FC = () => {
     dialCodeOptions,
     logoPreview,
     step,
+    isOnline,
+    showOfflineModal,
+    setShowOfflineModal,
     setStep,
     handleLogoChange,
     setEmail,
@@ -72,6 +76,10 @@ const RegisterScreen: React.FC = () => {
               </h2>
             </div>
 
+            {showOfflineModal && (
+              <ConnectionModal setShowOfflineModal={setShowOfflineModal} />
+            )}
+
             {step === 1 && (
               <FormComponentFirst
                 email={email}
@@ -88,6 +96,7 @@ const RegisterScreen: React.FC = () => {
                 country={country}
                 dialCode={dialCode}
                 taxIdError={taxIdError}
+                isOnline={isOnline}
                 setStep={setStep}
                 setEmail={setEmail}
                 setPassword={setPassword}

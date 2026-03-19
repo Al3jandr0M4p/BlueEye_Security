@@ -1,9 +1,6 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import type { LoginPayload } from "../../../types/types";
-import {
-  loginUser,
-  loginWithGoogleService,
-} from "../../../service/auth.service";
+import { loginUser, loginWithGoogleService } from "../../../service/services";
 
 export const loginThunk = createAsyncThunk(
   "auth/login",
