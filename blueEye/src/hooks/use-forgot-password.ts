@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { forgotPassword } from "../service/auth.service";
+import { forgotPassword } from "../service/services";
 import { sileo } from "sileo";
 
 export function useForgotPassword() {

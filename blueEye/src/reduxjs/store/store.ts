@@ -1,5 +1,6 @@
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
 import authReducer from "./slices/auth.slice";
+import { setAccessTokenGetter } from "../../api/api";
 import {
   FLUSH,
   PAUSE,
@@ -11,7 +12,6 @@ import {
   persistReducer,
   type PersistConfig,
 } from "redux-persist";
-// import storage from "redux-persist/lib/storage";
 
 const storageWrapper = {
   getItem: (key: string) => {
@@ -40,7 +40,6 @@ const persistConfig: PersistConfig<ReturnType<typeof rootReducer>> = {
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
 
-// ─── Store ────────────────────────────────────────────────────────────────────
 export const store = configureStore({
   reducer: persistedReducer,
   middleware: (getDefaultMiddleware) =>
@@ -51,6 +50,8 @@ export const store = configureStore({
     }),
   devTools: true,
 });
+
+setAccessTokenGetter(() => store.getState().auth.session?.access_token);
 
 export const persistor = persistStore(store);
 

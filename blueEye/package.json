@@ -23,6 +23,7 @@
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.5.0",
     "@reduxjs/toolkit": "^2.11.2",
+    "@supabase/supabase-js": "^2.99.0",
     "@tailwindcss/cli": "^4.1.18",
     "@types/jwt-decode": "^3.1.0",
     "axios": "^1.13.4",
@@ -39,8 +40,8 @@
     "react-is": "^19.2.4",
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.13.0",
-    "recharts": "^3.7.0",
     "react-select": "^5.10.2",
+    "recharts": "^3.7.0",
     "redux": "^5.0.1",
     "redux-persist": "6.0.0",
     "sileo": "^0.1.5",
@@ -57,12 +58,8 @@
     "@types/node": "^24.10.1",
     "@types/react": "^19.2.5",
     "@types/react-dom": "^19.2.3",
-<<<<<<< HEAD
-    "@types/recharts": "^1.8.29",
-=======
     "@types/react-is": "^19",
     "@types/recharts": "^2.0.1",
->>>>>>> develop
     "@vitejs/plugin-react": "^5.1.1",
     "@vitest/coverage-v8": "^4.0.18",
     "babel-plugin-react-compiler": "^1.0.0",
