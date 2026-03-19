@@ -12,7 +12,16 @@ import ClientDashboardMenu from "./screens/ClientDashboard/types/ClientDashboard
 import ClientDashboard from "./screens/ClientDashboard/types/Dashboard";
 
 import React from "react";
+import SuperAdminLayout from "./screens/Superadmindashboard/SuperAdminLayout";
 import SuperAdminDashboard from "./screens/Superadmindashboard/SuperAdminDashboard";
+import SuperAdminCompanies from "./screens/Superadmindashboard/SuperAdminCompanies";
+import SuperAdminPlans from "./screens/Superadmindashboard/SuperAdminPlans";
+import SuperAdminBilling from "./screens/Superadmindashboard/SuperAdminBilling";
+import SuperAdminUsers from "./screens/Superadmindashboard/SuperAdminUsers";
+import SuperAdminAudit from "./screens/Superadmindashboard/SuperAdminAudit";
+import SuperAdminSupport from "./screens/Superadmindashboard/SuperAdminSupport";
+import SuperAdminSettings from "./screens/Superadmindashboard/SuperAdminSettings";
+import SuperAdminProfile from "./screens/Superadmindashboard/SuperAdminProfile";
 import LoginScreen from "./screens/login/LoginScreen";
 import LandingHome from "./screens/landingHome/LandingPage";
 import ProfilePage from "./components/ProfileContainer/ProfileContainer";
@@ -52,7 +61,19 @@ const App: React.FC = () => {
           <Route path="mantenimiento" element={<div>Mantenimiento</div>} />
         </Route>
 
-        <Route path="/super/admin/dashboard" element={<SuperAdminDashboard />}/>
+        {/* ── Super Admin ── */}
+        <Route path="/super/admin" element={<SuperAdminLayout />}>
+          <Route index element={<Navigate to="dashboard" replace />} />
+          <Route path="dashboard" element={<SuperAdminDashboard />} />
+          <Route path="companies" element={<SuperAdminCompanies />} />
+          <Route path="plans" element={<SuperAdminPlans />} />
+          <Route path="billing" element={<SuperAdminBilling />} />
+          <Route path="users" element={<SuperAdminUsers />} />
+          <Route path="audit" element={<SuperAdminAudit />} />
+          <Route path="support" element={<SuperAdminSupport />} />
+          <Route path="settings" element={<SuperAdminSettings />} />
+          <Route path="profile" element={<SuperAdminProfile />} />
+        </Route>
 
         {/* TechDashboard by Alejandro */}
         <Route
