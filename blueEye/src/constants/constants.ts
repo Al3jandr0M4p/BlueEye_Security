@@ -118,7 +118,7 @@ export const techsData: UserCard[] = [
 ];
 
 export const usersFallback: Record<UserRoleTab, UserCard[]> = {
-  clientes: [
+  usuario: [
     {
       id: 1,
       name: "Mariana Cruz",
@@ -138,7 +138,7 @@ export const usersFallback: Record<UserRoleTab, UserCard[]> = {
       image: "https://i.pravatar.cc/320?img=12",
     },
   ],
-  tecnicos: [
+  tecnico: [
     {
       id: 11,
       name: "Luis Santana",

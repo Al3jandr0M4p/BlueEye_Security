@@ -1,0 +1,164 @@
+.planning-calendar .rbc-calendar {
+  border-radius: 24px;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  min-height: 100%;
+}
+
+.planning-calendar .rbc-toolbar {
+  margin-bottom: 0;
+  padding: 0.9rem 1rem;
+  border-bottom: 1px solid #e2e8f0;
+  background: #eff6ff;
+  gap: 0.75rem;
+}
+
+.planning-calendar .rbc-toolbar button {
+  border: 1px solid #cbd5e1;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #0f172a;
+  padding: 0.45rem 0.9rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.planning-calendar .rbc-toolbar button:hover,
+.planning-calendar .rbc-toolbar button:focus {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.planning-calendar .rbc-btn-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.planning-calendar .rbc-toolbar-label {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.planning-calendar .rbc-month-view,
+.planning-calendar .rbc-time-view {
+  border: 0;
+}
+
+.planning-calendar .rbc-header {
+  padding: 0.75rem 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #64748b;
+  border-bottom: 1px solid #e2e8f0;
+  background: #f8fafc;
+}
+
+.planning-calendar .rbc-date-cell {
+  padding: 0.35rem 0.45rem 0;
+  text-align: right;
+}
+
+.planning-calendar .rbc-date-cell > a {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #334155;
+}
+
+.planning-calendar .rbc-off-range-bg {
+  background: #f8fafc;
+}
+
+.planning-calendar .rbc-today {
+  background: #eff6ff;
+}
+
+.planning-calendar .rbc-day-bg {
+  transition: background-color 160ms ease;
+}
+
+.planning-calendar .rbc-day-selected {
+  background: #dbeafe;
+}
+
+.planning-calendar .rbc-day-past-disabled {
+  background: #f8fafc;
+  opacity: 0.65;
+}
+
+.planning-calendar .rbc-event {
+  border: 0;
+  border-radius: 12px;
+  padding: 0.28rem 0.55rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.planning-calendar .rbc-event-planned {
+  background: linear-gradient(135deg, #0f172a 0%, #334155 100%);
+  color: #ffffff;
+}
+
+.planning-calendar .rbc-event-current {
+  background: linear-gradient(135deg, #2563eb 0%, #0ea5e9 100%);
+  color: #ffffff;
+}
+
+.planning-calendar .rbc-selected {
+  background: linear-gradient(135deg, #2563eb 0%, #0ea5e9 100%);
+}
+
+.planning-calendar .rbc-show-more {
+  color: #2563eb;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+@media (max-width: 640px) {
+  .planning-calendar .rbc-toolbar {
+    align-items: flex-start;
+    padding: 0.85rem;
+  }
+
+  .planning-calendar .rbc-toolbar-label {
+    width: 100%;
+    text-align: left;
+  }
+
+  .planning-calendar .rbc-header {
+    font-size: 0.62rem;
+    padding: 0.55rem 0.2rem;
+  }
+
+  .planning-calendar .rbc-date-cell > a {
+    font-size: 0.72rem;
+  }
+
+  .planning-calendar .rbc-event {
+    font-size: 0.65rem;
+    padding: 0.12rem 0.3rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .planning-calendar .rbc-header {
+    padding: 0.95rem 0.45rem;
+    font-size: 0.76rem;
+  }
+
+  .planning-calendar .rbc-date-cell {
+    padding: 0.55rem 0.65rem 0;
+  }
+
+  .planning-calendar .rbc-date-cell > a {
+    font-size: 1rem;
+  }
+
+  .planning-calendar .rbc-row-content {
+    padding-inline: 0.2rem;
+  }
+}

@@ -7,6 +7,7 @@ import type {
   ResetPasswordPayload,
   RegisterResponse,
   CreateAdminPayload,
+  ConfigureUserAccountPayload,
   AdminDashboardStats,
 } from "../types/types";
 
@@ -80,6 +81,14 @@ export const loginWithGoogleService = async (credential: string) => {
 
 export const createUserAdminService = async (payload: CreateAdminPayload) => {
   const { data } = await api.post("/api/users/v1/invite/users", payload);
+
+  return data;
+};
+
+export const configureUserAccountService = async (
+  payload: ConfigureUserAccountPayload,
+) => {
+  const { data } = await api.post("/api/client/v1/config/users/account", payload);
 
   return data;
 };
