@@ -19,7 +19,7 @@ const InfoCrud: React.FC = () => {
   const state = (location.state as LocationState) || {};
 
   const normalizedType: UserRoleTab =
-    userType === "tecnicos" ? "tecnicos" : "clientes";
+    userType === "tecnico" ? "tecnico" : "usuario";
   const userId = Number(id);
 
   const user =
@@ -81,7 +81,7 @@ const InfoCrud: React.FC = () => {
                 >
                   Perfil:{" "}
                   <span className="font-semibold text-[#111827]">
-                    {normalizedType === "clientes" ? "Cliente" : "Tecnico"}
+                    {normalizedType === "usuario" ? "usuario" : "Tecnico"}
                   </span>
                 </p>
               </div>

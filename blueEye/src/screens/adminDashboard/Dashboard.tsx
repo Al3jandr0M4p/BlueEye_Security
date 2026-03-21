@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { fetchAdminDashboardStats } from "../../service/services";
 import { supabase } from "../../lib/supabase";
+import AdminPageShell from "../../components/AdminPageShell";
 
 const DashboardAdminScreen: React.FC = () => {
   const [stats, setStats] = useState({
     totalClients: 0,
     totalTechnicians: 0,
   });
+
   useEffect(() => {
     let mounted = true;
 
@@ -41,37 +43,30 @@ const DashboardAdminScreen: React.FC = () => {
   }, []);
 
   return (
-    <>
-      <div className="p-6">
-        <h1 className="text-2xl font-semibold mb-6">Dashboard</h1>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Clientes */}
-          <div className="bg-white shadow rounded-xl p-6 border">
-            <h2 className="text-gray-500 text-sm">Clientes</h2>
-
-            <p className="text-3xl font-bold mt-2">{stats.totalClients}</p>
-
-            <span className="text-xs text-gray-400">
-              Total de clientes registrados
-            </span>
-          </div>
-
-          {/* Técnicos */}
-          <div className="bg-white shadow rounded-xl p-6 border">
-            <h2 className="text-gray-500 text-sm">Técnicos</h2>
-
-            <p className="text-3xl font-bold mt-2">{stats.totalTechnicians}</p>
-
-            <span className="text-xs text-gray-400">
-              Total de técnicos registrados
-            </span>
-          </div>
-        </div>
+    <AdminPageShell
+      tag="Resumen"
+      title="Dashboard operacional"
+      subtitle="Actualizaciones en vivo para clientes y técnicos conectados al ecosistema."
+      actions={
+        <span className="rounded-full bg-white/20 px-3 py-1 text-xs uppercase tracking-[0.3em] text-white/90">
+          Live Update
+        </span>
+      }
+    >
+      <div className="grid gap-6 md:grid-cols-2">
+        <article className="rounded-3xl border border-white/10 bg-white/90 p-6 shadow-xl shadow-indigo-900/20 transition hover:-translate-y-1">
+          <p className="text-xs uppercase tracking-[0.4em] text-slate-500">Clientes</p>
+          <p className="mt-3 text-4xl font-bold text-slate-900">{stats.totalClients}</p>
+          <p className="text-sm text-slate-500">Total de clientes registrados</p>
+        </article>
+        <article className="rounded-3xl border border-white/10 bg-white/90 p-6 shadow-xl shadow-indigo-900/20 transition hover:-translate-y-1">
+          <p className="text-xs uppercase tracking-[0.4em] text-slate-500">Técnicos</p>
+          <p className="mt-3 text-4xl font-bold text-slate-900">{stats.totalTechnicians}</p>
+          <p className="text-sm text-slate-500">Técnicos activos en la plataforma</p>
+        </article>
       </div>
-    </>
+    </AdminPageShell>
   );
 };
 
 export default DashboardAdminScreen;
-

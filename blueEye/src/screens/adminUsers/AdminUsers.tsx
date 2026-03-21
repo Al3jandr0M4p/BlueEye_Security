@@ -6,12 +6,12 @@ import { clientsData, techsData } from "../../constants/constants";
 import { AdminAddUsersModal } from "../../modals/adminAddUsersModal/AdminAddUsersModal";
 
 const AdminUsersScreen: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<UserRoleTab>("clientes");
+  const [activeTab, setActiveTab] = useState<UserRoleTab>("usuario");
   const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false);
   const navigate = useNavigate();
 
   const users = useMemo(
-    () => (activeTab === "clientes" ? clientsData : techsData),
+    () => (activeTab === "usuario" ? clientsData : techsData),
     [activeTab],
   );
 
@@ -45,20 +45,20 @@ const AdminUsersScreen: React.FC = () => {
 
       <div className="mt-6 inline-flex rounded-xl bg-[#eef1f4] p-1">
         <button
-          onClick={() => setActiveTab("clientes")}
+          onClick={() => setActiveTab("usuario")}
           className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${
-            activeTab === "clientes"
+            activeTab === "usuario"
               ? "bg-white text-[#111827] shadow-sm"
               : "text-[#556070] hover:text-[#111827]"
           }`}
           style={{ fontFamily: "Google Sans" }}
         >
-          Clientes
+          Usuarios
         </button>
         <button
-          onClick={() => setActiveTab("tecnicos")}
+          onClick={() => setActiveTab("tecnico")}
           className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${
-            activeTab === "tecnicos"
+            activeTab === "tecnico"
               ? "bg-white text-[#111827] shadow-sm"
               : "text-[#556070] hover:text-[#111827]"
           }`}
