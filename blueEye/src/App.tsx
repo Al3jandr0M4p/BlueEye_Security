@@ -6,6 +6,7 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
+import React from "react";
 
 import ClientDashboardMenu from "./screens/ClientDashboard/types/ClientDashboardMenu";
 import ClientDashboard from "./features/client/pages/ClientDashboard";
@@ -13,7 +14,6 @@ import ClientTickets from "./features/client/pages/ClientTickets";
 import ClientInvoices from "./features/client/pages/ClientInvoices";
 import ClientMaintenance from "./features/client/pages/ClientMaintenance";
 
-import React from "react";
 import SuperAdminLayout from "./screens/Superadmindashboard/SuperAdminLayout";
 import SuperAdminDashboard from "./screens/Superadmindashboard/SuperAdminDashboard";
 import SuperAdminCompanies from "./screens/Superadmindashboard/SuperAdminCompanies";
@@ -41,6 +41,15 @@ import NotFound from "./screens/notFound/NotFound";
 import Forbidden from "./screens/errors/Forbidden";
 import BadRequest from "./screens/errors/BadRequest";
 import DashboardAdminScreen from "./screens/adminDashboard/Dashboard";
+import AdminClientsScreen from "./screens/adminDashboard/ClientsOverview";
+import AdminBusinessScreen from "./screens/adminDashboard/BusinessOverview";
+import AdminProjectsScreen from "./screens/adminDashboard/ProjectsManagement";
+import AdminPreProjectScreen from "./screens/adminDashboard/PreProjectPlanning";
+import AdminInventoryScreen from "./screens/adminDashboard/InventoryControl";
+import AdminSupportScreen from "./screens/adminDashboard/SupportDesk";
+import AdminOrdersPaymentsScreen from "./screens/adminDashboard/OrdersPayments";
+import AdminReportsScreen from "./screens/adminDashboard/ReportsHub";
+import InviteUserConfiguration from "./screens/inviteUserConfiguration/InviteUserConfiguration";
 
 const App: React.FC = () => {
   return (
@@ -51,7 +60,7 @@ const App: React.FC = () => {
         <Route path="/register" element={<RegisterScreen />} />
         <Route
           path="/invite/user/config/accounts"
-          element={<h1>Crea tu cuenta</h1>}
+          element={<InviteUserConfiguration />}
         />
 
         <Route path="/forgot-your-password" element={<ForgotYourPassword />} />
@@ -65,7 +74,14 @@ const App: React.FC = () => {
         <Route path="/404" element={<NotFound />} />
 
         {/* ── Client Dashboard — Sebastian ── */}
-        <Route path="/clientDashboard" element={<ClientDashboardMenu />}>
+        <Route
+          path="/clientDashboard"
+          element={
+            <ProtectedRoute allowedRoles={["usuario"]}>
+              <ClientDashboardMenu />
+            </ProtectedRoute>
+          }
+        >
           <Route index element={<Navigate to="overview" replace />} />
           <Route path="overview" element={<ClientDashboard />} />
           <Route path="tickets" element={<ClientTickets />} />
@@ -89,24 +105,24 @@ const App: React.FC = () => {
           <Route path="profile" element={<SuperAdminProfile />} />
         </Route>
 
-        {/* TechDashboard by Alejandro */}
+        <Route
+          path="/super/admin/dashboard"
+          element={<SuperAdminDashboard />}
+        />
+
+        {/* TechDashboard by Alejandro, sebastian, ryan */}
         <Route
           path="/techDashboard"
           element={
-            <ProtectedRoute allowedRoles={["tecnico"]}>
-              <TechDashboardMenu />
-            </ProtectedRoute>
+            // <ProtectedRoute allowedRoles={["tecnico"]}>
+            <TechDashboardMenu />
+            // </ProtectedRoute>
           }
         >
           <Route index element={<Navigate to="dashboard" />} />
           <Route path="dashboard" element={<TechDashboard />} />
           <Route path="tickets" element={<h1>Tickets Screen</h1>} />
         </Route>
-
-        <Route
-          path="/invite/user/config/accounts"
-          element={<h1>Configura tu cuenta</h1>}
-        />
 
         <Route
           path="/perfil"
@@ -139,15 +155,14 @@ const App: React.FC = () => {
         >
           <Route index element={<Navigate to="dashboard" />} />
           <Route path="dashboard" element={<DashboardAdminScreen />} />
-          <Route path="clients" />
-          <Route path="business" />
-          <Route path="proyects" />
-          <Route path="tech-pre-proyect" />
-          <Route path="devices" />
-          <Route path="inventory" />
-          <Route path="suport" />
-          <Route path="orders-payments" />
-          <Route path="reports" />
+          <Route path="clients" element={<AdminClientsScreen />} />
+          <Route path="business" element={<AdminBusinessScreen />} />
+          <Route path="proyects" element={<AdminProjectsScreen />} />
+          <Route path="tech-pre-proyect" element={<AdminPreProjectScreen />} />
+          <Route path="devices" element={<AdminInventoryScreen />} />
+          <Route path="suport" element={<AdminSupportScreen />} />
+          <Route path="orders-payments" element={<AdminOrdersPaymentsScreen />} />
+          <Route path="reports" element={<AdminReportsScreen />} />
           <Route path="employees" element={<AdminUsersScreen />} />
           <Route path="pricing" element={<PricingScreen />} />
         </Route>

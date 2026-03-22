@@ -37,7 +37,7 @@ export const adminNavItems: NavItem[] = [
   },
   {
     label: "Tickets",
-    to: "orders-payments",
+    to: "suport",
     icon: <Coins size={16} />,
     hasArrow: true,
   },
