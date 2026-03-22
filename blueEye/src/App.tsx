@@ -60,6 +60,7 @@ const App: React.FC = () => {
 
         <Route path="/unauthorized" element={<Forbidden />} />
         <Route path="/403" element={<Forbidden />} />
+        git 
         <Route path="/400" element={<BadRequest />} />
         <Route path="/404" element={<NotFound />} />
 
