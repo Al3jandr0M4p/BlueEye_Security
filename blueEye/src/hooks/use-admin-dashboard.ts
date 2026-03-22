@@ -4,11 +4,9 @@ import {
   fetchAdminCatalogOverview,
   fetchAdminClientsOverview,
   fetchAdminInventoryOverview,
-  fetchAdminOrdersPaymentsOverview,
   fetchAdminPreProjectOverview,
   fetchAdminProjectOverview,
   fetchAdminReportsOverview,
-  fetchAdminSupportOverview,
 } from "../service/adminServices";
 
 type Loader<T> = () => Promise<T>;
@@ -72,12 +70,6 @@ export const useAdminCatalogOverview = () =>
 
 export const useAdminInventoryOverview = () =>
   useAdminSection(fetchAdminInventoryOverview);
-
-export const useAdminSupportOverview = () =>
-  useAdminSection(fetchAdminSupportOverview);
-
-export const useAdminOrdersPaymentsOverview = () =>
-  useAdminSection(fetchAdminOrdersPaymentsOverview);
 
 export const useAdminReportsOverview = () =>
   useAdminSection(fetchAdminReportsOverview);

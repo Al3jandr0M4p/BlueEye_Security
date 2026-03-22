@@ -9,6 +9,8 @@ import type {
   CreateAdminPayload,
   ConfigureUserAccountPayload,
   AdminDashboardStats,
+  AdminTicket,
+  ApiResponse,
 } from "../types/types";
 
 export const registerUserService = async (payload: RegisterPayload) => {
@@ -98,5 +100,19 @@ export async function fetchAdminDashboardStats() {
     "/api/admin/v1/dashboard/stats",
   );
 
+  return data.data;
+}
+
+export async function fetchPedingTicketsService() {
+  const { data } = await api.get<AdminTicket[]>(
+    "/api/admin/v1/tickets/pending",
+  );
+  return data;
+}
+
+export async function fetchPlanningTicketsService() {
+  const { data } = await api.get<ApiResponse<AdminTicket[]>>(
+    "/api/admin/v1/tickets/planning"
+  );
   return data.data;
 }

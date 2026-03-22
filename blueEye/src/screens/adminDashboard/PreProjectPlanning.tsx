@@ -1,15 +1,15 @@
 import React from "react";
 import { useAdminPreProjectOverview } from "../../hooks/use-admin-dashboard";
-import { useAdminTicketPlanning } from "../../hooks/use-admin-ticket-planning";
+// import { useAdminTicketPlanning } from "../../hooks/use-admin-ticket-planning";
 import AdminPageShell from "../../components/AdminPageShell";
 
 const AdminPreProjectScreen: React.FC = () => {
   const { data, error } = useAdminPreProjectOverview();
-  const { state } = useAdminTicketPlanning();
+  // const { state } = useAdminTicketPlanning();
 
   const surveys = data?.surveys ?? [];
   const recommendations = data?.storageRecommendations ?? [];
-  const plannedTickets = state.planningQueue;
+  // const plannedTickets = state.planningQueue;
 
   return (
     <AdminPageShell
@@ -31,11 +31,11 @@ const AdminPreProjectScreen: React.FC = () => {
               </h2>
             </div>
             <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
-              {plannedTickets.length} en planificacion
+              {/* {plannedTickets.length} en planificacion */}
             </span>
           </div>
 
-          {plannedTickets.length > 0 ? (
+          {/* {plannedTickets.length > 0 ? (
             <div className="grid gap-4 lg:grid-cols-2">
               {plannedTickets.map((ticket) => (
                 <article
@@ -102,7 +102,7 @@ const AdminPreProjectScreen: React.FC = () => {
             <p className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6 text-sm text-slate-500">
               Todavia no hay tickets planificados desde la vista de Tickets.
             </p>
-          )}
+          )} */}
         </section>
 
         <div className="grid gap-4 md:grid-cols-2">

@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { type InternalAxiosRequestConfig } from "axios";
 
 const BaseUrl = import.meta.env.VITE_API_GATEWAY_URL! as string;
 
@@ -16,7 +16,7 @@ const api = axios.create({
   headers: { "Content-Type": "application/json" },
 });
 
-api.interceptors.request.use((config) => {
+api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   const token = accessTokenGetter?.();
 
   if (token) {

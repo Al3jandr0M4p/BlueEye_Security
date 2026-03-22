@@ -479,20 +479,6 @@ export interface AdminTicket {
   scheduledDate?: string;
 }
 
-export interface AdminSupportOverview {
-  ticketsByPriority: AdminPriorityTicket[];
-  slaTargets: AdminSlaTarget[];
-  pendingTickets: AdminTicket[];
-  planningQueue: AdminTicket[];
-  technicians: AdminTechnician[];
-  recentTickets: AdminTicket[];
-}
-
-export interface AdminTicketPlanningState {
-  pendingTickets: AdminTicket[];
-  planningQueue: AdminTicket[];
-  rejectedTicketIds: string[];
-}
 
 export interface AdminQuote {
   id: string;
@@ -516,12 +502,6 @@ export interface AdminOrder {
   scheduled: string;
 }
 
-export interface AdminOrdersPaymentsOverview {
-  quotes: AdminQuote[];
-  paymentsDue: AdminPaymentDue[];
-  orders: AdminOrder[];
-}
-
 export interface AdminReportCard {
   title: string;
   metric: string;
@@ -538,4 +518,9 @@ export interface AdminReportExport {
 export interface AdminReportsOverview {
   reports: AdminReportCard[];
   exports: AdminReportExport[];
+}
+
+export type ApiResponse<T> = {
+  success: boolean;
+  data: T;
 }
