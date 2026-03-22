@@ -57,6 +57,7 @@ const App: React.FC = () => {
         <Route path="/forgot-your-password" element={<ForgotYourPassword />} />
         <Route path="/reset-your-password" element={<ResetPassword />} />
 
+
         <Route path="/unauthorized" element={<Forbidden />} />
         <Route path="/403" element={<Forbidden />} />
         <Route path="/400" element={<BadRequest />} />
