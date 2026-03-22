@@ -2,24 +2,20 @@ import { useState } from "react";
 import type { ClientDocument } from "../types/client.types";
 import { clientService } from "../services/client.service";
 
-const C = {
-  bgCard:    "#0f172a",
-  bgCardEnd: "#1e293b",
-  bgBase:    "#060d1a",
-  primary:      "#22d3ee",
-  primaryBg:    "rgba(34,211,238,0.07)",
-  primaryBg2:   "rgba(34,211,238,0.12)",
-  primaryBd:    "rgba(34,211,238,0.16)",
-  primaryBd2:   "rgba(34,211,238,0.28)",
-  textPrimary:   "#f1f5f9",
-  textSecondary: "#e2e8f0",
-  textBody:      "#cbd5e1",
-  textMuted:     "#94a3b8",
-  textSubtle:    "#64748b",
-  border:      "rgba(255,255,255,0.06)",
-  borderCard:  "rgba(34,211,238,0.1)",
-  f: "'Geist','Inter',-apple-system,sans-serif",
-  m: "'Geist Mono','JetBrains Mono',ui-monospace,monospace",
+// ─── BlueEye Landing tokens ───────────────────────────────────────────────────
+const T = {
+  white:     "#FFFFFF",
+  green:     "#4CAF82",
+  greenDark: "#2E8B5E",
+  greenSft:  "#EAF7F1",
+  greenMid:  "#A8DBBE",
+  greenSft2: "rgba(76,175,130,0.12)",
+  t1:        "#1A2332",
+  t2:        "#4A5568",
+  t3:        "#9AA3B2",
+  border:    "#E2E8E4",
+  sans:      "'Plus Jakarta Sans', 'DM Sans', system-ui, sans-serif",
+  mono:      "'JetBrains Mono', 'Fira Mono', monospace",
 } as const;
 
 interface DocumentListProps {
@@ -27,21 +23,23 @@ interface DocumentListProps {
   onDownload: (documentId: string) => void;
 }
 
-function Tag({ bg, color, bd, children }: { bg: string; color: string; bd: string; children: React.ReactNode }) {
+function Tag({ children }: { children: React.ReactNode }) {
   return (
     <span style={{
-      fontSize: 9, fontFamily: C.m, letterSpacing: "0.1em", fontWeight: 600,
-      padding: "3px 9px", borderRadius: 5,
-      background: bg, color, border: `1px solid ${bd}`,
-      whiteSpace: "nowrap", lineHeight: 1, flexShrink: 0,
+      fontSize: 10, fontFamily: T.mono, letterSpacing: "0.08em", fontWeight: 700,
+      padding: "3px 10px", borderRadius: 100,
+      background: T.greenSft, color: T.green, border: `1px solid ${T.greenMid}`,
+      whiteSpace: "nowrap" as const, lineHeight: 1, flexShrink: 0,
     }}>
       {children}
     </span>
   );
 }
 
-function DocRow({ document, onDownload, last }: { document: ClientDocument; onDownload: () => void; last: boolean }) {
-  const [hov, setHov] = useState(false);
+function DocRow({ document, onDownload, last }: {
+  document: ClientDocument; onDownload: () => void; last: boolean;
+}) {
+  const [hov,    setHov]    = useState(false);
   const [btnHov, setBtnHov] = useState(false);
 
   return (
@@ -49,20 +47,23 @@ function DocRow({ document, onDownload, last }: { document: ClientDocument; onDo
       onMouseEnter={() => setHov(true)}
       onMouseLeave={() => setHov(false)}
       style={{
-        display: "flex", flexWrap: "wrap", alignItems: "center",
-        justifyContent: "space-between", gap: 10,
-        padding: "10px 14px",
-        borderBottom: last ? "none" : `1px solid ${C.border}`,
-        background: hov ? "rgba(255,255,255,0.02)" : "transparent",
-        transition: "background 0.15s",
-        cursor: "default",
+        display:        "flex",
+        flexWrap:       "wrap" as const,
+        alignItems:     "center",
+        justifyContent: "space-between",
+        gap:            10,
+        padding:        "10px 14px",
+        borderBottom:   last ? "none" : `1px solid ${T.border}`,
+        background:     hov ? T.greenSft : T.white,
+        transition:     "background 0.15s",
+        cursor:         "default",
       }}
     >
       <div style={{ minWidth: 0 }}>
-        <div style={{ fontSize: 12, fontWeight: 500, color: C.textSecondary, marginBottom: 2 }}>
+        <div style={{ fontSize: 12, fontWeight: 600, color: T.t1, marginBottom: 2 }}>
           {document.name}
         </div>
-        <div style={{ fontSize: 9, fontFamily: C.m, color: C.textSubtle }}>
+        <div style={{ fontSize: 10, fontFamily: T.mono, color: T.t3 }}>
           {clientService.getDocumentTypeLabel(document.type)}
         </div>
       </div>
@@ -72,12 +73,18 @@ function DocRow({ document, onDownload, last }: { document: ClientDocument; onDo
         onMouseEnter={() => setBtnHov(true)}
         onMouseLeave={() => setBtnHov(false)}
         style={{
-          padding: "4px 12px", borderRadius: 6,
-          background: btnHov ? C.primaryBg2 : C.primaryBg,
-          border: `1px solid ${btnHov ? C.primaryBd2 : C.primaryBd}`,
-          color: C.primary, fontSize: 10, fontFamily: C.m,
-          fontWeight: 600, letterSpacing: "0.06em",
-          cursor: "pointer", transition: "all 0.15s", flexShrink: 0,
+          padding:      "5px 14px",
+          borderRadius: 100,
+          background:   btnHov ? T.green     : T.greenSft,
+          border:       `1px solid ${btnHov ? T.green : T.greenMid}`,
+          color:        btnHov ? T.white     : T.greenDark,
+          fontSize:     10,
+          fontFamily:   T.mono,
+          fontWeight:   700,
+          letterSpacing:"0.06em",
+          cursor:       "pointer",
+          transition:   "all 0.15s",
+          flexShrink:   0,
         }}
       >
         Descargar
@@ -98,49 +105,58 @@ export default function DocumentList({ documents, onDownload }: DocumentListProp
 
   return (
     <section style={{
-      background:   `linear-gradient(135deg, ${C.bgCard} 0%, ${C.bgCardEnd} 100%)`,
-      border:       `1px solid ${C.borderCard}`,
-      borderRadius: 12,
+      background:   T.white,
+      border:       `1px solid ${T.border}`,
+      borderRadius: 14,
       overflow:     "hidden",
-      fontFamily:   C.f,
+      fontFamily:   T.sans,
+      boxShadow:    "0 1px 4px rgba(26,35,50,0.04)",
     }}>
-      {/* Panel header */}
+      {/* Header */}
       <div style={{
-        padding: "12px 18px",
-        borderBottom: `1px solid ${C.border}`,
-        background: "rgba(6,13,26,0.4)",
-        display: "flex", alignItems: "center", justifyContent: "space-between",
+        padding:        "13px 18px",
+        borderBottom:   `1px solid ${T.border}`,
+        background:     T.greenSft,
+        display:        "flex",
+        alignItems:     "center",
+        justifyContent: "space-between",
       }}>
         <div>
-          <div style={{ fontSize: 13, fontWeight: 600, color: C.textPrimary, letterSpacing: "-0.01em" }}>
+          <div style={{ fontSize: 13, fontWeight: 700, color: T.t1, letterSpacing: "-0.01em" }}>
             Documentos por sitio
           </div>
-          <div style={{ fontSize: 9, fontFamily: C.m, letterSpacing: "0.12em", textTransform: "uppercase", color: C.textSubtle, marginTop: 2 }}>
+          <div style={{
+            fontSize: 10, fontFamily: T.mono, letterSpacing: "0.12em",
+            textTransform: "uppercase" as const, color: T.t3, marginTop: 2,
+          }}>
             Archivos y contratos
           </div>
         </div>
-        <Tag bg={C.primaryBg} color={C.primary} bd={C.primaryBd}>{documents.length} archivos</Tag>
+        <Tag>{documents.length} archivos</Tag>
       </div>
 
       {/* Site groups */}
-      <div style={{ padding: "14px 18px", display: "flex", flexDirection: "column", gap: 10 }}>
+      <div style={{ padding: "14px 16px", display: "flex", flexDirection: "column", gap: 10 }}>
         {entries.map(([site, siteDocs]) => (
           <div key={site} style={{
-            background: "rgba(255,255,255,0.025)",
-            border: `1px solid ${C.border}`,
-            borderRadius: 10, overflow: "hidden",
+            background:   T.white,
+            border:       `1px solid ${T.border}`,
+            borderRadius: 10,
+            overflow:     "hidden",
           }}>
             {/* Site header */}
             <div style={{
-              display: "flex", alignItems: "center", justifyContent: "space-between",
-              padding: "8px 14px",
-              background: "rgba(34,211,238,0.04)",
-              borderBottom: `1px solid ${C.border}`,
+              display:        "flex",
+              alignItems:     "center",
+              justifyContent: "space-between",
+              padding:        "8px 14px",
+              background:     T.greenSft,
+              borderBottom:   `1px solid ${T.border}`,
             }}>
-              <span style={{ fontSize: 11, fontWeight: 600, color: C.primary, letterSpacing: "0.02em" }}>
+              <span style={{ fontSize: 12, fontWeight: 700, color: T.greenDark }}>
                 {site}
               </span>
-              <span style={{ fontSize: 9, fontFamily: C.m, color: C.textSubtle }}>
+              <span style={{ fontSize: 10, fontFamily: T.mono, color: T.t3 }}>
                 {siteDocs.length} {siteDocs.length === 1 ? "archivo" : "archivos"}
               </span>
             </div>
@@ -160,7 +176,10 @@ export default function DocumentList({ documents, onDownload }: DocumentListProp
         ))}
 
         {entries.length === 0 && (
-          <div style={{ padding: "40px 0", textAlign: "center", color: C.textSubtle, fontSize: 12 }}>
+          <div style={{
+            padding: "40px 0", textAlign: "center" as const,
+            color: T.t3, fontSize: 12,
+          }}>
             Sin documentos disponibles
           </div>
         )}

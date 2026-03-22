@@ -3,23 +3,21 @@ import MaintenanceHistory from "../components/MaintenanceHistory";
 import { clientService } from "../services/client.service";
 import type { MaintenanceRecord } from "../types/client.types";
 
-const C = {
-  bgCard:    "#0f172a",
-  bgCardEnd: "#1e293b",
-  primary:      "#22d3ee",
-  primaryBg:    "rgba(34,211,238,0.07)",
-  primaryBg2:   "rgba(34,211,238,0.15)",
-  primaryBd:    "rgba(34,211,238,0.16)",
-  primaryBd2:   "rgba(34,211,238,0.35)",
-  textPrimary:   "#f1f5f9",
-  textSecondary: "#e2e8f0",
-  textSubtle:    "#64748b",
-  inputBg:     "rgba(255,255,255,0.04)",
-  inputBd:     "rgba(255,255,255,0.09)",
-  border:      "rgba(255,255,255,0.06)",
-  borderCard:  "rgba(34,211,238,0.1)",
-  f: "'Geist','Inter',-apple-system,sans-serif",
-  m: "'Geist Mono','JetBrains Mono',ui-monospace,monospace",
+// ─── BlueEye Landing tokens ───────────────────────────────────────────────────
+const T = {
+  bg:         "#F8FAF8",
+  white:      "#FFFFFF",
+  green:      "#4CAF82",
+  greenDark:  "#2E8B5E",
+  greenSft:   "#EAF7F1",
+  greenMid:   "#A8DBBE",
+  greenLight: "#C8EDD9",
+  t1:         "#1A2332",
+  t2:         "#4A5568",
+  t3:         "#9AA3B2",
+  border:     "#E2E8E4",
+  sans:       "'Plus Jakarta Sans', 'DM Sans', system-ui, sans-serif",
+  mono:       "'JetBrains Mono', 'Fira Mono', monospace",
 } as const;
 
 function DateInput({ id, label, value, onChange }: {
@@ -31,8 +29,9 @@ function DateInput({ id, label, value, onChange }: {
     <div>
       <label htmlFor={id} style={{
         display: "block", marginBottom: 6,
-        fontSize: 9, fontFamily: C.m, letterSpacing: "0.12em",
-        textTransform: "uppercase", color: C.textSubtle, fontWeight: 600,
+        fontSize: 10, fontFamily: T.mono, letterSpacing: "0.12em",
+        textTransform: "uppercase" as const,
+        color: T.t3, fontWeight: 700,
       }}>
         {label}
       </label>
@@ -44,15 +43,15 @@ function DateInput({ id, label, value, onChange }: {
         onFocus={() => setFocus(true)}
         onBlur={() => setFocus(false)}
         style={{
-          padding: "9px 14px", borderRadius: 8,
-          background: focus ? "rgba(34,211,238,0.05)" : C.inputBg,
-          border: `1px solid ${focus ? C.primaryBd2 : C.inputBd}`,
-          color: value ? C.textSecondary : C.textSubtle,
-          fontSize: 12, fontFamily: C.m,
+          padding: "9px 14px", borderRadius: 10,
+          background: focus ? T.greenSft : T.white,
+          border: `1.5px solid ${focus ? T.greenMid : T.border}`,
+          color: value ? T.t1 : T.t3,
+          fontSize: 12, fontFamily: T.mono,
           outline: "none",
           transition: "all 0.18s",
-          boxShadow: focus ? "0 0 0 3px rgba(34,211,238,0.07)" : "none",
-          colorScheme: "dark",
+          boxShadow: focus ? `0 0 0 3px ${T.greenLight}` : "none",
+          colorScheme: "light",
         }}
       />
     </div>
@@ -60,10 +59,10 @@ function DateInput({ id, label, value, onChange }: {
 }
 
 const ClientMaintenance = () => {
-  const [records,   setRecords]   = useState<MaintenanceRecord[]>([]);
-  const [fromDate,  setFromDate]  = useState("");
-  const [toDate,    setToDate]    = useState("");
-  const [btnHov,    setBtnHov]    = useState(false);
+  const [records,  setRecords]  = useState<MaintenanceRecord[]>([]);
+  const [fromDate, setFromDate] = useState("");
+  const [toDate,   setToDate]   = useState("");
+  const [btnHov,   setBtnHov]   = useState(false);
 
   const loadHistory = useCallback(async (from?: string, to?: string) => {
     const data = await clientService.getMaintenanceHistory(from, to);
@@ -81,59 +80,65 @@ const ClientMaintenance = () => {
   };
 
   return (
-    <section style={{ padding: "24px 28px 56px", display: "flex", flexDirection: "column", gap: 20, fontFamily: C.f }}>
+    <section style={{
+      padding: "24px 28px 56px",
+      display: "flex", flexDirection: "column", gap: 20,
+      fontFamily: T.sans,
+      background: T.bg,
+      minHeight: "100vh",
+    }}>
 
-      {/* ── Page header ── */}
+      {/* Header */}
       <header>
-        <div style={{ fontSize: 10, fontFamily: C.m, letterSpacing: "0.18em", textTransform: "uppercase", color: C.primary, marginBottom: 6, opacity: 0.8 }}>
+        <div style={{
+          fontSize: 10, fontFamily: T.mono, letterSpacing: "0.18em",
+          textTransform: "uppercase" as const,
+          color: T.green, marginBottom: 6, fontWeight: 700,
+        }}>
           Portal del cliente · Técnico
         </div>
-        <h1 style={{ fontSize: 24, fontWeight: 600, color: C.textPrimary, letterSpacing: "-0.02em", margin: 0, lineHeight: 1.15 }}>
+        <h1 style={{
+          fontSize: 24, fontWeight: 800, color: T.t1,
+          letterSpacing: "-0.03em", margin: 0, lineHeight: 1.15,
+        }}>
           Historial de mantenimiento
         </h1>
-        <p style={{ fontSize: 12, color: C.textSubtle, margin: "5px 0 0" }}>
+        <p style={{ fontSize: 13, color: T.t3, margin: "5px 0 0", fontWeight: 500 }}>
           Seguimiento de intervenciones técnicas realizadas.
         </p>
       </header>
 
-      {/* ── Date filter ── */}
+      {/* Date filter */}
       <form
         onSubmit={applyFilter}
         style={{
-          background:   `linear-gradient(135deg, ${C.bgCard} 0%, ${C.bgCardEnd} 100%)`,
-          border:       `1px solid ${C.borderCard}`,
-          borderRadius: 12,
+          background:   T.white,
+          border:       `1px solid ${T.border}`,
+          borderRadius: 14,
           padding:      "16px 20px",
           display:      "flex",
-          flexWrap:     "wrap",
+          flexWrap:     "wrap" as const,
           alignItems:   "flex-end",
           gap:          16,
+          boxShadow:    "0 1px 4px rgba(26,35,50,0.04)",
         }}
       >
-        <DateInput
-          id="from-date"
-          label="Desde"
-          value={fromDate}
-          onChange={e => setFromDate(e.target.value)}
-        />
-        <DateInput
-          id="to-date"
-          label="Hasta"
-          value={toDate}
-          onChange={e => setToDate(e.target.value)}
-        />
+        <DateInput id="from-date" label="Desde" value={fromDate} onChange={e => setFromDate(e.target.value)} />
+        <DateInput id="to-date"   label="Hasta" value={toDate}   onChange={e => setToDate(e.target.value)}   />
         <button
           type="submit"
           onMouseEnter={() => setBtnHov(true)}
           onMouseLeave={() => setBtnHov(false)}
           style={{
-            padding: "9px 22px", borderRadius: 8,
-            background: btnHov ? C.primaryBg2 : C.primaryBg,
-            border: `1px solid ${btnHov ? C.primaryBd2 : C.primaryBd}`,
-            color: C.primary, fontSize: 12, fontFamily: C.m,
-            fontWeight: 600, letterSpacing: "0.08em",
+            padding: "9px 24px", borderRadius: 10,
+            background: btnHov ? T.green : T.greenSft,
+            border: `1.5px solid ${btnHov ? T.green : T.greenMid}`,
+            color: btnHov ? T.white : T.greenDark,
+            fontSize: 12, fontFamily: T.mono,
+            fontWeight: 700, letterSpacing: "0.08em",
             cursor: "pointer", transition: "all 0.18s",
             alignSelf: "flex-end",
+            boxShadow: btnHov ? "0 4px 16px rgba(76,175,130,0.25)" : "none",
           }}
         >
           Filtrar

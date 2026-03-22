@@ -1,41 +1,41 @@
-import { useState, type ChangeEvent, type FormEvent } from "react";
+import { useState, useRef, type ChangeEvent, type FormEvent, type DragEvent } from "react";
 import type { NewTicketInput } from "../types/client.types";
 
-const C = {
-  bgCard:    "#0f172a",
-  bgCardEnd: "#1e293b",
-  primary:      "#22d3ee",
-  primaryBg:    "rgba(34,211,238,0.07)",
-  primaryBg2:   "rgba(34,211,238,0.15)",
-  primaryBd:    "rgba(34,211,238,0.16)",
-  primaryBd2:   "rgba(34,211,238,0.35)",
-  danger:    "#ef4444",
-  dangerBg:  "rgba(239,68,68,0.08)",
-  dangerBd:  "rgba(239,68,68,0.22)",
-  textPrimary:   "#f1f5f9",
-  textSecondary: "#e2e8f0",
-  textBody:      "#cbd5e1",
-  textMuted:     "#94a3b8",
-  textSubtle:    "#64748b",
-  border:      "rgba(255,255,255,0.06)",
-  borderCard:  "rgba(34,211,238,0.1)",
-  inputBorder: "rgba(255,255,255,0.09)",
-  inputBg:     "rgba(255,255,255,0.04)",
-  f: "'Geist','Inter',-apple-system,sans-serif",
-  m: "'Geist Mono','JetBrains Mono',ui-monospace,monospace",
+// ─── BlueEye Landing tokens ───────────────────────────────────────────────────
+const T = {
+  white:      "#FFFFFF",
+  green:      "#4CAF82",
+  greenDark:  "#2E8B5E",
+  greenSft:   "#EAF7F1",
+  greenMid:   "#A8DBBE",
+  greenLight: "#C8EDD9",
+  warning:    "#D48A20",
+  danger:     "#E05252",
+  dangerSft:  "rgba(224,82,82,0.08)",
+  dangerBd:   "rgba(224,82,82,0.30)",
+  t1:         "#1A2332",
+  t2:         "#4A5568",
+  t3:         "#9AA3B2",
+  border:     "#E2E8E4",
+  sans:       "'Plus Jakarta Sans', 'DM Sans', system-ui, sans-serif",
+  mono:       "'JetBrains Mono', 'Fira Mono', monospace",
 } as const;
 
 interface TicketFormProps {
-  onSubmit: (input: NewTicketInput) => Promise<void>;
+  onSubmit: (input: NewTicketInput, photo?: File) => Promise<void>;
 }
 
 interface FormErrors {
   site?:        string;
   equipment?:   string;
   description?: string;
+  photo?:       string;
 }
 
 const initialState: NewTicketInput = { site: "", equipment: "", description: "" };
+
+const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+const MAX_SIZE_MB    = 5;
 
 function Field({
   id, label, error, placeholder, value, onChange, textarea,
@@ -45,28 +45,36 @@ function Field({
   textarea?: boolean;
 }) {
   const [focus, setFocus] = useState(false);
+
   const shared: React.CSSProperties = {
-    width: "100%", borderRadius: 8,
-    background: focus ? "rgba(34,211,238,0.05)" : C.inputBg,
-    border: `1px solid ${error ? C.dangerBd : focus ? C.primaryBd2 : C.inputBorder}`,
-    color: C.textSecondary,
-    fontSize: 12, fontFamily: C.f,
-    outline: "none",
-    transition: "all 0.18s",
-    boxSizing: "border-box",
-    boxShadow: focus ? `0 0 0 3px rgba(34,211,238,0.07)` : "none",
+    width:        "100%",
+    borderRadius: 10,
+    background:   focus ? T.greenSft : T.white,
+    border:       `1.5px solid ${error ? T.dangerBd : focus ? T.greenMid : T.border}`,
+    color:        T.t1,
+    fontSize:     13,
+    fontFamily:   T.sans,
+    outline:      "none",
+    transition:   "all 0.18s",
+    boxSizing:    "border-box",
+    boxShadow:    focus ? `0 0 0 3px ${T.greenLight}` : "none",
   };
 
   return (
     <div>
       <label htmlFor={id} style={{
-        display: "block", marginBottom: 6,
-        fontSize: 9, fontFamily: C.m, letterSpacing: "0.12em",
-        textTransform: "uppercase", color: error ? "#f87171" : C.textSubtle,
-        fontWeight: 600,
+        display:       "block",
+        marginBottom:  6,
+        fontSize:      10,
+        fontFamily:    T.mono,
+        letterSpacing: "0.12em",
+        textTransform: "uppercase",
+        color:         error ? T.danger : T.t3,
+        fontWeight:    700,
       }}>
         {label}
       </label>
+
       {textarea ? (
         <textarea
           id={id}
@@ -88,18 +96,211 @@ function Field({
           style={{ ...shared, padding: "10px 14px" }}
         />
       )}
+
       {error && (
-        <p style={{ marginTop: 5, fontSize: 10, color: "#f87171", fontFamily: C.m }}>{error}</p>
+        <p style={{ marginTop: 5, fontSize: 11, color: T.danger, fontFamily: T.mono, margin: "5px 0 0" }}>
+          {error}
+        </p>
       )}
     </div>
   );
 }
 
+// ─── Photo upload field ────────────────────────────────────────────────────────
+function PhotoField({
+  photo,
+  preview,
+  error,
+  dragging,
+  onFile,
+  onRemove,
+  onDragEnter,
+  onDragLeave,
+  onDrop,
+}: {
+  photo:       File | null;
+  preview:     string | null;
+  error?:      string;
+  dragging:    boolean;
+  onFile:      (file: File) => void;
+  onRemove:    () => void;
+  onDragEnter: (e: DragEvent<HTMLDivElement>) => void;
+  onDragLeave: (e: DragEvent<HTMLDivElement>) => void;
+  onDrop:      (e: DragEvent<HTMLDivElement>) => void;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) onFile(file);
+    // reset input so same file can be re-selected after removal
+    e.target.value = "";
+  };
+
+  return (
+    <div>
+      <label style={{
+        display:       "block",
+        marginBottom:  6,
+        fontSize:      10,
+        fontFamily:    T.mono,
+        letterSpacing: "0.12em",
+        textTransform: "uppercase",
+        color:         error ? T.danger : T.t3,
+        fontWeight:    700,
+      }}>
+        Foto (opcional)
+      </label>
+
+      {/* Hidden file input */}
+      <input
+        ref={inputRef}
+        type="file"
+        accept={ACCEPTED_TYPES.join(",")}
+        style={{ display: "none" }}
+        onChange={handleChange}
+      />
+
+      {preview ? (
+        /* ── Preview card ── */
+        <div style={{
+          position:     "relative",
+          borderRadius: 10,
+          overflow:     "hidden",
+          border:       `1.5px solid ${T.greenMid}`,
+          background:   T.greenSft,
+        }}>
+          <img
+            src={preview}
+            alt="preview"
+            style={{ width: "100%", maxHeight: 180, objectFit: "cover", display: "block" }}
+          />
+          {/* Overlay with file info + remove button */}
+          <div style={{
+            padding:         "7px 10px",
+            display:         "flex",
+            alignItems:      "center",
+            justifyContent:  "space-between",
+            background:      T.white,
+            borderTop:       `1px solid ${T.border}`,
+          }}>
+            <div style={{ overflow: "hidden" }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: T.t1, fontFamily: T.mono, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: 200 }}>
+                {photo?.name}
+              </div>
+              <div style={{ fontSize: 10, color: T.t3, fontFamily: T.mono, marginTop: 1 }}>
+                {photo ? (photo.size / 1024 / 1024).toFixed(2) : "0"} MB
+              </div>
+            </div>
+            <div style={{ display: "flex", gap: 6 }}>
+              <button
+                type="button"
+                onClick={() => inputRef.current?.click()}
+                style={{
+                  padding: "5px 10px", borderRadius: 8, fontSize: 11, fontFamily: T.mono,
+                  background: T.greenSft, border: `1px solid ${T.greenMid}`, color: T.greenDark,
+                  cursor: "pointer", fontWeight: 700,
+                }}
+              >
+                Cambiar
+              </button>
+              <button
+                type="button"
+                onClick={onRemove}
+                style={{
+                  padding: "5px 10px", borderRadius: 8, fontSize: 11, fontFamily: T.mono,
+                  background: T.dangerSft, border: `1px solid ${T.dangerBd}`, color: T.danger,
+                  cursor: "pointer", fontWeight: 700,
+                }}
+              >
+                Quitar
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : (
+        /* ── Drop zone ── */
+        <div
+          onDragEnter={onDragEnter}
+          onDragOver={e => e.preventDefault()}
+          onDragLeave={onDragLeave}
+          onDrop={onDrop}
+          onClick={() => inputRef.current?.click()}
+          style={{
+            borderRadius:   10,
+            border:         `1.5px dashed ${error ? T.dangerBd : dragging ? T.green : T.greenMid}`,
+            background:     dragging ? T.greenSft : T.white,
+            padding:        "22px 16px",
+            textAlign:      "center",
+            cursor:         "pointer",
+            transition:     "all 0.18s",
+            boxShadow:      dragging ? `0 0 0 3px ${T.greenLight}` : "none",
+          }}
+        >
+          <div style={{ fontSize: 22, marginBottom: 6 }}>📷</div>
+          <div style={{ fontSize: 12, fontWeight: 700, color: T.t2 }}>
+            Arrastra una imagen aquí
+          </div>
+          <div style={{ fontSize: 11, color: T.t3, marginTop: 3 }}>
+            o <span style={{ color: T.green, fontWeight: 700 }}>haz clic para seleccionar</span>
+          </div>
+          <div style={{ marginTop: 8, fontSize: 10, fontFamily: T.mono, color: T.t3 }}>
+            JPG · PNG · WEBP · GIF &nbsp;·&nbsp; máx. {MAX_SIZE_MB} MB
+          </div>
+        </div>
+      )}
+
+      {error && (
+        <p style={{ marginTop: 5, fontSize: 11, color: T.danger, fontFamily: T.mono, margin: "5px 0 0" }}>
+          {error}
+        </p>
+      )}
+    </div>
+  );
+}
+
+// ─── Main form ────────────────────────────────────────────────────────────────
 export default function TicketForm({ onSubmit }: TicketFormProps) {
-  const [formData,    setFormData]    = useState<NewTicketInput>(initialState);
-  const [errors,      setErrors]      = useState<FormErrors>({});
+  const [formData,     setFormData]     = useState<NewTicketInput>(initialState);
+  const [errors,       setErrors]       = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [btnHov,      setBtnHov]      = useState(false);
+  const [btnHov,       setBtnHov]       = useState(false);
+
+  // photo state
+  const [photo,    setPhoto]    = useState<File | null>(null);
+  const [preview,  setPreview]  = useState<string | null>(null);
+  const [dragging, setDragging] = useState(false);
+
+  const applyFile = (file: File) => {
+    if (!ACCEPTED_TYPES.includes(file.type)) {
+      setErrors(prev => ({ ...prev, photo: "Formato no soportado. Usa JPG, PNG, WEBP o GIF." }));
+      return;
+    }
+    if (file.size > MAX_SIZE_MB * 1024 * 1024) {
+      setErrors(prev => ({ ...prev, photo: `La imagen no puede superar ${MAX_SIZE_MB} MB.` }));
+      return;
+    }
+    setErrors(prev => ({ ...prev, photo: undefined }));
+    setPhoto(file);
+    const url = URL.createObjectURL(file);
+    setPreview(prev => { if (prev) URL.revokeObjectURL(prev); return url; });
+  };
+
+  const removePhoto = () => {
+    if (preview) URL.revokeObjectURL(preview);
+    setPhoto(null);
+    setPreview(null);
+    setErrors(prev => ({ ...prev, photo: undefined }));
+  };
+
+  const handleDragEnter = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setDragging(true); };
+  const handleDragLeave = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setDragging(false); };
+  const handleDrop      = (e: DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setDragging(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) applyFile(file);
+  };
 
   const validate = (): FormErrors => {
     const e: FormErrors = {};
@@ -117,9 +318,10 @@ export default function TicketForm({ onSubmit }: TicketFormProps) {
     if (Object.keys(nextErrors).length > 0) return;
     try {
       setIsSubmitting(true);
-      await onSubmit(formData);
+      await onSubmit(formData, photo ?? undefined);
       setFormData(initialState);
       setErrors({});
+      removePhoto();
     } finally {
       setIsSubmitting(false);
     }
@@ -134,32 +336,44 @@ export default function TicketForm({ onSubmit }: TicketFormProps) {
     <form
       onSubmit={handleSubmit}
       style={{
-        background:   `linear-gradient(135deg, ${C.bgCard} 0%, ${C.bgCardEnd} 100%)`,
-        border:       `1px solid ${C.borderCard}`,
-        borderRadius: 12,
+        background:   T.white,
+        border:       `1px solid ${T.border}`,
+        borderRadius: 14,
         overflow:     "hidden",
-        fontFamily:   C.f,
+        fontFamily:   T.sans,
+        boxShadow:    "0 1px 4px rgba(26,35,50,0.04)",
       }}
     >
       {/* Panel header */}
       <div style={{
-        padding: "12px 18px",
-        borderBottom: `1px solid ${C.border}`,
-        background: "rgba(6,13,26,0.4)",
-        display: "flex", alignItems: "center", justifyContent: "space-between",
+        padding:        "13px 18px",
+        borderBottom:   `1px solid ${T.border}`,
+        background:     T.greenSft,
+        display:        "flex",
+        alignItems:     "center",
+        justifyContent: "space-between",
       }}>
         <div>
-          <div style={{ fontSize: 13, fontWeight: 600, color: C.textPrimary, letterSpacing: "-0.01em" }}>
+          <div style={{ fontSize: 13, fontWeight: 700, color: T.t1, letterSpacing: "-0.01em" }}>
             Reportar falla
           </div>
-          <div style={{ fontSize: 9, fontFamily: C.m, letterSpacing: "0.12em", textTransform: "uppercase", color: C.textSubtle, marginTop: 2 }}>
+          <div style={{
+            fontSize: 10, fontFamily: T.mono, letterSpacing: "0.12em",
+            textTransform: "uppercase", color: T.t3, marginTop: 2,
+          }}>
             Nuevo ticket de soporte
           </div>
         </div>
         <span style={{
-          fontSize: 9, fontFamily: C.m, letterSpacing: "0.1em", fontWeight: 600,
-          padding: "3px 9px", borderRadius: 5,
-          background: C.primaryBg, color: C.primary, border: `1px solid ${C.primaryBd}`,
+          fontSize:      10,
+          fontFamily:    T.mono,
+          letterSpacing: "0.08em",
+          fontWeight:    700,
+          padding:       "3px 10px",
+          borderRadius:  100,
+          background:    T.white,
+          color:         T.green,
+          border:        `1px solid ${T.greenMid}`,
         }}>
           Soporte técnico
         </span>
@@ -196,12 +410,26 @@ export default function TicketForm({ onSubmit }: TicketFormProps) {
         {/* Char counter */}
         <div style={{ display: "flex", justifyContent: "flex-end", marginTop: -8 }}>
           <span style={{
-            fontSize: 9, fontFamily: C.m,
-            color: formData.description.length > 450 ? "#fcd34d" : C.textSubtle,
+            fontSize:  10,
+            fontFamily: T.mono,
+            color: formData.description.length > 450 ? T.warning : T.t3,
           }}>
             {formData.description.length} / 500
           </span>
         </div>
+
+        {/* Photo upload */}
+        <PhotoField
+          photo={photo}
+          preview={preview}
+          error={errors.photo}
+          dragging={dragging}
+          onFile={applyFile}
+          onRemove={removePhoto}
+          onDragEnter={handleDragEnter}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+        />
 
         <button
           type="submit"
@@ -209,22 +437,22 @@ export default function TicketForm({ onSubmit }: TicketFormProps) {
           onMouseEnter={() => setBtnHov(true)}
           onMouseLeave={() => setBtnHov(false)}
           style={{
-            padding: "11px 22px", borderRadius: 8,
-            background: isSubmitting
-              ? "rgba(34,211,238,0.06)"
-              : btnHov
-                ? C.primaryBg2
-                : C.primaryBg,
-            border: `1px solid ${isSubmitting ? C.primaryBd : btnHov ? C.primaryBd2 : C.primaryBd}`,
-            color: isSubmitting ? C.textSubtle : C.primary,
-            fontSize: 12, fontFamily: C.m,
-            fontWeight: 600, letterSpacing: "0.08em",
-            cursor: isSubmitting ? "not-allowed" : "pointer",
-            transition: "all 0.18s",
-            alignSelf: "flex-start",
+            padding:       "11px 24px",
+            borderRadius:  10,
+            background:    isSubmitting ? T.greenSft : btnHov ? T.green    : T.greenSft,
+            border:        `1.5px solid ${isSubmitting ? T.greenMid : btnHov ? T.green : T.greenMid}`,
+            color:         isSubmitting ? T.t3        : btnHov ? T.white   : T.greenDark,
+            fontSize:      13,
+            fontFamily:    T.sans,
+            fontWeight:    700,
+            letterSpacing: "0.01em",
+            cursor:        isSubmitting ? "not-allowed" : "pointer",
+            transition:    "all 0.18s",
+            alignSelf:     "flex-start",
+            boxShadow:     btnHov && !isSubmitting ? "0 4px 16px rgba(76,175,130,0.25)" : "none",
           }}
         >
-          {isSubmitting ? "Enviando..." : "Crear ticket"}
+          {isSubmitting ? "Enviando..." : "Crear ticket →"}
         </button>
       </div>
     </form>

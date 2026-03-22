@@ -3,45 +3,41 @@ import TicketForm from "../components/TicketForm";
 import { clientService } from "../services/client.service";
 import type { NewTicketInput, Ticket } from "../types/client.types";
 
-const C = {
-  bgCard:    "#0f172a",
-  bgCardEnd: "#1e293b",
-  primary:      "#22d3ee",
-  primaryBg:    "rgba(34,211,238,0.07)",
-  primaryBd:    "rgba(34,211,238,0.16)",
-  warning:   "#fbbf24",
-  warningBg: "rgba(251,191,36,0.08)",
-  warningBd: "rgba(251,191,36,0.22)",
-  info:    "#0ea5e9",
-  infoBg:  "rgba(14,165,233,0.08)",
-  infoBd:  "rgba(14,165,233,0.22)",
-  success:    "#22c55e",
-  successBg:  "rgba(34,197,94,0.08)",
-  successBd:  "rgba(34,197,94,0.22)",
-  textPrimary:   "#f1f5f9",
-  textSecondary: "#e2e8f0",
-  textBody:      "#cbd5e1",
-  textMuted:     "#94a3b8",
-  textSubtle:    "#64748b",
-  border:      "rgba(255,255,255,0.06)",
-  borderCard:  "rgba(34,211,238,0.1)",
-  f: "'Geist','Inter',-apple-system,sans-serif",
-  m: "'Geist Mono','JetBrains Mono',ui-monospace,monospace",
+// ─── BlueEye Landing tokens ───────────────────────────────────────────────────
+const T = {
+  bg:         "#F8FAF8",
+  white:      "#FFFFFF",
+  green:      "#4CAF82",
+  greenDark:  "#2E8B5E",
+  greenSft:   "#EAF7F1",
+  greenMid:   "#A8DBBE",
+  warning:    "#D48A20",
+  warningSft: "rgba(212,138,32,0.08)",
+  warningBd:  "rgba(212,138,32,0.30)",
+  info:       "#5A9EC8",
+  infoSft:    "rgba(90,158,200,0.10)",
+  infoBd:     "rgba(90,158,200,0.30)",
+  t1:         "#1A2332",
+  t2:         "#4A5568",
+  t3:         "#9AA3B2",
+  border:     "#E2E8E4",
+  sans:       "'Plus Jakarta Sans', 'DM Sans', system-ui, sans-serif",
+  mono:       "'JetBrains Mono', 'Fira Mono', monospace",
 } as const;
 
 const STATUS_CFG = {
-  open:        { label: "abierto",     color: C.info,    bg: C.infoBg,    bd: C.infoBd    },
-  in_progress: { label: "en progreso", color: C.warning, bg: C.warningBg, bd: C.warningBd },
-  resolved:    { label: "resuelto",    color: C.success, bg: C.successBg, bd: C.successBd },
+  open:        { label: "abierto",     color: T.info,    bg: T.infoSft,    bd: T.infoBd    },
+  in_progress: { label: "en progreso", color: T.warning, bg: T.warningSft, bd: T.warningBd },
+  resolved:    { label: "resuelto",    color: T.green,   bg: T.greenSft,   bd: T.greenMid  },
 } satisfies Record<Ticket["status"], object>;
 
 function Tag({ bg, color, bd, children }: { bg: string; color: string; bd: string; children: React.ReactNode }) {
   return (
     <span style={{
-      fontSize: 9, fontFamily: C.m, letterSpacing: "0.1em", fontWeight: 600,
-      padding: "3px 9px", borderRadius: 5,
+      fontSize: 10, fontFamily: T.mono, letterSpacing: "0.08em", fontWeight: 700,
+      padding: "3px 10px", borderRadius: 100,
       background: bg, color, border: `1px solid ${bd}`,
-      whiteSpace: "nowrap", lineHeight: 1, flexShrink: 0,
+      whiteSpace: "nowrap" as const, lineHeight: 1, flexShrink: 0,
     }}>
       {children}
     </span>
@@ -67,8 +63,19 @@ const ClientTickets = () => {
     void load();
   }, [loadTickets]);
 
-  const createTicket = async (input: NewTicketInput) => {
-    await clientService.createTicket(input);
+  // ── Photo is passed as a separate File arg; attach to FormData if your
+  //    backend supports multipart, or upload separately and attach the URL.
+  const createTicket = async (input: NewTicketInput, photo?: File) => {
+    if (photo) {
+      const formData = new FormData();
+      formData.append("site",        input.site);
+      formData.append("equipment",   input.equipment);
+      formData.append("description", input.description);
+      formData.append("photo",       photo, photo.name);
+      await clientService.createTicketWithPhoto(formData);
+    } else {
+      await clientService.createTicket(input);
+    }
     await loadTickets();
   };
 
@@ -79,58 +86,61 @@ const ClientTickets = () => {
       gridTemplateColumns: "minmax(320px, 420px) 1fr",
       gap: 20,
       alignItems: "start",
-      fontFamily: C.f,
+      fontFamily: T.sans,
+      background: T.bg,
+      minHeight: "100vh",
     }}>
 
       <TicketForm onSubmit={createTicket} />
 
-      {/* ── Ticket history panel ── */}
+      {/* Ticket history panel */}
       <article style={{
-        background:   `linear-gradient(135deg, ${C.bgCard} 0%, ${C.bgCardEnd} 100%)`,
-        border:       `1px solid ${C.borderCard}`,
-        borderRadius: 12,
+        background:   T.white,
+        border:       `1px solid ${T.border}`,
+        borderRadius: 14,
         overflow:     "hidden",
+        boxShadow:    "0 1px 4px rgba(26,35,50,0.04)",
       }}>
         {/* Panel header */}
         <div style={{
-          padding: "12px 18px",
-          borderBottom: `1px solid ${C.border}`,
-          background: "rgba(6,13,26,0.4)",
+          padding: "13px 18px",
+          borderBottom: `1px solid ${T.border}`,
+          background: T.greenSft,
           display: "flex", alignItems: "center", justifyContent: "space-between",
         }}>
           <div>
-            <div style={{ fontSize: 13, fontWeight: 600, color: C.textPrimary, letterSpacing: "-0.01em" }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: T.t1, letterSpacing: "-0.01em" }}>
               Historial de tickets
             </div>
-            <div style={{ fontSize: 9, fontFamily: C.m, letterSpacing: "0.12em", textTransform: "uppercase", color: C.textSubtle, marginTop: 2 }}>
+            <div style={{
+              fontSize: 10, fontFamily: T.mono, letterSpacing: "0.12em",
+              textTransform: "uppercase" as const, color: T.t3, marginTop: 2,
+            }}>
               Solicitudes de soporte
             </div>
           </div>
-          <Tag bg={C.primaryBg} color={C.primary} bd={C.primaryBd}>
-            {tickets.length} tickets
-          </Tag>
+          <Tag bg={T.white} color={T.green} bd={T.greenMid}>{tickets.length} tickets</Tag>
         </div>
 
-        {/* Loading state */}
+        {/* Loading */}
         {isLoading && (
-          <div style={{ padding: "40px 0", textAlign: "center", fontSize: 12, color: C.textSubtle, fontFamily: C.m }}>
+          <div style={{ padding: "40px 0", textAlign: "center" as const, fontSize: 12, color: T.t3, fontFamily: T.mono }}>
             Cargando tickets...
           </div>
         )}
 
-        {/* Empty state */}
+        {/* Empty */}
         {!isLoading && tickets.length === 0 && (
-          <div style={{ padding: "40px 0", textAlign: "center", fontSize: 12, color: C.textSubtle }}>
+          <div style={{ padding: "40px 0", textAlign: "center" as const, fontSize: 12, color: T.t3 }}>
             ✓ No hay tickets registrados.
           </div>
         )}
 
-        {/* Ticket list */}
+        {/* List */}
         <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
           {tickets.map((ticket, i) => {
-            const cfg    = STATUS_CFG[ticket.status];
-            const isHov  = hovRow === ticket.id;
-            const isLast = i === tickets.length - 1;
+            const cfg   = STATUS_CFG[ticket.status];
+            const isHov = hovRow === ticket.id;
 
             return (
               <li
@@ -142,8 +152,8 @@ const ClientTickets = () => {
                   gridTemplateColumns: "3px 1fr auto",
                   gap: 14, alignItems: "start",
                   padding: "12px 18px",
-                  borderBottom: isLast ? "none" : `1px solid ${C.border}`,
-                  background: isHov ? "rgba(255,255,255,0.02)" : "transparent",
+                  borderBottom: i < tickets.length - 1 ? `1px solid ${T.border}` : "none",
+                  background: isHov ? T.greenSft : T.white,
                   cursor: "default",
                   transition: "background 0.15s",
                 }}
@@ -152,33 +162,39 @@ const ClientTickets = () => {
                 <div style={{
                   width: 3, borderRadius: 2, minHeight: 36, marginTop: 3,
                   background: cfg.color,
-                  boxShadow: `0 0 8px ${cfg.color}55`,
                 }} />
 
                 {/* Content */}
                 <div>
                   <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 3 }}>
-                    <span style={{ fontSize: 12, fontWeight: 600, color: C.textPrimary, fontFamily: C.m }}>
-                      {ticket.id}
-                    </span>
-                    <span style={{ fontSize: 11, color: C.textSubtle }}>{ticket.site}</span>
+                    <span style={{ fontSize: 12, fontWeight: 700, color: T.t1, fontFamily: T.mono }}>{ticket.id}</span>
+                    <span style={{ fontSize: 11, color: T.t3 }}>{ticket.site}</span>
                   </div>
-                  <div style={{ fontSize: 11, color: C.textBody, marginBottom: 3 }}>
-                    <span style={{ color: C.textMuted, fontWeight: 500 }}>Equipo: </span>
-                    {ticket.equipment}
+                  <div style={{ fontSize: 11, color: T.t2, marginBottom: 3 }}>
+                    <span style={{ color: T.t3, fontWeight: 600 }}>Equipo: </span>{ticket.equipment}
                   </div>
-                  <div style={{ fontSize: 11, color: C.textMuted, lineHeight: 1.55 }}>
-                    {ticket.description}
-                  </div>
-                  <div style={{ marginTop: 6, fontSize: 9, fontFamily: C.m, color: C.textSubtle, letterSpacing: "0.06em" }}>
+                  <div style={{ fontSize: 11, color: T.t2, lineHeight: 1.55 }}>{ticket.description}</div>
+                  {/* Show thumbnail if ticket has a photo URL */}
+                  {ticket.photoUrl && (
+                    <a href={ticket.photoUrl} target="_blank" rel="noreferrer" style={{ display: "inline-block", marginTop: 6 }}>
+                      <img
+                        src={ticket.photoUrl}
+                        alt="evidencia"
+                        style={{
+                          height: 52, width: 72, objectFit: "cover",
+                          borderRadius: 6, border: `1px solid ${T.border}`,
+                          display: "block",
+                        }}
+                      />
+                    </a>
+                  )}
+                  <div style={{ marginTop: 6, fontSize: 10, fontFamily: T.mono, color: T.t3, letterSpacing: "0.04em" }}>
                     {new Date(ticket.createdAt).toLocaleString()}
                   </div>
                 </div>
 
                 {/* Status tag */}
-                <Tag bg={cfg.bg} color={cfg.color} bd={cfg.bd}>
-                  {cfg.label}
-                </Tag>
+                <Tag bg={cfg.bg} color={cfg.color} bd={cfg.bd}>{cfg.label}</Tag>
               </li>
             );
           })}

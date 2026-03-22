@@ -61,9 +61,9 @@ const App: React.FC = () => {
         <Route
           path="/techDashboard"
           element={
-            <ProtectedRoute allowedRoles={["tecnico"]}>
+            // <ProtectedRoute allowedRoles={["tecnico"]}>
               <TechDashboardMenu />
-            </ProtectedRoute>
+            // </ProtectedRoute>
           }
         >
           <Route index element={<Navigate to="dashboard" />} />
