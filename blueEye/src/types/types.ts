@@ -132,6 +132,7 @@ export interface FormComponentFirstProps {
   password: string;
   username: string;
   businessName: string;
+  isOnline: boolean;
   currencyOptions: {
     value: string;
     label: string;
@@ -168,7 +169,7 @@ export interface RegisterResponse {
   data: {
     userId: string | null;
     businessId: string | null;
-  }
+  };
 }
 
 export interface ComingSoonModalProps {
@@ -180,4 +181,346 @@ export interface NavItem {
   to: string;
   icon: React.ReactNode;
   hasArrow?: boolean;
+}
+
+export interface ActivityItem {
+  id: number;
+  title: string;
+  highlight: string;
+  date: string;
+}
+
+export interface AdminAddUsersModalProps {
+  setIsAddUserModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+export interface CreateAdminPayload {
+  email: string;
+  rolename: string;
+}
+
+export interface ConfigureUserAccountPayload {
+  username: string;
+  invitationToken?: string;
+}
+
+export type UserRoleTab = "usuario" | "tecnico";
+
+export type UserCard = {
+  id: number;
+  name: string;
+  email: string;
+  phone: string;
+  company: string;
+  city: string;
+  image: string;
 };
+
+export type LocationState = {
+  user?: UserCard;
+  userType?: UserRoleTab;
+};
+
+export interface AdminDashboardStats {
+  message: string;
+  data: {
+    totalClients: number;
+    totalTechnicians: number;
+  };
+}
+
+export interface AdminSummaryStat {
+  label: string;
+  value: number;
+  detail: string;
+}
+
+export interface AdminClientProfile {
+  name: string;
+  type: "hogar" | "comercio" | "empresa";
+  sites: number;
+  status: string;
+  nextVisit: string;
+  tags: string[];
+  image: string;
+  primaryContact: string;
+  plan: string;
+  nextAudit: string;
+}
+
+export interface AdminClientOverview {
+  stats: AdminSummaryStat[];
+  clients: AdminClientProfile[];
+}
+
+export interface AdminBusinessLimit {
+  label: string;
+  used: number;
+  limit: number;
+}
+
+export interface AdminTenant {
+  name: string;
+  timezone: string;
+  currency: string;
+  status: string;
+}
+
+export interface AdminSecurityCheck {
+  title: string;
+  detail: string;
+  status: string;
+}
+
+export interface AdminBusinessOverview {
+  currentPlan: string;
+  renewalDate: string;
+  currency: string;
+  limits: AdminBusinessLimit[];
+  tenants: AdminTenant[];
+  security: AdminSecurityCheck[];
+}
+
+export interface AdminProjectPhase {
+  phase: string;
+  count: number;
+  completion: number;
+}
+
+export interface AdminProjectItem {
+  name: string;
+  client: string;
+  status: string;
+  nextMilestone: string;
+  notes: string;
+  dueDate: string;
+}
+
+export interface AdminSurveyEvidence {
+  label: string;
+  value: string;
+}
+
+export interface AdminSurveyChecklistItem {
+  label: string;
+  status: string;
+}
+
+export interface AdminAiQuoteLineItem {
+  concept: string;
+  quantity: number;
+  unitPrice: string;
+  subtotal: string;
+}
+
+export interface AdminAiQuote {
+  generatedFor: string;
+  scope: string;
+  complexity: string;
+  estimatedTime: string;
+  subtotal: string;
+  installation: string;
+  aiAdjustment: string;
+  total: string;
+  rationale: string;
+  lineItems: AdminAiQuoteLineItem[];
+}
+
+export interface AdminSurveyReport {
+  ticketId: string;
+  projectName: string;
+  client: string;
+  site: string;
+  placeType: string;
+  technician: string;
+  surveyDate: string;
+  status: string;
+  summary: string;
+  zoneCoverage: string[];
+  infrastructure: string[];
+  risks: string[];
+  recommendations: string[];
+  evidence: AdminSurveyEvidence[];
+  checklist: AdminSurveyChecklistItem[];
+  proposedDevices: string[];
+  nextStep: string;
+  aiQuote: AdminAiQuote;
+}
+
+export interface AdminProjectOverview {
+  projectCount: number;
+  phaseStats: AdminProjectPhase[];
+  activeProjects: AdminProjectItem[];
+  surveyReports: AdminSurveyReport[];
+}
+
+export interface AdminSurvey {
+  site: string;
+  zone: string;
+  objective: string;
+  risks: string[];
+  nextSteps: string;
+  measurements: string;
+  networkStatus: string;
+  timeline: string;
+}
+
+export interface AdminStorageRecommendation {
+  cameras: number;
+  resolution: string;
+  codec: string;
+  retentionDays: number;
+  recommendedDisk: string;
+  nvr: string;
+}
+
+export interface AdminPreProjectOverview {
+  surveys: AdminSurvey[];
+  storageRecommendations: AdminStorageRecommendation[];
+}
+
+export interface AdminCategory {
+  name: string;
+  items: number;
+  description: string;
+  recommended: string;
+}
+
+export interface AdminCatalogOverview {
+  categories: AdminCategory[];
+  compatibilityAlerts: string[];
+  cameraCatalog: AdminCameraCatalogItem[];
+  motionSensorCatalog: AdminMotionSensorCatalogItem[];
+}
+
+export interface AdminCameraCatalogItem {
+  name: string;
+  type: string;
+  resolution: string;
+  sts?: string;
+  lens: string;
+  poe: boolean;
+  onvif: boolean;
+  nightVision: string;
+  description: string;
+  image: string;
+  price: string;
+  stock: number;
+  features: string[];
+}
+
+export interface AdminMotionSensorCatalogItem {
+  name: string;
+  coverage: string;
+  detection: string;
+  connectivity: string;
+  installation: string;
+  description: string;
+  image: string;
+  price: string;
+  stock: number;
+  idealFor: string[];
+  features: string[];
+}
+
+export interface AdminStockLevel {
+  material: string;
+  current: number;
+  minimum: number;
+  location: string;
+  status: string;
+}
+
+export interface AdminInventoryOverview {
+  stockLevels: AdminStockLevel[];
+  alerts: string[];
+  lastUpdated: string;
+}
+
+export interface AdminPriorityTicket {
+  priority: string;
+  count: number;
+}
+
+export interface AdminSlaTarget {
+  type: string;
+  target: string;
+  breached: number;
+}
+
+export interface AdminDeviceRequest {
+  name: string;
+  quantity: number;
+  status: string;
+}
+
+export interface AdminTechnician {
+  id: string;
+  name: string;
+  role: string;
+  location: string;
+  status: string;
+  expertise: string[];
+  nextAvailable: string;
+}
+
+export interface AdminTicket {
+  id: string;
+  site: string;
+  status: string;
+  assignedTo: string;
+  summary: string;
+  priority: string;
+  createdAt: string;
+  slaDue: string;
+  requestedBy: string;
+  devices: AdminDeviceRequest[];
+  tags: string[];
+  scheduledDate?: string;
+}
+
+
+export interface AdminQuote {
+  id: string;
+  status: string;
+  total: string;
+  client: string;
+  sentDate: string;
+}
+
+export interface AdminPaymentDue {
+  client: string;
+  amount: string;
+  dueDate: string;
+  method: string;
+}
+
+export interface AdminOrder {
+  id: string;
+  status: string;
+  nextAction: string;
+  scheduled: string;
+}
+
+export interface AdminReportCard {
+  title: string;
+  metric: string;
+  trend: string;
+  details: string;
+}
+
+export interface AdminReportExport {
+  type: string;
+  lastExported: string;
+  format: string;
+}
+
+export interface AdminReportsOverview {
+  reports: AdminReportCard[];
+  exports: AdminReportExport[];
+}
+
+export type ApiResponse<T> = {
+  success: boolean;
+  data: T;
+}
