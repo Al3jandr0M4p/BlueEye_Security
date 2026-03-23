@@ -152,11 +152,12 @@ function PhotoField({
         Foto (opcional)
       </label>
 
-      {/* Hidden file input */}
+      {/* Hidden file input — aria-label satisfies axe/forms accessibility rule */}
       <input
         ref={inputRef}
         type="file"
         accept={ACCEPTED_TYPES.join(",")}
+        aria-label="Seleccionar foto"
         style={{ display: "none" }}
         onChange={handleChange}
       />
