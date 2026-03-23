@@ -8,36 +8,46 @@ import {
 } from "react-router-dom";
 import React from "react";
 
+import ClientDashboardMenu from "./screens/ClientDashboard/types/ClientDashboardMenu";
+import ClientDashboard from "./features/client/pages/ClientDashboard";
+import ClientTickets from "./features/client/pages/ClientTickets";
+import ClientInvoices from "./features/client/pages/ClientInvoices";
+import ClientMaintenance from "./features/client/pages/ClientMaintenance";
+
+import SuperAdminLayout from "./screens/Superadmindashboard/SuperAdminLayout";
+import SuperAdminDashboard from "./screens/Superadmindashboard/SuperAdminDashboard";
+import SuperAdminCompanies from "./screens/Superadmindashboard/SuperAdminCompanies";
+import SuperAdminPlans from "./screens/Superadmindashboard/SuperAdminPlans";
+import SuperAdminBilling from "./screens/Superadmindashboard/SuperAdminBilling";
+import SuperAdminUsers from "./screens/Superadmindashboard/SuperAdminUsers";
+import SuperAdminAudit from "./screens/Superadmindashboard/SuperAdminAudit";
+import SuperAdminSupport from "./screens/Superadmindashboard/SuperAdminSupport";
+import SuperAdminSettings from "./screens/Superadmindashboard/SuperAdminSettings";
+import SuperAdminProfile from "./screens/Superadmindashboard/SuperAdminProfile";
+import LoginScreen from "./screens/login/LoginScreen";
+import LandingHome from "./screens/landingHome/LandingPage";
+import ProfilePage from "./components/ProfileContainer/ProfileContainer";
+import TechDashboard from "./screens/techDashboard/Dashboard";
+import PricingScreen from "./screens/pricing/Princing";
+import ResetPassword from "./screens/resetPassword/ResetPassword";
+import ProtectedRoute from "./components/ProtectedRoutes/ProtectedRoutes";
+import RegisterScreen from "./screens/register/Registerscreen";
+import TechDashboardMenu from "./components/techDashboardMenu/TechDashboardMenu";
+import ForgotYourPassword from "./screens/forgotPassword/ForgotPassword";
+import AdminDashboardMenu from "./components/adminDashboardMenu/AdminDashboardMenu";
+import AdminUsersScreen from "./screens/adminUsers/AdminUsers";
+import InfoCrud from "./components/infoCrudUsers/InfoCrud";
 import NotFound from "./screens/notFound/NotFound";
 import Forbidden from "./screens/errors/Forbidden";
 import BadRequest from "./screens/errors/BadRequest";
-import LoginScreen from "./screens/login/LoginScreen";
-import PricingScreen from "./screens/pricing/Princing";
-import InfoCrud from "./components/infoCrudUsers/InfoCrud";
-import LandingHome from "./screens/landingHome/LandingPage";
-import TechDashboard from "./screens/techDashboard/Dashboard";
-import RegisterScreen from "./screens/register/Registerscreen";
-import AdminUsersScreen from "./screens/adminUsers/AdminUsers";
-import ResetPassword from "./screens/resetPassword/ResetPassword";
-import ClientTickets from "./features/client/pages/ClientTickets";
-import ClientInvoices from "./features/client/pages/ClientInvoices";
 import AdminReportsScreen from "./screens/adminDashboard/ReportsHub";
-import ClientDashboard from "./features/client/pages/ClientDashboard";
 import DashboardAdminScreen from "./screens/adminDashboard/Dashboard";
 import AdminSupportScreen from "./screens/adminDashboard/SupportDesk";
-import ForgotYourPassword from "./screens/forgotPassword/ForgotPassword";
-import ProfilePage from "./components/ProfileContainer/ProfileContainer";
-import ProtectedRoute from "./components/ProtectedRoutes/ProtectedRoutes";
-import ClientMaintenance from "./features/client/pages/ClientMaintenance";
 import AdminClientsScreen from "./screens/adminDashboard/ClientsOverview";
 import AdminBusinessScreen from "./screens/adminDashboard/BusinessOverview";
 import AdminInventoryScreen from "./screens/adminDashboard/InventoryControl";
 import AdminProjectsScreen from "./screens/adminDashboard/ProjectsManagement";
 import AdminPreProjectScreen from "./screens/adminDashboard/PreProjectPlanning";
-import TechDashboardMenu from "./components/techDashboardMenu/TechDashboardMenu";
-import SuperAdminDashboard from "./screens/Superadmindashboard/SuperAdminDashboard";
-import AdminDashboardMenu from "./components/adminDashboardMenu/AdminDashboardMenu";
-import ClientDashboardMenu from "./screens/ClientDashboard/types/ClientDashboardMenu";
 import InviteUserConfiguration from "./screens/inviteUserConfiguration/InviteUserConfiguration";
 
 const App: React.FC = () => {
@@ -55,8 +65,10 @@ const App: React.FC = () => {
         <Route path="/forgot-your-password" element={<ForgotYourPassword />} />
         <Route path="/reset-your-password" element={<ResetPassword />} />
 
+
         <Route path="/unauthorized" element={<Forbidden />} />
         <Route path="/403" element={<Forbidden />} />
+        git 
         <Route path="/400" element={<BadRequest />} />
         <Route path="/404" element={<NotFound />} />
 
@@ -76,6 +88,20 @@ const App: React.FC = () => {
           <Route path="documentos" element={<ClientInvoices />} />
           <Route path="notificaciones" element={<ClientDashboard />} />
           <Route path="mantenimiento" element={<ClientMaintenance />} />
+        </Route>
+
+        {/* ── Super Admin ── */}
+        <Route path="/super/admin" element={<SuperAdminLayout />}>
+          <Route index element={<Navigate to="dashboard" replace />} />
+          <Route path="dashboard" element={<SuperAdminDashboard />} />
+          <Route path="companies" element={<SuperAdminCompanies />} />
+          <Route path="plans" element={<SuperAdminPlans />} />
+          <Route path="billing" element={<SuperAdminBilling />} />
+          <Route path="users" element={<SuperAdminUsers />} />
+          <Route path="audit" element={<SuperAdminAudit />} />
+          <Route path="support" element={<SuperAdminSupport />} />
+          <Route path="settings" element={<SuperAdminSettings />} />
+          <Route path="profile" element={<SuperAdminProfile />} />
         </Route>
 
         <Route
