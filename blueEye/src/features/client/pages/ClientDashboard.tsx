@@ -1,45 +1,93 @@
 import { useCallback, useEffect, useState } from "react";
 import CameraStatusCard from "../components/CameraStatusCard";
-import StatCard from "../components/StatCard";
+
 import { clientService } from "../services/client.service";
 import type { ClientNotification, SystemStatusData } from "../types/client.types";
 
-// ─── BlueEye Tokens ───────────────────────────────────────────────────────────
-const C = {
-  bgCard:    "#0f172a",
-  bgCardEnd: "#1e293b",
-  primary:      "#22d3ee",
-  primaryBg:    "rgba(34,211,238,0.07)",
-  primaryBd:    "rgba(34,211,238,0.16)",
-  warning:   "#fbbf24",
-  warningBg: "rgba(251,191,36,0.08)",
-  warningBd: "rgba(251,191,36,0.22)",
-  danger:    "#ef4444",
-  dangerBg:  "rgba(239,68,68,0.08)",
-  dangerBd:  "rgba(239,68,68,0.22)",
-  info:    "#0ea5e9",
-  infoBg:  "rgba(14,165,233,0.08)",
-  infoBd:  "rgba(14,165,233,0.22)",
-  textPrimary:   "#f1f5f9",
-  textSecondary: "#e2e8f0",
-  textMuted:     "#94a3b8",
-  textSubtle:    "#64748b",
-  border:      "rgba(255,255,255,0.06)",
-  borderCard:  "rgba(34,211,238,0.1)",
-  f: "'Geist','Inter',-apple-system,sans-serif",
-  m: "'Geist Mono','JetBrains Mono',ui-monospace,monospace",
+// ─── BlueEye Landing tokens ───────────────────────────────────────────────────
+const T = {
+  bg:         "#F8FAF8",
+  white:      "#FFFFFF",
+  green:      "#4CAF82",
+  greenDark:  "#2E8B5E",
+  greenSft:   "#EAF7F1",
+  greenMid:   "#A8DBBE",
+  greenLight: "#C8EDD9",
+  warning:    "#D48A20",
+  warningSft: "rgba(212,138,32,0.08)",
+  warningBd:  "rgba(212,138,32,0.22)",
+  danger:     "#E05252",
+  dangerSft:  "rgba(224,82,82,0.08)",
+  dangerBd:   "rgba(224,82,82,0.22)",
+  navy:       "#1A2332",
+  t1:         "#1A2332",
+  t2:         "#4A5568",
+  t3:         "#9AA3B2",
+  border:     "#E2E8E4",
+  sans:       "'Plus Jakarta Sans', 'DM Sans', system-ui, sans-serif",
+  mono:       "'JetBrains Mono', 'Fira Mono', monospace",
 } as const;
 
 const NVR_CFG = {
-  online:   { color: C.primary, bg: C.primaryBg, bd: C.primaryBd, label: "Online"   },
-  degraded: { color: C.warning, bg: C.warningBg, bd: C.warningBd, label: "Degradado" },
-  offline:  { color: C.danger,  bg: C.dangerBg,  bd: C.dangerBd,  label: "Offline"  },
+  online:   { color: T.green,   bg: T.greenSft,  bd: T.greenMid,   label: "Online"    },
+  degraded: { color: T.warning, bg: T.warningSft, bd: T.warningBd, label: "Degradado" },
+  offline:  { color: T.danger,  bg: T.dangerSft,  bd: T.dangerBd,  label: "Offline"   },
 } as const;
 
+// ─── Stat Card light ──────────────────────────────────────────────────────────
+const accentMap: Record<string, { color: string; bg: string; bd: string }> = {
+  blue:  { color: "#5A9EC8", bg: "rgba(90,158,200,0.08)",  bd: "rgba(90,158,200,0.22)"  },
+  green: { color: T.green,   bg: T.greenSft,               bd: T.greenMid               },
+  red:   { color: T.danger,  bg: T.dangerSft,              bd: T.dangerBd               },
+  amber: { color: T.warning, bg: T.warningSft,             bd: T.warningBd              },
+};
+
+function LightStatCard({ title, value, accent, detail, barWidth }: {
+  title: string; value: number; accent: string; detail: string; barWidth?: string;
+}) {
+  const a = accentMap[accent] ?? accentMap.green;
+  return (
+    <div style={{
+      background: T.white,
+      border: `1px solid ${T.border}`,
+      borderRadius: 14,
+      padding: "18px 20px",
+      display: "flex",
+      flexDirection: "column",
+      gap: 8,
+      fontFamily: T.sans,
+      boxShadow: "0 1px 4px rgba(26,35,50,0.04)",
+    }}>
+      <div style={{ fontSize: 11, fontWeight: 600, color: T.t3, letterSpacing: "0.04em" }}>{title}</div>
+      <div style={{ fontSize: 32, fontWeight: 800, color: T.t1, letterSpacing: "-0.04em", lineHeight: 1 }}>{value}</div>
+      <div style={{ fontSize: 11, color: T.t3 }}>{detail}</div>
+      {barWidth && (
+        <div style={{ height: 3, borderRadius: 2, background: T.border, marginTop: 4, overflow: "hidden" }}>
+          <div style={{ width: barWidth, height: "100%", background: a.color, borderRadius: 2, transition: "width 0.5s ease" }} />
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Tag helper ───────────────────────────────────────────────────────────────
+function Tag({ color, bg, bd, children }: { color: string; bg: string; bd: string; children: React.ReactNode }) {
+  return (
+    <span style={{
+      fontSize: 10, fontFamily: T.mono, letterSpacing: "0.08em", fontWeight: 700,
+      padding: "3px 10px", borderRadius: 100,
+      background: bg, color, border: `1px solid ${bd}`,
+      whiteSpace: "nowrap",
+    }}>
+      {children}
+    </span>
+  );
+}
+
 const ClientDashboard = () => {
-  const [statusData,     setStatusData]     = useState<SystemStatusData | null>(null);
-  const [notifications,  setNotifications]  = useState<ClientNotification[]>([]);
-  const [isLoading,      setIsLoading]      = useState(true);
+  const [statusData,    setStatusData]    = useState<SystemStatusData | null>(null);
+  const [notifications, setNotifications] = useState<ClientNotification[]>([]);
+  const [isLoading,     setIsLoading]     = useState(true);
 
   const loadStatus = useCallback(async () => {
     const data = await clientService.getSystemStatus();
@@ -72,165 +120,80 @@ const ClientDashboard = () => {
 
   if (isLoading || !statusData) {
     return (
-      <div style={{ padding: 24, fontFamily: C.f, fontSize: 12, color: C.textSubtle }}>
+      <div style={{ padding: 24, fontFamily: T.sans, fontSize: 12, color: T.t3 }}>
         Cargando portal cliente...
       </div>
     );
   }
 
-  const nvr = NVR_CFG[statusData.summary.nvrStatus];
+  const nvr    = NVR_CFG[statusData.summary.nvrStatus];
   const unread = notifications.filter(n => !n.read).length;
 
   return (
-    <section style={{ padding: "24px 28px 56px", display: "flex", flexDirection: "column", gap: 20, fontFamily: C.f }}>
+    <section style={{ padding: "24px 28px 56px", display: "flex", flexDirection: "column", gap: 20, fontFamily: T.sans, background: T.bg, minHeight: "100vh" }}>
 
-      {/* ── Page header ── */}
+      {/* Header */}
       <header>
-        <div style={{ fontSize: 10, fontFamily: C.m, letterSpacing: "0.18em", textTransform: "uppercase", color: C.primary, marginBottom: 6, opacity: 0.8 }}>
+        <div style={{ fontSize: 10, fontFamily: T.mono, letterSpacing: "0.18em", textTransform: "uppercase", color: T.green, marginBottom: 6, fontWeight: 700 }}>
           Portal del cliente · Monitoreo
         </div>
-        <h1 style={{ fontSize: 24, fontWeight: 600, color: C.textPrimary, letterSpacing: "-0.02em", margin: 0, lineHeight: 1.15 }}>
+        <h1 style={{ fontSize: 24, fontWeight: 800, color: T.t1, letterSpacing: "-0.03em", margin: 0, lineHeight: 1.15 }}>
           Estado del sistema
         </h1>
-        <p style={{ fontSize: 12, color: C.textSubtle, margin: "5px 0 0" }}>
+        <p style={{ fontSize: 13, color: T.t3, margin: "5px 0 0", fontWeight: 500 }}>
           Vista exclusiva de monitoreo para cliente.
         </p>
       </header>
 
-      {/* ── Stat cards ── */}
+      {/* Stat cards */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
-        <StatCard
-          title="Cámaras totales"
-          value={statusData.summary.totalCameras}
-          accent="blue"
-          detail="instaladas"
-        />
-        <StatCard
-          title="Cámaras online"
-          value={statusData.summary.onlineCameras}
-          accent="green"
-          detail="en línea ahora"
-          barWidth={`${(statusData.summary.onlineCameras / statusData.summary.totalCameras) * 100}%`}
-        />
-        <StatCard
-          title="Cámaras offline"
-          value={statusData.summary.offlineCameras}
-          accent="red"
-          detail="requieren atención"
-        />
-        <StatCard
-          title="Alertas activas"
-          value={statusData.summary.activeAlerts}
-          accent="amber"
-          detail="sin resolver"
-        />
+        <LightStatCard title="Cámaras totales"  value={statusData.summary.totalCameras}   accent="blue"  detail="instaladas" />
+        <LightStatCard title="Cámaras online"   value={statusData.summary.onlineCameras}  accent="green" detail="en línea ahora" barWidth={`${(statusData.summary.onlineCameras / statusData.summary.totalCameras) * 100}%`} />
+        <LightStatCard title="Cámaras offline"  value={statusData.summary.offlineCameras} accent="red"   detail="requieren atención" />
+        <LightStatCard title="Alertas activas"  value={statusData.summary.activeAlerts}   accent="amber" detail="sin resolver" />
       </div>
 
-      {/* ── NVR Status ── */}
-      <div style={{
-        background: `linear-gradient(135deg, ${C.bgCard} 0%, ${C.bgCardEnd} 100%)`,
-        border: `1px solid ${C.borderCard}`,
-        borderRadius: 12,
-        padding: "14px 20px",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        fontFamily: C.f,
-      }}>
+      {/* NVR status */}
+      <div style={{ background: T.white, border: `1px solid ${T.border}`, borderRadius: 12, padding: "14px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", boxShadow: "0 1px 4px rgba(26,35,50,0.04)" }}>
         <div>
-          <div style={{ fontSize: 13, fontWeight: 600, color: C.textPrimary, letterSpacing: "-0.01em" }}>
-            Estado NVR
-          </div>
-          <div style={{ fontSize: 10, fontFamily: C.m, letterSpacing: "0.1em", textTransform: "uppercase", color: C.textSubtle, marginTop: 3 }}>
-            Grabador de Video en Red
-          </div>
+          <div style={{ fontSize: 13, fontWeight: 700, color: T.t1, letterSpacing: "-0.01em" }}>Estado NVR</div>
+          <div style={{ fontSize: 10, fontFamily: T.mono, letterSpacing: "0.1em", textTransform: "uppercase", color: T.t3, marginTop: 3 }}>Grabador de Video en Red</div>
         </div>
-        <span style={{
-          fontSize: 9, fontFamily: C.m, letterSpacing: "0.1em", fontWeight: 600,
-          padding: "4px 12px", borderRadius: 6,
-          background: nvr.bg, color: nvr.color, border: `1px solid ${nvr.bd}`,
-          textTransform: "uppercase",
-        }}>
-          {nvr.label}
-        </span>
+        <Tag color={nvr.color} bg={nvr.bg} bd={nvr.bd}>{nvr.label}</Tag>
       </div>
 
-      {/* ── Camera grid ── */}
+      {/* Cameras grid */}
       <section>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
-          <h2 style={{ fontSize: 14, fontWeight: 600, color: C.textSecondary, margin: 0 }}>
-            Cámaras por sitio
-          </h2>
-          <span style={{
-            fontSize: 9, fontFamily: C.m, letterSpacing: "0.1em", fontWeight: 600,
-            padding: "3px 9px", borderRadius: 5,
-            background: C.primaryBg, color: C.primary, border: `1px solid ${C.primaryBd}`,
-          }}>
+          <h2 style={{ fontSize: 14, fontWeight: 700, color: T.t2, margin: 0 }}>Cámaras por sitio</h2>
+          <Tag color={T.green} bg={T.greenSft} bd={T.greenMid}>
             {statusData.summary.onlineCameras} / {statusData.summary.totalCameras} activas
-          </span>
+          </Tag>
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12 }}>
-          {statusData.cameras.map(camera => (
-            <CameraStatusCard key={camera.id} camera={camera} />
-          ))}
+          {statusData.cameras.map(camera => <CameraStatusCard key={camera.id} camera={camera} />)}
         </div>
       </section>
 
-      {/* ── Notifications inline ── */}
+      {/* Notifications */}
       {notifications.length > 0 && (
-        <section style={{
-          background: `linear-gradient(135deg, ${C.bgCard} 0%, ${C.bgCardEnd} 100%)`,
-          border: `1px solid ${C.borderCard}`,
-          borderRadius: 12,
-          overflow: "hidden",
-        }}>
-          <div style={{
-            padding: "12px 18px",
-            borderBottom: `1px solid ${C.border}`,
-            background: "rgba(6,13,26,0.4)",
-            display: "flex", alignItems: "center", justifyContent: "space-between",
-          }}>
+        <section style={{ background: T.white, border: `1px solid ${T.border}`, borderRadius: 12, overflow: "hidden", boxShadow: "0 1px 4px rgba(26,35,50,0.04)" }}>
+          <div style={{ padding: "13px 18px", borderBottom: `1px solid ${T.border}`, background: T.greenSft, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             <div>
-              <div style={{ fontSize: 13, fontWeight: 600, color: C.textPrimary }}>Notificaciones recientes</div>
-              <div style={{ fontSize: 9, fontFamily: C.m, letterSpacing: "0.12em", textTransform: "uppercase", color: C.textSubtle, marginTop: 2 }}>
-                Actividad del sistema
-              </div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: T.t1 }}>Notificaciones recientes</div>
+              <div style={{ fontSize: 10, fontFamily: T.mono, letterSpacing: "0.12em", textTransform: "uppercase", color: T.t3, marginTop: 2 }}>Actividad del sistema</div>
             </div>
-            <span style={{
-              fontSize: 9, fontFamily: C.m, letterSpacing: "0.1em", fontWeight: 600,
-              padding: "3px 9px", borderRadius: 5,
-              background: C.primaryBg, color: C.primary, border: `1px solid ${C.primaryBd}`,
-            }}>
-              {unread} sin leer
-            </span>
+            <Tag color={T.green} bg={T.white} bd={T.greenMid}>{unread} sin leer</Tag>
           </div>
           <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
             {notifications.slice(0, 4).map((n, i) => (
-              <li
-                key={n.id}
-                style={{
-                  display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12,
-                  padding: "12px 18px",
-                  borderBottom: i < Math.min(notifications.length, 4) - 1 ? `1px solid ${C.border}` : "none",
-                  opacity: n.read ? 0.55 : 1,
-                }}
-              >
+              <li key={n.id} style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12, padding: "12px 18px", borderBottom: i < Math.min(notifications.length, 4) - 1 ? `1px solid ${T.border}` : "none", opacity: n.read ? 0.45 : 1 }}>
                 <div>
-                  <div style={{ fontSize: 12, fontWeight: 500, color: C.textPrimary, marginBottom: 2 }}>{n.title}</div>
-                  <div style={{ fontSize: 11, color: C.textMuted }}>{n.message}</div>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: T.t1, marginBottom: 2 }}>{n.title}</div>
+                  <div style={{ fontSize: 11, color: T.t2 }}>{n.message}</div>
                 </div>
                 {!n.read && (
-                  <button
-                    type="button"
-                    onClick={() => markAsRead(n.id)}
-                    style={{
-                      padding: "3px 10px", borderRadius: 6,
-                      background: "rgba(255,255,255,0.04)",
-                      border: "1px solid rgba(255,255,255,0.08)",
-                      color: C.textMuted, fontSize: 9, fontFamily: C.m,
-                      fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap", flexShrink: 0,
-                    }}
-                  >
+                  <button type="button" onClick={() => markAsRead(n.id)} style={{ padding: "4px 12px", borderRadius: 100, background: T.greenSft, border: `1px solid ${T.greenMid}`, color: T.greenDark, fontSize: 10, fontFamily: T.mono, fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap", flexShrink: 0 }}>
                     Marcar leída
                   </button>
                 )}
