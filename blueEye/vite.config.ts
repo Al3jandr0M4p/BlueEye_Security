@@ -22,4 +22,11 @@ export default defineConfig({
       exclude: ["src/main.tsx"],
     },
   },
+  server: {
+    hmr: {
+      protocol: "ws", // usa 'ws', no 'wss'
+      host: "localhost", // host donde corre Vite
+      port: 5173, // puerto de Vite
+    },
+  },
 });
