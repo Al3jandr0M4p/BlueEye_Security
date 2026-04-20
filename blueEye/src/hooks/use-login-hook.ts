@@ -23,7 +23,7 @@ export function useLoginHook() {
     if (loginThunk.fulfilled.match(resultAction)) {
       const rolename = resultAction.payload?.profile?.rolename;
 
-      if (rolename === "usuario") navigate("/clientDashbord");
+      if (rolename === "usuario") navigate("/clientDashboard");
       else if (rolename === "tecnico") navigate("/techDashboard");
       else if (rolename === "admin") navigate("/adminDashboard");
       else if (rolename === "superAdmin") navigate("/super/admin/dashboard");

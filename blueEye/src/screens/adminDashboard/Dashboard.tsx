@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { fetchAdminDashboardStats } from "../../service/services";
+import { fetchAdminDashboardStats } from "../../service/service";
 import { supabase } from "../../lib/supabase";
 import AdminPageShell from "../../components/AdminPageShell";
 

@@ -26,22 +26,10 @@ import {
 } from "recharts";
 import { useAdminReportsOverview } from "../../hooks/use-admin-dashboard";
 import AdminPageShell from "../../components/AdminPageShell";
+import type { AdminReportExport } from "../../types/types";
 
 type ExportFormat = "CSV" | "Excel" | "PDF";
 type ExportRow = Record<string, string | number>;
-
-const EMPTY_REPORTS: {
-  title: string;
-  metric: string;
-  trend: string;
-  details: string;
-}[] = [];
-
-const EMPTY_EXPORTS: {
-  type: string;
-  lastExported: string;
-  format: string;
-}[] = [];
 
 const chartColors = ["#0f172a", "#2563eb", "#14b8a6", "#f59e0b"];
 
@@ -75,12 +63,7 @@ const toExcelHtml = (title: string, rows: ExportRow[]) => {
   const headers = Object.keys(rows[0]);
   const head = headers.map((header) => `<th>${header}</th>`).join("");
   const body = rows
-    .map(
-      (row) =>
-        `<tr>${headers
-          .map((header) => `<td>${String(row[header])}</td>`)
-          .join("")}</tr>`,
-    )
+    .map((row) => `<tr>${headers.map((header) => `<td>${String(row[header])}</td>`).join("")}</tr>`)
     .join("");
 
   return `
@@ -97,11 +80,23 @@ const toExcelHtml = (title: string, rows: ExportRow[]) => {
   `;
 };
 
+const formatFileName = (value: string) =>
+  value.toLowerCase().replace(/\s+/g, "-").replace(/&/g, "and");
+
+const getExportIcon = (format: string) => {
+  if (format === "Excel") return FileSpreadsheet;
+  if (format === "PDF") return FileText;
+  return ArrowDownToLine;
+};
+
 const AdminReportsScreen: React.FC = () => {
-  const { data, error } = useAdminReportsOverview();
-  const reports = data?.reports ?? EMPTY_REPORTS;
-  const exportsList = data?.exports ?? EMPTY_EXPORTS;
+  const { data, error, loading } = useAdminReportsOverview();
   const [lastExport, setLastExport] = useState<string | null>(null);
+
+  const reports = data?.reports ?? [];
+  const exportsList = data?.exports ?? [];
+  const trendData = data?.monthlyTrend ?? [];
+  const mixData = data?.mix ?? [];
 
   const summaryChartData = useMemo(
     () =>
@@ -112,52 +107,9 @@ const AdminReportsScreen: React.FC = () => {
     [reports],
   );
 
-  const trendData = useMemo(
-    () => [
-      { month: "Ene", ingresos: 66, tickets: 18, proyectos: 5 },
-      { month: "Feb", ingresos: 79, tickets: 14, proyectos: 6 },
-      { month: "Mar", ingresos: 98, tickets: 11, proyectos: 8 },
-      { month: "Abr", ingresos: 104, tickets: 9, proyectos: 9 },
-      { month: "May", ingresos: 113, tickets: 8, proyectos: 10 },
-      { month: "Jun", ingresos: 121, tickets: 7, proyectos: 11 },
-    ],
-    [],
-  );
-
-  const mixData = useMemo(
-    () => [
-      { name: "Proyectos", value: parseMetricValue(reports[0]?.metric ?? "0") },
-      { name: "Ingresos", value: parseMetricValue(reports[1]?.metric ?? "0") / 1000 },
-      { name: "Tickets", value: parseMetricValue(reports[2]?.metric ?? "0") },
-      { name: "Equipos", value: parseMetricValue(reports[3]?.metric ?? "0") / 12 },
-    ],
-    [reports],
-  );
-
-  const exportDataMap = useMemo<Record<string, ExportRow[]>>(
-    () => ({
-      "Clientes & sitios": [
-        { cliente: "Banco Horizonte", sitios: 3, estado: "Activo", plan: "Enterprise Plus" },
-        { cliente: "NovaTech Logistics", sitios: 5, estado: "Activo", plan: "Enterprise Plus" },
-        { cliente: "Colmado del Valle", sitios: 1, estado: "Pendiente", plan: "Growth Vision" },
-      ],
-      "Cotizaciones aprobadas": [
-        { cotizacion: "COT-2041", cliente: "Banco Horizonte", total: "USD 7,800", estado: "Aprobada" },
-        { cotizacion: "COT-2050", cliente: "Grupo Polaris", total: "USD 11,200", estado: "Aprobada" },
-        { cotizacion: "COT-2053", cliente: "BlueShore Resort", total: "USD 6,900", estado: "Aprobada" },
-      ],
-      "Tickets y SLA": [
-        { ticket: "TCK-1050", prioridad: "Urgente", sla: "4h", estado: "Pendiente" },
-        { ticket: "TCK-1051", prioridad: "Alta", sla: "24h", estado: "En analisis" },
-        { ticket: "TCK-1045", prioridad: "Alta", sla: "24h", estado: "Planificado" },
-      ],
-    }),
-    [],
-  );
-
-  const handleDownload = (type: string, format: ExportFormat) => {
-    const rows = exportDataMap[type] ?? [];
-    const fileBaseName = type.toLowerCase().replace(/\s+/g, "-").replace(/&/g, "and");
+  const handleDownload = (item: AdminReportExport, format: ExportFormat) => {
+    const rows = item.rows ?? [];
+    const fileBaseName = formatFileName(item.type);
 
     if (format === "CSV") {
       downloadBlob(toCsv(rows), `${fileBaseName}.csv`, "text/csv;charset=utf-8;");
@@ -165,7 +117,7 @@ const AdminReportsScreen: React.FC = () => {
 
     if (format === "Excel") {
       downloadBlob(
-        toExcelHtml(type, rows),
+        toExcelHtml(item.type, rows),
         `${fileBaseName}.xls`,
         "application/vnd.ms-excel;charset=utf-8;",
       );
@@ -174,7 +126,7 @@ const AdminReportsScreen: React.FC = () => {
     if (format === "PDF") {
       const doc = new jsPDF({ unit: "pt", format: "a4" });
       doc.setFontSize(18);
-      doc.text(type, 40, 40);
+      doc.text(item.type, 40, 40);
       autoTable(doc, {
         startY: 60,
         head: rows.length > 0 ? [Object.keys(rows[0])] : [["Sin datos"]],
@@ -188,14 +140,14 @@ const AdminReportsScreen: React.FC = () => {
       doc.save(`${fileBaseName}.pdf`);
     }
 
-    setLastExport(`${type} · ${format}`);
+    setLastExport(`${item.type} · ${format}`);
   };
 
   return (
     <AdminPageShell
       tag="Reportes"
       title="Analitica del negocio"
-      subtitle="Vista ejecutiva con graficos y exportaciones descargables."
+      subtitle="Graficos reales, datasets listos para exportar y una lectura rapida de operacion e inventario."
     >
       <div className="space-y-6">
         <section className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm">
@@ -205,22 +157,32 @@ const AdminReportsScreen: React.FC = () => {
                 Reportes ejecutivos
               </p>
               <h2 className="mt-3 text-3xl font-semibold tracking-tight text-slate-900">
-                Un panel claro para negocio, soporte y operaciones
+                Operacion, personal e inventario en una sola vista
               </h2>
               <p className="mt-3 text-sm leading-6 text-slate-600">
-                Reorganicé la pantalla para que se vea sobria y profesional:
-                menos ruido visual, mejor jerarquía y acciones de descarga más claras.
+                El panel ya no depende de valores fake: ahora responde a tickets,
+                usuarios del negocio y catalogo real de inventario.
               </p>
               {error && <p className="mt-3 text-sm text-rose-600">{error}</p>}
             </div>
 
-            <div className="min-w-[240px] rounded-3xl border border-slate-200 bg-slate-50 p-5">
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-                Ultima exportacion
-              </p>
-              <p className="mt-2 text-lg font-semibold text-slate-900">
-                {lastExport ?? "Sin descargas aun"}
-              </p>
+            <div className="grid min-w-[240px] gap-3 sm:grid-cols-2 lg:grid-cols-1">
+              <div className="rounded-3xl border border-slate-200 bg-slate-50 p-5">
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                  Ultima exportacion
+                </p>
+                <p className="mt-2 text-lg font-semibold text-slate-900">
+                  {lastExport ?? "Sin descargas aun"}
+                </p>
+              </div>
+              <div className="rounded-3xl border border-slate-200 bg-slate-50 p-5">
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                  Estado
+                </p>
+                <p className="mt-2 text-lg font-semibold text-slate-900">
+                  {loading ? "Cargando..." : `${reports.length} KPIs activos`}
+                </p>
+              </div>
             </div>
           </div>
         </section>
@@ -270,8 +232,11 @@ const AdminReportsScreen: React.FC = () => {
                     }}
                   />
                   <Bar dataKey="value" radius={[12, 12, 0, 0]}>
-                    {summaryChartData.map((entry, index) => (
-                      <Cell key={`${entry.name}-${index}`} fill={chartColors[index % chartColors.length]} />
+                    {summaryChartData.map((entry) => (
+                      <Cell
+                        key={entry.name}
+                        fill={chartColors[summaryChartData.findIndex((item) => item.name === entry.name) % chartColors.length]}
+                      />
                     ))}
                   </Bar>
                 </BarChart>
@@ -284,7 +249,7 @@ const AdminReportsScreen: React.FC = () => {
               <PieChartIcon className="h-5 w-5 text-slate-700" />
               <div>
                 <h2 className="text-lg font-semibold text-slate-900">Distribucion operativa</h2>
-                <p className="text-sm text-slate-500">Balance entre areas del negocio.</p>
+                <p className="text-sm text-slate-500">Balance actual entre backlog y capacidad.</p>
               </div>
             </div>
             <div className="mt-5 h-[320px] sm:h-[360px]">
@@ -300,8 +265,11 @@ const AdminReportsScreen: React.FC = () => {
                     outerRadius="76%"
                     paddingAngle={2}
                   >
-                    {mixData.map((entry, index) => (
-                      <Cell key={`${entry.name}-${index}`} fill={chartColors[index % chartColors.length]} />
+                    {mixData.map((entry) => (
+                      <Cell
+                        key={entry.name}
+                        fill={chartColors[mixData.findIndex((item) => item.name === entry.name) % chartColors.length]}
+                      />
                     ))}
                   </Pie>
                   <Tooltip
@@ -323,7 +291,7 @@ const AdminReportsScreen: React.FC = () => {
             <LineChartIcon className="h-5 w-5 text-slate-700" />
             <div>
               <h2 className="text-lg font-semibold text-slate-900">Tendencia mensual</h2>
-              <p className="text-sm text-slate-500">Ingresos, tickets y proyectos por mes.</p>
+              <p className="text-sm text-slate-500">Tickets, planificacion y flujo de stock.</p>
             </div>
           </div>
           <div className="mt-5 h-[340px] sm:h-[400px]">
@@ -340,9 +308,9 @@ const AdminReportsScreen: React.FC = () => {
                   }}
                 />
                 <Legend />
-                <Line type="monotone" dataKey="ingresos" stroke="#0f172a" strokeWidth={3} dot={{ r: 4 }} />
-                <Line type="monotone" dataKey="tickets" stroke="#2563eb" strokeWidth={3} dot={{ r: 4 }} />
-                <Line type="monotone" dataKey="proyectos" stroke="#14b8a6" strokeWidth={3} dot={{ r: 4 }} />
+                <Line type="monotone" dataKey="tickets" stroke="#0f172a" strokeWidth={3} dot={{ r: 4 }} />
+                <Line type="monotone" dataKey="planned" stroke="#2563eb" strokeWidth={3} dot={{ r: 4 }} />
+                <Line type="monotone" dataKey="stockFlow" stroke="#14b8a6" strokeWidth={3} dot={{ r: 4 }} />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -353,7 +321,7 @@ const AdminReportsScreen: React.FC = () => {
             <div>
               <h2 className="text-2xl font-semibold text-slate-900">Exportaciones</h2>
               <p className="text-sm text-slate-600">
-                Descarga datasets del panel en el formato que necesites.
+                Descarga el estado real de usuarios, tickets e inventario.
               </p>
             </div>
             <span className="rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.28em] text-slate-500">
@@ -371,7 +339,7 @@ const AdminReportsScreen: React.FC = () => {
                   <div>
                     <h3 className="text-lg font-semibold text-slate-900">{item.type}</h3>
                     <p className="mt-1 text-sm text-slate-500">
-                      Ultima exportacion: {item.lastExported}
+                      Ultima referencia: {item.lastExported}
                     </p>
                   </div>
                   <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
@@ -379,41 +347,27 @@ const AdminReportsScreen: React.FC = () => {
                   </span>
                 </div>
 
-                <div className="mt-4 space-y-2">
-                  <button
-                    onClick={() => handleDownload(item.type, "CSV")}
-                    className="flex w-full items-center justify-between rounded-2xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
-                  >
-                    <span className="inline-flex items-center gap-2">
-                      <ArrowDownToLine className="h-4 w-4" />
-                      Descargar CSV
-                    </span>
-                    <span className="text-xs text-slate-400">Rapido</span>
-                  </button>
-                  <button
-                    onClick={() => handleDownload(item.type, "Excel")}
-                    className="flex w-full items-center justify-between rounded-2xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
-                  >
-                    <span className="inline-flex items-center gap-2">
-                      <FileSpreadsheet className="h-4 w-4" />
-                      Descargar Excel
-                    </span>
-                    <span className="text-xs text-slate-400">Hoja</span>
-                  </button>
-                  <button
-                    onClick={() => handleDownload(item.type, "PDF")}
-                    className="flex w-full items-center justify-between rounded-2xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
-                  >
-                    <span className="inline-flex items-center gap-2">
-                      <FileText className="h-4 w-4" />
-                      Descargar PDF
-                    </span>
-                    <span className="text-xs text-slate-400">Formal</span>
-                  </button>
+                <div className="mt-4 grid gap-2 sm:grid-cols-3 xl:grid-cols-1">
+                  {(["CSV", "Excel", "PDF"] as ExportFormat[]).map((format) => {
+                    const Icon = getExportIcon(format);
+                    return (
+                      <button
+                        key={`${item.type}-${format}`}
+                        onClick={() => handleDownload(item, format)}
+                        className="flex w-full items-center justify-between rounded-2xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                      >
+                        <span className="inline-flex items-center gap-2">
+                          <Icon className="h-4 w-4" />
+                          Descargar {format}
+                        </span>
+                        <span className="text-xs text-slate-400">{item.rows.length}</span>
+                      </button>
+                    );
+                  })}
                 </div>
 
                 <div className="mt-4 border-t border-slate-100 pt-4 text-xs text-slate-500">
-                  {exportDataMap[item.type]?.length ?? 0} filas disponibles para exportar
+                  {item.rows.length} filas disponibles para exportar
                 </div>
               </article>
             ))}

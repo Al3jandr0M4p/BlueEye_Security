@@ -13,7 +13,6 @@ export const Menu: React.FC = () => {
   const {
     openSideBar,
     showNav,
-    isPricing,
     showNotificationsPanel,
     setShowNotificationsPanel,
     setOpenSideBar,
@@ -46,15 +45,6 @@ export const Menu: React.FC = () => {
         }
         right={
           <>
-            {!isPricing && (
-              <Link
-                to="/techDashboard/pricing"
-                className="px-6 py-2 rounded-full bg-gray-950 text-white font-medium hover:bg-black transition"
-              >
-                Get Pro
-              </Link>
-            )}
-
             {/* NOTIFICATIONS ICON */}
             <div className="relative cursor-pointer">
               <FontAwesomeIcon
@@ -105,7 +95,9 @@ export const Menu: React.FC = () => {
 
       {/* OVERLAY */}
       {openSideBar && (
-        <div
+        <button
+          type="button"
+          aria-label="Cerrar menú lateral"
           className="fixed inset-0 bg-black/50 z-40 transition-opacity duration-500 opacity-100"
           onClick={() => setOpenSideBar(false)}
         />
@@ -141,6 +133,22 @@ export const Menu: React.FC = () => {
             closeSideBar={() => setOpenSideBar(false)}
           >
             Tickets
+          </AnimatedLink>
+
+          <AnimatedLink
+            to="/techDashboard/levantamientos"
+            className="block w-full hover:bg-gray-200 p-2 rounded"
+            closeSideBar={() => setOpenSideBar(false)}
+          >
+            Levantamientos
+          </AnimatedLink>
+
+          <AnimatedLink
+            to="/techDashboard/sitios"
+            className="block w-full hover:bg-gray-200 p-2 rounded"
+            closeSideBar={() => setOpenSideBar(false)}
+          >
+            Sitios
           </AnimatedLink>
 
           <button onClick={handleLogOut}>Cerrar sesion</button>

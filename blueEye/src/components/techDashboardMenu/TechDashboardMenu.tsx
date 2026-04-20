@@ -1,6 +1,6 @@
 import React from "react";
 import { Outlet } from "react-router-dom";
-import { Menu } from "../../components/DashboardMenu/Menu";
+import { Menu } from "../DashboardMenu/Menu";
 
 const TechDashboardMenu: React.FC = () => {
   return (

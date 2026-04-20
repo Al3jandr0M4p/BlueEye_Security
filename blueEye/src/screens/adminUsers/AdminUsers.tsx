@@ -1,19 +1,18 @@
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 import { Mail, Phone, Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useAdminUsers } from "../../hooks/use-admin-users";
 import type { UserRoleTab } from "../../types/types";
-import { clientsData, techsData } from "../../constants/constants";
 import { AdminAddUsersModal } from "../../modals/adminAddUsersModal/AdminAddUsersModal";
+import { AdminSelectUserTypeModal } from "../../modals/adminAddUsersModal/AdminSelectUserTypeModal";
 
 const AdminUsersScreen: React.FC = () => {
   const [activeTab, setActiveTab] = useState<UserRoleTab>("usuario");
   const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false);
+  const [selectedTypeToCreate, setSelectedTypeToCreate] =
+    useState<UserRoleTab | null>(null);
   const navigate = useNavigate();
-
-  const users = useMemo(
-    () => (activeTab === "usuario" ? clientsData : techsData),
-    [activeTab],
-  );
+  const { error, isLoading, loadUsers, users } = useAdminUsers(activeTab);
 
   return (
     <section className="w-full">
@@ -34,7 +33,10 @@ const AdminUsersScreen: React.FC = () => {
         </div>
 
         <button
-          onClick={() => setIsAddUserModalOpen(true)}
+          onClick={() => {
+            setSelectedTypeToCreate(null);
+            setIsAddUserModalOpen(true);
+          }}
           className="inline-flex items-center gap-2 rounded-xl bg-[#111827] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#1f2937]"
           style={{ fontFamily: "Google Sans" }}
         >
@@ -69,7 +71,21 @@ const AdminUsersScreen: React.FC = () => {
       </div>
 
       <div className="mt-6 grid grid-cols-1 gap-5 md:grid-cols-2 2xl:grid-cols-3">
-        {users.map((user) => (
+        {isLoading && (
+          <div className="rounded-2xl border border-[#e3e7ee] bg-white p-5 text-sm text-[#5d6675]">
+            Cargando usuarios...
+          </div>
+        )}
+
+        {!isLoading && error && (
+          <div className="rounded-2xl border border-[#fecaca] bg-[#fff1f2] p-5 text-sm text-[#b91c1c]">
+            {error}
+          </div>
+        )}
+
+        {!isLoading &&
+          !error &&
+          users.map((user) => (
           <article
             key={user.id}
             className="group rounded-2xl border border-[#e3e7ee] bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg"
@@ -92,7 +108,7 @@ const AdminUsersScreen: React.FC = () => {
                     className="text-xs text-[#667084]"
                     style={{ fontFamily: "Google Sans" }}
                   >
-                    {user.company}
+                    {user.username}
                   </p>
                 </div>
               </div>
@@ -132,16 +148,36 @@ const AdminUsersScreen: React.FC = () => {
                 className="text-sm text-[#4f5b6b]"
                 style={{ fontFamily: "Google Sans" }}
               >
-                Ciudad:{" "}
-                <span className="font-medium text-[#1c2431]">{user.city}</span>
+                Estado:{" "}
+                <span className="font-medium text-[#1c2431]">
+                  {user.isActive ? "Activo" : "Inactivo"}
+                </span>
               </p>
             </div>
           </article>
         ))}
+
+        {!isLoading && !error && users.length === 0 && (
+          <div className="rounded-2xl border border-dashed border-[#cfd8e3] bg-white p-8 text-center text-sm text-[#5d6675]">
+            No hay {activeTab === "usuario" ? "usuarios" : "tecnicos"} registrados.
+          </div>
+        )}
       </div>
 
-      {isAddUserModalOpen && (
-        <AdminAddUsersModal setIsAddUserModalOpen={setIsAddUserModalOpen} />
+      {isAddUserModalOpen && !selectedTypeToCreate && (
+        <AdminSelectUserTypeModal
+          setIsAddUserModalOpen={setIsAddUserModalOpen}
+          onSelectType={setSelectedTypeToCreate}
+        />
+      )}
+
+      {isAddUserModalOpen && selectedTypeToCreate && (
+        <AdminAddUsersModal
+          selectedType={selectedTypeToCreate}
+          setIsAddUserModalOpen={setIsAddUserModalOpen}
+          onCreated={loadUsers}
+          onBackToTypeSelection={() => setSelectedTypeToCreate(null)}
+        />
       )}
     </section>
   );

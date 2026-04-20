@@ -51,6 +51,7 @@ const ForgotYourPassword: React.FC = () => {
               <Input
                 type="email"
                 text="email"
+                variant="default"
                 value={email}
                 onValueChange={setEmail}
                 translationKey={"email"}

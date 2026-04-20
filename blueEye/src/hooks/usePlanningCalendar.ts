@@ -1,44 +1,43 @@
 import { useEffect, useState } from "react";
 import { format as formatDate, isValid, parseISO, startOfDay } from "date-fns";
 import type { SlotInfo } from "react-big-calendar";
-import type { AdminTicket } from "../types/types";
+import type { AdminManagedUser, AdminTicket } from "../types/types";
 import {
+  fetchAdminUsersService,
   fetchPedingTicketsService,
   fetchPlanningTicketsService,
-} from "../service/services";
+  planAdminTicketService,
+  rejectAdminTicketService,
+} from "../service/service";
 
 const getTodayDate = () => new Date().toISOString().split("T")[0];
 const getDateFromInput = (value: string) => parseISO(`${value}T00:00:00`);
 
 export function usePlanningCalendar() {
-//   const technicians = data?.technicians ?? [];
-
-  // 🔥 DATA REAL
   const [pendingTickets, setPendingTickets] = useState<AdminTicket[]>([]);
   const [planningQueue, setPlanningQueue] = useState<AdminTicket[]>([]);
+  const [technicians, setTechnicians] = useState<AdminManagedUser[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // 🔥 UI STATE
   const [selectedTicket, setSelectedTicket] = useState<AdminTicket | null>(
     null,
   );
   const [selectedTechnicianId, setSelectedTechnicianId] = useState("");
   const [scheduledDate, setScheduledDate] = useState(getTodayDate());
 
-  // 🔥 FETCH REAL
   const loadTickets = async () => {
     try {
       setLoading(true);
 
-      const [pending, planning] = await Promise.all([
+      const [pending, planning, users] = await Promise.all([
         fetchPedingTicketsService(),
         fetchPlanningTicketsService(),
+        fetchAdminUsersService(),
       ]);
-
-      console.log("PLANNING:", planning);
 
       setPendingTickets(pending);
       setPlanningQueue(planning);
+      setTechnicians(users.filter((user) => user.rolename === "tecnico"));
     } catch (err) {
       console.error(err);
     } finally {
@@ -47,19 +46,19 @@ export function usePlanningCalendar() {
   };
 
   useEffect(() => {
-    loadTickets();
+    void loadTickets();
   }, []);
 
-  // 🔥 FILTRO TECNICOS
-//   const availableTechnicians = useMemo(
-//     () => technicians.filter((t) => t.status === "Disponible"),
-//     [technicians],
-//   );
-
-  // 🔥 MODAL
   const openPlanningModal = (ticket: AdminTicket) => {
     setSelectedTicket(ticket);
-    // setSelectedTechnicianId(availableTechnicians[0]?.id ?? "");
+
+    const matchedTechnician = technicians.find(
+      (technician) => technician.name === ticket.assignedTo,
+    );
+
+    setSelectedTechnicianId(
+      String(matchedTechnician?.id ?? technicians[0]?.id ?? ""),
+    );
     setScheduledDate(ticket.scheduledDate ?? getTodayDate());
   };
 
@@ -69,46 +68,34 @@ export function usePlanningCalendar() {
     setScheduledDate(getTodayDate());
   };
 
-  // 🔥 REJECT → BACKEND
   const handleReject = async (ticketId: string) => {
     try {
-      await fetch(`/api/admin/v1/tickets/${ticketId}/reject`, {
-        method: "POST",
-      });
-
+      await rejectAdminTicketService(ticketId);
       await loadTickets();
     } catch (err) {
       console.error(err);
     }
   };
 
-  // 🔥 EVENTS (igual pero con data real)
   const events = planningQueue
-    .filter((t) => t.scheduledDate)
-    .map((t) => {
-      const d = getDateFromInput(t.scheduledDate!);
+    .filter((ticket) => ticket.scheduledDate)
+    .map((ticket) => {
+      const scheduled = getDateFromInput(ticket.scheduledDate!);
       return {
-        title: `${t.id} · ${t.assignedTo}`,
-        start: d,
-        end: d,
-        resource: t,
+        title: `${ticket.id} - ${ticket.assignedTo}`,
+        start: scheduled,
+        end: scheduled,
+        resource: ticket,
       };
     });
 
-  // 🔥 SAVE PLAN → BACKEND
   const handleSavePlan = async () => {
     if (!selectedTicket || !selectedTechnicianId) return;
 
     try {
-      await fetch(`/api/admin/v1/tickets/${selectedTicket.id}/plan`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          technicianId: selectedTechnicianId,
-          scheduledDate,
-        }),
+      await planAdminTicketService(selectedTicket.id, {
+        technicianId: selectedTechnicianId,
+        scheduledDate,
       });
 
       await loadTickets();
@@ -129,22 +116,17 @@ export function usePlanningCalendar() {
   };
 
   return {
-    // error,
     loading,
-    // technicians,
+    technicians,
     pendingTickets,
     planningQueue,
-    // availableTechnicians,
-
     selectedTicket,
     selectedTechnicianId,
     scheduledDate,
     selectedCalendarDate,
     events,
-
     setSelectedTechnicianId,
     setScheduledDate,
-
     openPlanningModal,
     closePlanningModal,
     handleReject,

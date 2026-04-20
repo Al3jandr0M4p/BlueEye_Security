@@ -191,12 +191,24 @@ export interface ActivityItem {
 }
 
 export interface AdminAddUsersModalProps {
+  selectedType: UserRoleTab;
+  setIsAddUserModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  onBackToTypeSelection: () => void;
+  onCreated?: () => Promise<void> | void;
+}
+
+export interface AdminSelectUserTypeModalProps {
+  onSelectType: (type: UserRoleTab) => void;
   setIsAddUserModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export interface CreateAdminPayload {
   email: string;
-  rolename: string;
+  rolename: UserRoleTab;
+  username?: string;
+  fullName?: string;
+  phone?: string;
+  city?: string;
 }
 
 export interface ConfigureUserAccountPayload {
@@ -207,7 +219,7 @@ export interface ConfigureUserAccountPayload {
 export type UserRoleTab = "usuario" | "tecnico";
 
 export type UserCard = {
-  id: number;
+  id: number | string;
   name: string;
   email: string;
   phone: string;
@@ -216,10 +228,23 @@ export type UserCard = {
   image: string;
 };
 
+export interface AdminManagedUser extends UserCard {
+  rolename: UserRoleTab;
+  username: string;
+  isActive: boolean;
+  pictureUrl?: string;
+}
+
 export type LocationState = {
-  user?: UserCard;
+  user?: AdminManagedUser;
   userType?: UserRoleTab;
 };
+
+export interface AdminUserUpdatePayload {
+  email?: string;
+  phone?: string;
+  password?: string;
+}
 
 export interface AdminDashboardStats {
   message: string;
@@ -236,6 +261,7 @@ export interface AdminSummaryStat {
 }
 
 export interface AdminClientProfile {
+  id?: string;
   name: string;
   type: "hogar" | "comercio" | "empresa";
   sites: number;
@@ -431,10 +457,51 @@ export interface AdminStockLevel {
   status: string;
 }
 
+export interface AdminInventoryProduct {
+  id: string;
+  name: string;
+  category: string;
+  subcategory: string;
+  price: number;
+  stock: number;
+  minimum: number;
+  location: string;
+  image: string;
+  description: string;
+  specLineA: string;
+  specLineB: string;
+  specLineC: string;
+  chips: string[];
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AdminInventoryMovement {
+  id: string;
+  productId: string;
+  productName: string;
+  quantity: number;
+  movementType: "in" | "out";
+  reason: string;
+  reference: string;
+  createdAt: string;
+}
+
+export interface AdminInventorySummary {
+  totalProducts: number;
+  totalUnits: number;
+  lowStock: number;
+  totalValue: number;
+}
+
 export interface AdminInventoryOverview {
+  summary: AdminInventorySummary;
+  products: AdminInventoryProduct[];
   stockLevels: AdminStockLevel[];
   alerts: string[];
-  lastUpdated: string;
+  recentMovements: AdminInventoryMovement[];
+  lastUpdated: string | null;
 }
 
 export interface AdminPriorityTicket {
@@ -513,14 +580,59 @@ export interface AdminReportExport {
   type: string;
   lastExported: string;
   format: string;
+  rows: Record<string, string | number>[];
+}
+
+export interface AdminTrendPoint {
+  month: string;
+  tickets: number;
+  planned: number;
+  stockFlow: number;
+}
+
+export interface AdminMixPoint {
+  name: string;
+  value: number;
 }
 
 export interface AdminReportsOverview {
   reports: AdminReportCard[];
+  monthlyTrend: AdminTrendPoint[];
+  mix: AdminMixPoint[];
   exports: AdminReportExport[];
+}
+
+export interface CreateInventoryProductPayload {
+  name: string;
+  category: string;
+  subcategory?: string;
+  price?: number;
+  stock?: number;
+  minimum?: number;
+  location?: string;
+  image?: string;
+  description?: string;
+  specLineA?: string;
+  specLineB?: string;
+  specLineC?: string;
+  chips?: string[];
+}
+
+export interface CreateInventoryMovementPayload {
+  quantity: number;
+  movementType: "in" | "out";
+  reason?: string;
+  reference?: string;
 }
 
 export type ApiResponse<T> = {
   success: boolean;
   data: T;
+}
+
+export interface TicketsBody {
+  site: string;
+  equipment: string;
+  description: string;
+  photo?: File | string;
 }

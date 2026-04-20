@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { resetPasswordService } from "../service/services";
+import { resetPasswordService } from "../service/service";
 import { sileo } from "sileo";
 import { useNavigate } from "react-router-dom";
 

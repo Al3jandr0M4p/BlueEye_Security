@@ -1,9 +1,10 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import type { LoginPayload } from "../../../types/types";
-import { loginUser, loginWithGoogleService } from "../../../service/services";
+import { loginUser, loginWithGoogleService } from "../../../service/service";
 import { supabase } from "../../../lib/supabase";
 import api from "../../../api/api";
 import { jwtDecode } from "jwt-decode";
+import axios from "axios";
 
 export const loginThunk = createAsyncThunk(
   "auth/login",
@@ -12,9 +13,16 @@ export const loginThunk = createAsyncThunk(
       const result = await loginUser(payload);
       return result.data;
     } catch (err: unknown) {
-      if (err instanceof Error) {
-        return rejectWithValue(err.message || "Login failed");
+      if (axios.isAxiosError(err)) {
+        const backendMessage =
+          (err.response?.data as any)?.error?.message ??
+          (err.response?.data as any)?.message ??
+          err.message;
+        return rejectWithValue(backendMessage || "Login failed");
       }
+
+      if (err instanceof Error) return rejectWithValue(err.message || "Login failed");
+      return rejectWithValue("Login failed");
     }
   },
 );

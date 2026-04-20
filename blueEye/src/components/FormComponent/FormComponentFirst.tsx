@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import Input from "../../components/Input/Input";
+import Input from "../Input/Input";
 import Select from "react-select";
 import type { FormComponentFirstProps } from "../../types/types";
 

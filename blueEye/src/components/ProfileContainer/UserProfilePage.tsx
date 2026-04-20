@@ -16,6 +16,7 @@ import { useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../hooks/use-store-hook";
 import { logout } from "../../reduxjs/store/slices/auth.slice";
 import { persistor } from "../../reduxjs/store/store";
+import { signOut } from "../../service/service";
 import type { Role } from "../../types/types";
 import "./profile-page.css";
 
@@ -163,9 +164,15 @@ const UserProfilePage: React.FC = () => {
   };
 
   const handleLogout = async () => {
-    dispatch(logout());
-    await persistor.purge();
-    navigate("/login", { replace: true });
+    try {
+      await signOut();
+    } catch (error) {
+      console.error("Logout Error:", error);
+    } finally {
+      dispatch(logout());
+      await persistor.purge();
+      navigate("/login", { replace: true });
+    }
   };
 
   return (

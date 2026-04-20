@@ -22,15 +22,12 @@ const AdminSupportScreen = () => {
               <h1 className="text-3xl font-semibold">
                 Mesa de aprobacion y planificacion
               </h1>
-              {/* {planning.error && (
-                <p className="text-red-500 text-sm">{planning.error}</p>
-              )} */}
             </div>
 
             <div className="flex gap-4">
               <div>Pendientes: {planning.pendingTickets.length}</div>
               <div>Planificados: {planning.planningQueue.length}</div>
-              {/* <div>Disponibles: {planning.availableTechnicians.length}</div> */}
+              <div>Tecnicos: {planning.technicians.length}</div>
             </div>
           </div>
         </section>
@@ -56,7 +53,7 @@ const AdminSupportScreen = () => {
           isOpen={!!planning.selectedTicket}
           ticket={planning.selectedTicket}
           date={planning.selectedCalendarDate}
-          // technicians={planning.availableTechnicians}
+          technicians={planning.technicians}
           selectedTechnicianId={planning.selectedTechnicianId}
           scheduledDate={planning.scheduledDate}
           events={planning.events}
@@ -64,7 +61,7 @@ const AdminSupportScreen = () => {
           onSave={planning.handleSavePlan}
           onSelectSlot={planning.handleSelectCalendarSlot}
           setScheduledDate={planning.setScheduledDate}
-          // setSelectedTechnicianId={planning.setSelectedTechnicianId}
+          setSelectedTechnicianId={planning.setSelectedTechnicianId}
         />
       </div>
     </AdminPageShell>

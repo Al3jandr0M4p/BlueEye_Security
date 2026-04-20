@@ -7,29 +7,31 @@ import {
   Navigate,
 } from "react-router-dom";
 import React from "react";
-
-import ClientDashboardMenu from "./screens/ClientDashboard/types/ClientDashboardMenu";
-import ClientDashboard from "./features/client/pages/ClientDashboard";
-import ClientTickets from "./features/client/pages/ClientTickets";
-import ClientInvoices from "./features/client/pages/ClientInvoices";
-import ClientMaintenance from "./features/client/pages/ClientMaintenance";
-
-import SuperAdminLayout from "./screens/Superadmindashboard/SuperAdminLayout";
-import SuperAdminDashboard from "./screens/Superadmindashboard/SuperAdminDashboard";
-import SuperAdminCompanies from "./screens/Superadmindashboard/SuperAdminCompanies";
-import SuperAdminPlans from "./screens/Superadmindashboard/SuperAdminPlans";
-import SuperAdminBilling from "./screens/Superadmindashboard/SuperAdminBilling";
-import SuperAdminUsers from "./screens/Superadmindashboard/SuperAdminUsers";
-import SuperAdminAudit from "./screens/Superadmindashboard/SuperAdminAudit";
-import SuperAdminSupport from "./screens/Superadmindashboard/SuperAdminSupport";
-import SuperAdminSettings from "./screens/Superadmindashboard/SuperAdminSettings";
-import SuperAdminProfile from "./screens/Superadmindashboard/SuperAdminProfile";
+import ClientDashboardMenu from "./screens/ClientDashboard/ClientDashboardMenu";
+import ClientDashboard from "./screens/ClientDashboard/Overview";
+import ClientTickets from "./screens/ClientDashboard/Tickets";
+import ClientInvoices from "./screens/ClientDashboard/Invoices";
+import ClientMaintenance from "./screens/ClientDashboard/Maintenance";
+import SuperAdminLayout from "./screens/SuperAdmin/Layout";
+import SuperAdminDashboard from "./screens/SuperAdmin/Dashboard";
+import SuperAdminCompanies from "./screens/SuperAdmin/Companies";
+import SuperAdminPlans from "./screens/SuperAdmin/Plans";
+import SuperAdminBilling from "./screens/SuperAdmin/Billing";
+import SuperAdminUsers from "./screens/SuperAdmin/Users";
+import SuperAdminAudit from "./screens/SuperAdmin/Audit";
+import SuperAdminSupport from "./screens/SuperAdmin/Support";
+import SuperAdminSettings from "./screens/SuperAdmin/Settings";
+import SuperAdminProfile from "./screens/SuperAdmin/Profile";
 import LoginScreen from "./screens/login/LoginScreen";
 import LandingHome from "./screens/landingHome/LandingPage";
 import ProfilePage from "./components/ProfileContainer/ProfileContainer";
 import TechDashboard from "./screens/techDashboard/Dashboard";
+import TechTickets from "./screens/techDashboard/Tickets";
+import TechSurveys from "./screens/techDashboard/Surveys";
+import TechSites from "./screens/techDashboard/Sites";
 import PricingScreen from "./screens/pricing/Princing";
 import ResetPassword from "./screens/resetPassword/ResetPassword";
+import VerifyEmail from "./screens/verifyEmail/VerifyEmail";
 import ProtectedRoute from "./components/ProtectedRoutes/ProtectedRoutes";
 import RegisterScreen from "./screens/register/Registerscreen";
 import TechDashboardMenu from "./components/techDashboardMenu/TechDashboardMenu";
@@ -44,6 +46,7 @@ import AdminReportsScreen from "./screens/adminDashboard/ReportsHub";
 import DashboardAdminScreen from "./screens/adminDashboard/Dashboard";
 import AdminSupportScreen from "./screens/adminDashboard/SupportDesk";
 import AdminClientsScreen from "./screens/adminDashboard/ClientsOverview";
+import AdminClientSitesScreen from "./screens/adminDashboard/ClientSites";
 import AdminBusinessScreen from "./screens/adminDashboard/BusinessOverview";
 import AdminInventoryScreen from "./screens/adminDashboard/InventoryControl";
 import AdminProjectsScreen from "./screens/adminDashboard/ProjectsManagement";
@@ -57,6 +60,7 @@ const App: React.FC = () => {
         <Route path="/" element={<LandingHome />} />
         <Route path="/login" element={<LoginScreen />} />
         <Route path="/register" element={<RegisterScreen />} />
+        <Route path="/verify-email" element={<VerifyEmail />} />
         <Route
           path="/invite/user/config/accounts"
           element={<InviteUserConfiguration />}
@@ -65,10 +69,8 @@ const App: React.FC = () => {
         <Route path="/forgot-your-password" element={<ForgotYourPassword />} />
         <Route path="/reset-your-password" element={<ResetPassword />} />
 
-
         <Route path="/unauthorized" element={<Forbidden />} />
         <Route path="/403" element={<Forbidden />} />
-        git 
         <Route path="/400" element={<BadRequest />} />
         <Route path="/404" element={<NotFound />} />
 
@@ -76,9 +78,9 @@ const App: React.FC = () => {
         <Route
           path="/clientDashboard"
           element={
-            // <ProtectedRoute allowedRoles={["usuario"]}>
-            <ClientDashboardMenu />
-            // </ProtectedRoute>
+            <ProtectedRoute allowedRoles={["usuario"]}>
+              <ClientDashboardMenu />
+            </ProtectedRoute>
           }
         >
           <Route index element={<Navigate to="overview" replace />} />
@@ -107,9 +109,9 @@ const App: React.FC = () => {
         <Route
           path="/super/admin/dashboard"
           element={
-            // <ProtectedRoute allowedRoles={["superAdmin"]}>
+            <ProtectedRoute allowedRoles={["superAdmin"]}>
               <SuperAdminDashboard />
-            // </ProtectedRoute>
+            </ProtectedRoute>
           }
         />
 
@@ -117,14 +119,16 @@ const App: React.FC = () => {
         <Route
           path="/techDashboard"
           element={
-            // <ProtectedRoute allowedRoles={["tecnico"]}>
-            <TechDashboardMenu />
-            // </ProtectedRoute>
+            <ProtectedRoute allowedRoles={["tecnico"]}>
+              <TechDashboardMenu />
+            </ProtectedRoute>
           }
         >
           <Route index element={<Navigate to="dashboard" />} />
           <Route path="dashboard" element={<TechDashboard />} />
-          <Route path="tickets" element={<h1>Tickets Screen</h1>} />
+          <Route path="tickets" element={<TechTickets />} />
+          <Route path="levantamientos" element={<TechSurveys />} />
+          <Route path="sitios" element={<TechSites />} />
         </Route>
 
         <Route
@@ -159,6 +163,10 @@ const App: React.FC = () => {
           <Route index element={<Navigate to="dashboard" />} />
           <Route path="dashboard" element={<DashboardAdminScreen />} />
           <Route path="clients" element={<AdminClientsScreen />} />
+          <Route
+            path="clients/:clientId/sites"
+            element={<AdminClientSitesScreen />}
+          />
           <Route path="business" element={<AdminBusinessScreen />} />
           <Route path="proyects" element={<AdminProjectsScreen />} />
           <Route path="tech-pre-proyect" element={<AdminPreProjectScreen />} />

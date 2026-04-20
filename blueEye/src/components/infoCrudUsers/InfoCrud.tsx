@@ -8,24 +8,28 @@ import {
   ShieldCheck,
   UserCircle2,
 } from "lucide-react";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { usersFallback } from "../../constants/constants";
-import type { LocationState, UserRoleTab } from "../../types/types";
+import { useNavigate, useParams } from "react-router-dom";
+import Input from "../Input/Input";
+import { useAdminUserDetails } from "../../hooks/use-admin-user-details";
+import type { UserRoleTab } from "../../types/types";
 
 const InfoCrud: React.FC = () => {
   const navigate = useNavigate();
-  const location = useLocation();
   const { userType, id } = useParams();
-  const state = (location.state as LocationState) || {};
-
   const normalizedType: UserRoleTab =
     userType === "tecnico" ? "tecnico" : "usuario";
-  const userId = Number(id);
+  const { deactivateUser, error, form, isLoading, saveChanges, updateField, user } =
+    useAdminUserDetails(id);
 
-  const user =
-    state.user ||
-    usersFallback[normalizedType].find((item) => item.id === userId) ||
-    null;
+  if (isLoading) {
+    return (
+      <main className="min-h-screen bg-[#f5f7fb] px-4 py-8 md:px-8">
+        <div className="mx-auto max-w-4xl rounded-2xl border border-[#e2e8f0] bg-white p-8 text-center text-sm text-[#64748b]">
+          Cargando usuario...
+        </div>
+      </main>
+    );
+  }
 
   if (!user) {
     return (
@@ -37,6 +41,7 @@ const InfoCrud: React.FC = () => {
           >
             Usuario no encontrado
           </h1>
+          {error && <p className="mt-3 text-sm text-[#b91c1c]">{error}</p>}
           <button
             onClick={() => navigate("/adminDashboard/employees")}
             className="mt-6 rounded-xl bg-[#111827] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#1f2937]"
@@ -81,16 +86,22 @@ const InfoCrud: React.FC = () => {
                 >
                   Perfil:{" "}
                   <span className="font-semibold text-[#111827]">
-                    {normalizedType === "usuario" ? "usuario" : "Tecnico"}
+                    {normalizedType === "usuario" ? "Usuario" : "Tecnico"}
                   </span>
                 </p>
               </div>
             </div>
 
+            {error && (
+              <div className="mt-6 rounded-xl border border-[#fecaca] bg-[#fff1f2] p-4 text-sm text-[#b91c1c]">
+                {error}
+              </div>
+            )}
+
             <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
               <article className="rounded-xl border border-[#e7edf4] bg-[#fbfcfe] p-4">
                 <p className="text-xs font-semibold uppercase tracking-wide text-[#64748b]">
-                  Correo
+                  Correo actual
                 </p>
                 <p className="mt-2 inline-flex items-center gap-2 text-sm text-[#1e293b]">
                   <Mail size={14} />
@@ -100,7 +111,7 @@ const InfoCrud: React.FC = () => {
 
               <article className="rounded-xl border border-[#e7edf4] bg-[#fbfcfe] p-4">
                 <p className="text-xs font-semibold uppercase tracking-wide text-[#64748b]">
-                  Telefono
+                  Telefono actual
                 </p>
                 <p className="mt-2 inline-flex items-center gap-2 text-sm text-[#1e293b]">
                   <Phone size={14} />
@@ -134,15 +145,37 @@ const InfoCrud: React.FC = () => {
                 className="text-lg font-semibold text-[#0f172a]"
                 style={{ fontFamily: "Google Sans" }}
               >
-                Informacion adicional
+                Editar datos
               </h2>
-              <p
-                className="mt-2 text-sm text-[#5b6576]"
-                style={{ fontFamily: "Google Sans" }}
-              >
-                Aqui puedes mostrar historial, plan, notas internas, permisos,
-                direcciones y cualquier metrica relacionada al usuario.
-              </p>
+
+              <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+                <Input
+                  text="admin-user-email"
+                  translationKey="Nuevo email"
+                  type="email"
+                  variant="default"
+                  value={form.email}
+                  onValueChange={updateField("email")}
+                />
+                <Input
+                  text="admin-user-phone"
+                  translationKey="Nuevo telefono"
+                  type="text"
+                  variant="default"
+                  value={form.phone}
+                  onValueChange={updateField("phone")}
+                />
+                <div className="md:col-span-2">
+                  <Input
+                    text="admin-user-password"
+                    translationKey="Nueva contrasena"
+                    type="password"
+                    variant="default"
+                    value={form.password}
+                    onValueChange={updateField("password")}
+                  />
+                </div>
+              </div>
             </section>
           </section>
 
@@ -159,13 +192,14 @@ const InfoCrud: React.FC = () => {
                 <UserCircle2 size={16} />
                 ID de usuario: {user.id}
               </div>
-              <div className="flex items-center gap-2 rounded-xl border border-[#dcfce7] bg-[#f0fdf4] p-3 text-sm text-[#166534]">
+              <div className={`flex items-center gap-2 rounded-xl p-3 text-sm ${user.isActive ? "border border-[#dcfce7] bg-[#f0fdf4] text-[#166534]" : "border border-[#fecaca] bg-[#fff1f2] text-[#b91c1c]"}`}>
                 <ShieldCheck size={16} />
-                Estado: Activo
+                Estado: {user.isActive ? "Activo" : "Inactivo"}
               </div>
             </div>
 
             <button
+              onClick={() => void saveChanges()}
               className="mt-5 w-full rounded-xl bg-[#111827] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#1f2937]"
               style={{ fontFamily: "Google Sans" }}
             >
@@ -173,6 +207,12 @@ const InfoCrud: React.FC = () => {
             </button>
 
             <button
+              onClick={async () => {
+                const ok = await deactivateUser();
+                if (ok) {
+                  navigate("/adminDashboard/employees");
+                }
+              }}
               className="mt-3 w-full rounded-xl border border-[#fecaca] bg-[#fff1f2] px-4 py-3 text-sm font-semibold text-[#b91c1c] transition hover:bg-[#ffe4e6]"
               style={{ fontFamily: "Google Sans" }}
             >

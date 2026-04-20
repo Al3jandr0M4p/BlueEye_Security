@@ -1,7 +1,7 @@
 import { AxiosError } from "axios";
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { configureUserAccountService } from "../service/services";
+import { configureUserAccountService } from "../service/service";
 
 export function useInviteUserConfigurationHook() {
   const navigate = useNavigate();

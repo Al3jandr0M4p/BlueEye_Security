@@ -1,27 +1,63 @@
-import { useState } from "react";
-import { createUserAdminService } from "../service/services";
+import { useMemo, useState } from "react";
 import { sileo } from "sileo";
+import { createUserAdminService } from "../service/service";
+import type { CreateAdminPayload, UserRoleTab } from "../types/types";
 
-export function useAdminCreateUsersHook() {
-  const [selectedType, setSelectedType] = useState<
-    "usuario" | "tecnico" | null
-  >(null);
-  const [email, setEmail] = useState<string>("");
+interface UseAdminCreateUsersHookParams {
+  onSuccess?: () => Promise<void> | void;
+  selectedType: UserRoleTab;
+}
+
+const initialFormState = {
+  city: "",
+  email: "",
+  fullName: "",
+  phone: "",
+  username: "",
+};
+
+export function useAdminCreateUsersHook({
+  onSuccess,
+  selectedType,
+}: UseAdminCreateUsersHookParams) {
+  const [formData, setFormData] = useState(initialFormState);
+
+  const isSubmitDisabled = useMemo(
+    () =>
+      !formData.email.trim() ||
+      !formData.fullName.trim() ||
+      !formData.username.trim(),
+    [formData.email, formData.fullName, formData.username],
+  );
+
+  const updateField =
+    (field: keyof typeof initialFormState) => (value: string) => {
+      setFormData((prev) => ({ ...prev, [field]: value }));
+    };
 
   const handleCreateUser = async () => {
-    if (!email || !selectedType) return;
+    if (isSubmitDisabled) return;
 
     try {
-      const promise = createUserAdminService({
-        email,
+      const payload: CreateAdminPayload = {
+        email: formData.email.trim(),
         rolename: selectedType,
+        username: formData.username.trim(),
+        fullName: formData.fullName.trim(),
+        phone: formData.phone.trim() || undefined,
+        city: formData.city.trim() || undefined,
+      };
+
+      const promise = createUserAdminService(payload);
+
+      await sileo.promise(promise, {
+        loading: { title: "Creando usuario..." },
+        success: { title: "Usuario creado y enviado al backend" },
+        error: { title: "No se pudo crear el usuario" },
       });
 
-      sileo.promise(promise, {
-        loading: { title: "Enviando invitacion..." },
-        success: { title: "Link enviado al gmail exitosamente" },
-        error: { title: "No se pudo enviar la invitacion" },
-      });
+      setFormData(initialFormState);
+      await onSuccess?.();
     } catch (err) {
       if (err instanceof Error) {
         console.error(err);
@@ -30,10 +66,9 @@ export function useAdminCreateUsersHook() {
   };
 
   return {
-    selectedType,
-    email,
-    setSelectedType,
-    setEmail,
+    formData,
     handleCreateUser,
+    isSubmitDisabled,
+    updateField,
   };
 }

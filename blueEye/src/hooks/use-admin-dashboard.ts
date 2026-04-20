@@ -7,7 +7,7 @@ import {
   fetchAdminPreProjectOverview,
   fetchAdminProjectOverview,
   fetchAdminReportsOverview,
-} from "../service/adminServices";
+} from "../service/service";
 
 type Loader<T> = () => Promise<T>;
 
@@ -15,42 +15,50 @@ type UseAdminSectionResult<T> = {
   data: T | null;
   loading: boolean;
   error: string | null;
+  reload: () => Promise<void>;
 };
 
 const useAdminSection = <T,>(loader: Loader<T>): UseAdminSectionResult<T> => {
   const [data, setData] = useState<T | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [reloadToken, setReloadToken] = useState(0);
+
+  const loadSection = async (mountedRef?: { current: boolean }) => {
+    try {
+      setLoading(true);
+      const result = await loader();
+      if (mountedRef && !mountedRef.current) return;
+      setData(result);
+      setError(null);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (err) {
+      if (mountedRef && !mountedRef.current) return;
+      setError("No se pudo cargar la informacion");
+    } finally {
+      if (mountedRef && !mountedRef.current) return;
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    let mounted = true;
+    const mountedRef = { current: true };
 
-    const loadSection = async () => {
-      try {
-        setLoading(true);
-        const result = await loader();
-        if (!mounted) return;
-        setData(result);
-        setError(null);
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      } catch (err) {
-        if (!mounted) return;
-        setError("No se pudo cargar la informacion");
-      } finally {
-        // eslint-disable-next-line no-unsafe-finally
-        if (!mounted) return;
-        setLoading(false);
-      }
-    };
-
-    loadSection();
+    void loadSection(mountedRef);
 
     return () => {
-      mounted = false;
+      mountedRef.current = false;
     };
-  }, [loader]);
+  }, [loader, reloadToken]);
 
-  return { data, loading, error };
+  return {
+    data,
+    loading,
+    error,
+    reload: async () => {
+      setReloadToken((current) => current + 1);
+    },
+  };
 };
 
 export const useAdminClientsOverview = () =>

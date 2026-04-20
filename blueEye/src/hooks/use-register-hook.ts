@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { registerUserService } from "../service/services";
+import { registerUserService } from "../service/service";
 import type { CountryOption, RestCountry } from "../types/types";
 
 export function useRegisterHook() {
@@ -212,7 +212,7 @@ export function useRegisterHook() {
       });
 
       console.log(result);
-      navigate("/login");
+      navigate(`/verify-email?email=${encodeURIComponent(email)}`);
     } catch (err) {
       console.error(err);
     } finally {
