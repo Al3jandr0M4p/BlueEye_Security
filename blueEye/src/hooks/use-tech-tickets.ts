@@ -6,6 +6,8 @@ import {
 } from "../service/service";
 import type { TechTicket, TechTicketStatus } from "../types/tech.types";
 
+const REFRESH_MS = 60000;
+
 export function useTechTickets() {
   const [tickets, setTickets] = useState<TechTicket[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -26,6 +28,27 @@ export function useTechTickets() {
 
   useEffect(() => {
     void load();
+
+    const intervalId = window.setInterval(() => {
+      if (!document.hidden) {
+        void load();
+      }
+    }, REFRESH_MS);
+
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        void load();
+      }
+    };
+
+    window.addEventListener("focus", handleVisibilityChange);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      window.clearInterval(intervalId);
+      window.removeEventListener("focus", handleVisibilityChange);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
   }, [load]);
 
   const updateStatus = useCallback(async (ticketId: string, status: TechTicketStatus) => {

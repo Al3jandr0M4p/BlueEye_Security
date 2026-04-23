@@ -31,10 +31,10 @@ function NotificationRow({
 
   return (
     <li
-      className={`rounded-2xl border px-4 py-3 transition ${
+      className={`rounded-[24px] border px-4 py-4 transition ${
         isUnread
-          ? "border-sky-200 bg-sky-50/70"
-          : "border-slate-200 bg-white opacity-80"
+          ? "border-sky-200 bg-sky-50/85 shadow-sm"
+          : "border-slate-200 bg-white"
       }`}
     >
       <div className="flex items-start justify-between gap-3">
@@ -47,7 +47,7 @@ function NotificationRow({
           </p>
         </div>
         {isUnread && (
-          <span className="rounded-full bg-sky-600 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-white">
+          <span className="rounded-full bg-sky-600 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-white">
             Nueva
           </span>
         )}
@@ -82,10 +82,10 @@ const TechNotificationsPanel: React.FC<TechNotificationsPanelProps> = ({
   onMarkAsRead,
 }) => {
   return (
-    <section className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm">
+    <section className="rounded-[30px] border border-slate-200 bg-white/95 p-5 shadow-sm backdrop-blur-sm">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
             Notificaciones
           </p>
           <h2 className="mt-1 text-lg font-semibold text-slate-900">

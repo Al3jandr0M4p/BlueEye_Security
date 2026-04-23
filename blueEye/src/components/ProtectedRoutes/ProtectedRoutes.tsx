@@ -8,6 +8,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   allowedRoles,
 }) => {
   const { isAuthenticated, profile } = useAppSelector((state) => state.auth);
+  const user = useAppSelector((state) => state.auth.user);
   const isHydrated = useAppSelector((state) => state._persist?.rehydrated);
 
   if (!isHydrated) return null;
@@ -16,7 +17,12 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     return <Navigate to="/login" replace />;
   }
 
-  if (!allowedRoles.includes(profile.rolename)) {
+  const effectiveRole =
+    profile?.rolename === "superAdmin" || user?.rolename === "superAdmin"
+      ? "superAdmin"
+      : profile?.rolename ?? user?.rolename;
+
+  if (!effectiveRole || !allowedRoles.includes(effectiveRole)) {
     return <Navigate to="/unauthorized" replace />;
   }
 

@@ -1,61 +1,104 @@
-import { useEffect, useState } from "react";
-import { fetchSuperAdminAudit } from "../../../service/service";
+import { useDeferredValue, useEffect, useState } from "react";
+import {
+  createUserAdminService,
+  deleteAdminUserService,
+  fetchSuperAdminCompanies,
+  fetchSuperAdminUsers,
+  updateAdminUserService,
+} from "../../../service/service";
 import { useAppSelector } from "../../../hooks/use-store-hook";
+import type { SuperAdminUserRow } from "../../../types/superAdmin.types";
 
 type AccessRow = {
   actor: string;
   company: string;
+  createdAt: string;
+  email: string;
   id: string;
-  lastSeen: string;
-  risk: "alto" | "normal";
+  phone: string;
+  role: string;
+  status: string;
 };
 
 export function useSuperAdminUsers() {
   const { profile, user } = useAppSelector((state) => state.auth);
   const [entries, setEntries] = useState<AccessRow[]>([]);
+  const [companies, setCompanies] = useState<Array<{ id: string; name: string }>>([]);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const deferredSearch = useDeferredValue(search);
+  const [total, setTotal] = useState(0);
+
+  const loadUsersOverview = async (searchValue = deferredSearch.trim()) => {
+    setIsLoading(true);
+    try {
+      const [usersData, companiesData] = await Promise.all([
+        fetchSuperAdminUsers(searchValue),
+        fetchSuperAdminCompanies(),
+      ]);
+
+      setEntries(
+        usersData.rows.map((entry: SuperAdminUserRow) => ({
+          actor: entry.username,
+          company: entry.company,
+          createdAt: entry.createdAt
+            ? new Date(entry.createdAt).toLocaleDateString("es-DO")
+            : "No disponible",
+          email: entry.email,
+          id: entry.id,
+          phone: entry.phone,
+          role: entry.role,
+          status: entry.status,
+        })),
+      );
+      setCompanies(
+        companiesData.companies.map((company) => ({
+          id: String(company.id),
+          name: company.name,
+        })),
+      );
+      setTotal(usersData.total);
+      setError(null);
+    } catch {
+      setError("No se pudo cargar la vista de usuarios.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    let mounted = true;
-
-    const loadUsersOverview = async () => {
-      try {
-        setIsLoading(true);
-        const audit = await fetchSuperAdminAudit();
-        if (!mounted) return;
-
-        const seen = new Map<string, AccessRow>();
-
-        audit.entries.forEach((entry, index) => {
-          if (!seen.has(entry.actor)) {
-            seen.set(entry.actor, {
-              actor: entry.actor,
-              company: entry.empresa,
-              id: `${entry.actor}-${index}`,
-              lastSeen: entry.tiempo,
-              risk: entry.tipo === "critical" ? "alto" : "normal",
-            });
-          }
-        });
-
-        setEntries(Array.from(seen.values()).slice(0, 8));
-        setError(null);
-      } catch (err) {
-        if (!mounted) return;
-        setError("No se pudo cargar la vista de accesos.");
-      } finally {
-        if (!mounted) return;
-        setIsLoading(false);
-      }
-    };
-
     void loadUsersOverview();
+  }, [deferredSearch]);
 
-    return () => {
-      mounted = false;
-    };
-  }, []);
+  const createUser = async (payload: {
+    businessId: string;
+    email: string;
+    fullName?: string;
+    phone?: string;
+    rolename: "usuario" | "tecnico";
+    username?: string;
+  }) => {
+    await createUserAdminService(payload);
+    await loadUsersOverview();
+  };
+
+  const updateUser = async (
+    userId: string,
+    payload: {
+      email?: string;
+      phone?: string;
+      password?: string;
+    },
+  ) => {
+    await updateAdminUserService(userId, payload);
+    await loadUsersOverview();
+  };
+
+  const deleteUser = async (userId: string) => {
+    await deleteAdminUserService(userId);
+    await loadUsersOverview();
+  };
 
   const currentUser = {
     email: user?.email ?? "No disponible",
@@ -64,14 +107,18 @@ export function useSuperAdminUsers() {
   };
 
   return {
-    admins: entries.filter((entry) => entry.company !== "-").length,
+    admins: entries.filter((entry) => ["admin", "superAdmin"].includes(entry.role)).length,
+    companies,
+    createUser,
     currentUser,
+    deleteUser,
     entries,
     error,
-    integrationNote: "El backend aun no expone GET /api/super/admin/users para listado global de cuentas.",
-    invited: 0,
+    integrationNote: "Listado y acciones conectados a `/api/super/admin/users` y `/api/users/v1/*`.",
     isLoading,
-    mfaPercent: 0,
-    total: entries.length,
+    search,
+    setSearch,
+    total,
+    updateUser,
   };
 }

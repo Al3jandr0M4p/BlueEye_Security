@@ -93,7 +93,14 @@ const App: React.FC = () => {
         </Route>
 
         {/* ── Super Admin ── */}
-        <Route path="/super/admin" element={<SuperAdminLayout />}>
+        <Route
+          path="/super/admin"
+          element={
+            <ProtectedRoute allowedRoles={["superAdmin", "admin"]}>
+              <SuperAdminLayout />
+            </ProtectedRoute>
+          }
+        >
           <Route index element={<Navigate to="dashboard" replace />} />
           <Route path="dashboard" element={<SuperAdminDashboard />} />
           <Route path="companies" element={<SuperAdminCompanies />} />
@@ -105,15 +112,6 @@ const App: React.FC = () => {
           <Route path="settings" element={<SuperAdminSettings />} />
           <Route path="profile" element={<SuperAdminProfile />} />
         </Route>
-
-        <Route
-          path="/super/admin/dashboard"
-          element={
-            <ProtectedRoute allowedRoles={["superAdmin"]}>
-              <SuperAdminDashboard />
-            </ProtectedRoute>
-          }
-        />
 
         {/* TechDashboard by Alejandro, sebastian, ryan */}
         <Route

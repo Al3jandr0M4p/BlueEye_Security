@@ -12,7 +12,18 @@ import { PANEL_STYLE, StatCard, planBadge, stateBadge } from "./components/share
 import { useSuperAdminBilling } from "./hooks/useSuperAdminBilling";
 
 export default function SuperAdminBilling(): React.ReactElement {
-  const { error, invoices, isLoading, mrr, overdue, pending, refunds, revenue } =
+  const {
+    collected,
+    error,
+    invoices,
+    isLoading,
+    mrr,
+    overdue,
+    paidInvoices,
+    pending,
+    refunds,
+    revenue,
+  } =
     useSuperAdminBilling();
 
   return (
@@ -21,7 +32,7 @@ export default function SuperAdminBilling(): React.ReactElement {
         <StatCard label="MRR" value={`$${mrr.toLocaleString()}`} sub="Ingreso recurrente mensual" accent="#a855f7" />
         <StatCard label="Pagos pendientes" value={pending} sub="Cobros por procesar" accent="#fbbf24" />
         <StatCard label="Facturas pendientes" value={overdue} sub="Pendientes en backend" accent="#ef4444" />
-        <StatCard label="Reembolsos" value={refunds} sub="Sin endpoint dedicado" accent="#94a3b8" />
+        <StatCard label="Reembolsos" value={refunds} sub="Registros marcados como refunded" accent="#94a3b8" />
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 360px", gap: 16 }}>
@@ -39,13 +50,18 @@ export default function SuperAdminBilling(): React.ReactElement {
 
           <div style={{ marginTop: 18, display: "flex", flexDirection: "column", gap: 4 }}>
             {invoices.map((invoice) => (
-              <div key={invoice.id} className="row-hover" style={{ display: "grid", gridTemplateColumns: "1.7fr 90px 110px 120px", gap: 12, padding: "12px 10px", borderRadius: 12, alignItems: "center" }}>
+              <div key={invoice.id} className="row-hover" style={{ display: "grid", gridTemplateColumns: "1.6fr 90px 110px 130px 120px", gap: 12, padding: "12px 10px", borderRadius: 12, alignItems: "center" }}>
                 <div>
                   <div style={{ color: "#0f172a", fontSize: 12, fontWeight: 900 }}>{invoice.name}</div>
-                  <div style={{ color: "#64748b", fontSize: 10, marginTop: 2 }}>Ultima actividad: {invoice.lastActivity}</div>
+                  <div style={{ color: "#64748b", fontSize: 10, marginTop: 2 }}>
+                    Ultima actividad: {invoice.lastActivity} · {invoice.totalInvoices} facturas
+                  </div>
                 </div>
                 <div>{planBadge(invoice.plan as "Free" | "Starter" | "Pro" | "Enterprise")}</div>
                 <div>{stateBadge(invoice.status)}</div>
+                <div style={{ color: "#475569", fontSize: 11 }}>
+                  Pend.: {invoice.pendingPayments} pagos / {invoice.pendingInvoices} fact.
+                </div>
                 <div style={{ fontFamily: "'DM Mono',monospace", fontSize: 12, color: "#0f172a", fontWeight: 800 }}>${invoice.estimatedMrr}</div>
               </div>
             ))}
@@ -60,10 +76,10 @@ export default function SuperAdminBilling(): React.ReactElement {
         <div style={{ ...PANEL_STYLE, padding: 18 }}>
           <div style={{ color: "#0f172a", fontSize: 13, fontWeight: 900, fontFamily: "'Syne',sans-serif" }}>Estado de facturacion</div>
           <div style={{ color: "#64748b", fontSize: 12, marginTop: 10, lineHeight: 1.6 }}>
-            Esta vista ya usa el backend real para MRR, crecimiento, pagos pendientes y empresas activas.
+            Esta vista ya usa el backend real para MRR, pagos, facturas y cartera por empresa.
           </div>
           <div style={{ color: "#64748b", fontSize: 12, marginTop: 10, lineHeight: 1.6 }}>
-            Lo que todavia no existe en backend es un endpoint detallado de facturas y reembolsos por empresa.
+            Cobrado total: <strong>${collected.toLocaleString()}</strong> · Facturas pagadas: <strong>{paidInvoices}</strong>
           </div>
           {error && <div style={{ color: "#b91c1c", fontSize: 12, marginTop: 12 }}>{error}</div>}
         </div>

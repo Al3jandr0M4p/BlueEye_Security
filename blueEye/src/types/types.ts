@@ -209,6 +209,7 @@ export interface CreateAdminPayload {
   fullName?: string;
   phone?: string;
   city?: string;
+  businessId?: string;
 }
 
 export interface ConfigureUserAccountPayload {
@@ -251,6 +252,10 @@ export interface AdminDashboardStats {
   data: {
     totalClients: number;
     totalTechnicians: number;
+    openTickets: number;
+    pendingPlanning: number;
+    totalSites: number;
+    totalInventoryProducts: number;
   };
 }
 
@@ -544,6 +549,7 @@ export interface AdminTicket {
   devices: AdminDeviceRequest[];
   tags: string[];
   scheduledDate?: string;
+  image?: string;
 }
 
 
@@ -623,6 +629,22 @@ export interface CreateInventoryMovementPayload {
   movementType: "in" | "out";
   reason?: string;
   reference?: string;
+}
+
+export interface UpdateInventoryProductPayload {
+  name?: string;
+  category?: string;
+  subcategory?: string;
+  price?: number;
+  stock?: number;
+  minimum?: number;
+  location?: string;
+  image?: string;
+  description?: string;
+  specLineA?: string;
+  specLineB?: string;
+  specLineC?: string;
+  chips?: string[];
 }
 
 export type ApiResponse<T> = {

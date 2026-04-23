@@ -1,26 +1,15 @@
 import { useEffect, useState } from "react";
-import { fetchSuperAdminCompanies } from "../../../service/service";
-
-const PLAN_META = [
-  { accent: "#94a3b8", id: "free", name: "Free", price: "$0" },
-  { accent: "#0ea5e9", id: "starter", name: "Starter", price: "$49" },
-  { accent: "#06b6d4", id: "pro", name: "Pro", price: "$99" },
-  { accent: "#a855f7", id: "enterprise", name: "Enterprise", price: "$249" },
-] as const;
+import {
+  fetchSuperAdminPlans,
+  updateSuperAdminPlan,
+} from "../../../service/service";
+import type { SuperAdminPlanRow } from "../../../types/superAdmin.types";
 
 export function useSuperAdminPlans() {
-  const [plans, setPlans] = useState<
-    Array<{
-      accent: string;
-      adoption: number;
-      backendRouteReady: boolean;
-      id: string;
-      name: string;
-      price: string;
-    }>
-  >([]);
+  const [plans, setPlans] = useState<SuperAdminPlanRow[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [savingPlanId, setSavingPlanId] = useState<string | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -28,31 +17,14 @@ export function useSuperAdminPlans() {
     const loadPlans = async () => {
       try {
         setIsLoading(true);
-        const companies = await fetchSuperAdminCompanies();
+        const data = await fetchSuperAdminPlans();
         if (!mounted) return;
 
-        const planCounts = companies.companies.reduce<Record<string, number>>(
-          (accumulator, company) => {
-            accumulator[company.plan] = (accumulator[company.plan] ?? 0) + 1;
-            return accumulator;
-          },
-          {},
-        );
-
-        setPlans(
-          PLAN_META.map((plan) => ({
-            accent: plan.accent,
-            adoption: planCounts[plan.name] ?? 0,
-            backendRouteReady: false,
-            id: plan.id,
-            name: plan.name,
-            price: plan.price,
-          })),
-        );
+        setPlans(data);
         setError(null);
-      } catch (err) {
+      } catch {
         if (!mounted) return;
-        setError("No se pudo cargar la adopcion de planes.");
+        setError("No se pudo cargar el catalogo de planes.");
       } finally {
         if (!mounted) return;
         setIsLoading(false);
@@ -66,5 +38,45 @@ export function useSuperAdminPlans() {
     };
   }, []);
 
-  return { error, isLoading, plans };
+  const handlePlanFieldChange = (
+    planId: SuperAdminPlanRow["id"],
+    field: keyof SuperAdminPlanRow,
+    value: string | number,
+  ) => {
+    setPlans((current) =>
+      current.map((plan) =>
+        plan.id === planId ? { ...plan, [field]: value } : plan,
+      ),
+    );
+  };
+
+  const handleSavePlan = async (plan: SuperAdminPlanRow) => {
+    try {
+      setSavingPlanId(plan.id);
+      await updateSuperAdminPlan(plan.id, {
+        accent: plan.accent,
+        description: plan.description,
+        maxBusinesses: plan.maxBusinesses,
+        maxSites: plan.maxSites,
+        maxTickets: plan.maxTickets,
+        maxUsers: plan.maxUsers,
+        name: plan.name,
+        price: plan.price,
+      });
+      setError(null);
+    } catch {
+      setError(`No se pudo guardar el plan ${plan.name}.`);
+    } finally {
+      setSavingPlanId(null);
+    }
+  };
+
+  return {
+    error,
+    handlePlanFieldChange,
+    handleSavePlan,
+    isLoading,
+    plans,
+    savingPlanId,
+  };
 }

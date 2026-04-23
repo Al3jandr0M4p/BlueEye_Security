@@ -7,6 +7,7 @@ export type TechTicketStatus =
 export type TechTicket = {
   id: string;
   user_id?: string | null;
+  site_id?: string | null;
   site?: string | null;
   equipment?: string | null;
   content_description?: string | null;
@@ -42,6 +43,7 @@ export type TechNotification = {
 export type TechSite = {
   id: string;
   client_id?: string | null;
+  client_name?: string | null;
   name?: string | null;
   address?: string | null;
   type?: string | null;
@@ -54,6 +56,7 @@ export type TechSurvey = {
   id: string;
   business_id?: string | null;
   site_id?: string | null;
+  ticket_id?: string | null;
   created_by?: string | null;
   title?: string | null;
   status?: TechSurveyStatus | null;
@@ -76,6 +79,35 @@ export type TechSurveyPoint = {
   camera_suggestion?: string | null;
   notes?: string | null;
   created_at?: string | null;
+};
+
+export type TechSurveyUpdate = {
+  id: string;
+  survey_id?: string | null;
+  status?: string | null;
+  title?: string | null;
+  details?: string | null;
+  created_at?: string | null;
+};
+
+export type TechSurveyRequirement = {
+  id: string;
+  survey_id?: string | null;
+  category?: string | null;
+  item_name?: string | null;
+  quantity?: number | null;
+  unit_price?: number | null;
+  install_area?: string | null;
+  notes?: string | null;
+  created_at?: string | null;
+};
+
+export type TechCatalogProduct = {
+  id: string;
+  name: string;
+  price: number;
+  stock: number;
+  description?: string | null;
 };
 
 export type TechSurveyPhoto = {

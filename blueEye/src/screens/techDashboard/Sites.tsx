@@ -10,7 +10,8 @@ const SitesTechScreen: React.FC = () => {
     const normalized = query.trim().toLowerCase();
     if (!normalized) return sites;
     return sites.filter((site) => {
-      const haystack = `${site.name ?? ""} ${site.address ?? ""} ${site.type ?? ""}`.toLowerCase();
+      const haystack =
+        `${site.name ?? ""} ${site.address ?? ""} ${site.type ?? ""} ${site.client_name ?? ""}`.toLowerCase();
       return haystack.includes(normalized);
     });
   }, [query, sites]);
@@ -31,7 +32,7 @@ const SitesTechScreen: React.FC = () => {
         <div>
           <h1 className="text-3xl font-semibold text-slate-900">Sitios</h1>
           <p className="mt-1 text-sm text-slate-600">
-            Consulta ubicaciones activas asociadas a tu empresa.
+            Consulta los sitios activos y el cliente asociado a cada ubicacion.
           </p>
         </div>
 
@@ -59,14 +60,14 @@ const SitesTechScreen: React.FC = () => {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               className="mt-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
-              placeholder="Nombre, dirección, tipo…"
+              placeholder="Nombre, direccion, tipo o cliente..."
               disabled={isLoading}
             />
           </div>
 
           <div className="flex items-center justify-between">
             <h2 className="text-base font-semibold text-slate-900">Lista</h2>
-            {isLoading && <p className="text-xs text-slate-500">Cargando…</p>}
+            {isLoading && <p className="text-xs text-slate-500">Cargando...</p>}
           </div>
 
           {filteredSites.length === 0 && !isLoading ? (
@@ -90,7 +91,10 @@ const SitesTechScreen: React.FC = () => {
                       {site.name ?? site.id}
                     </p>
                     <p className={`mt-1 line-clamp-2 text-xs ${isSelected ? "text-white/75" : "text-slate-600"}`}>
-                      {site.address ?? "Sin dirección"}
+                      {site.address ?? "Sin direccion"}
+                    </p>
+                    <p className={`mt-2 text-[11px] uppercase tracking-[0.16em] ${isSelected ? "text-white/65" : "text-slate-400"}`}>
+                      {site.client_name ?? "Cliente sin nombre"}
                     </p>
                   </button>
                 );
@@ -119,12 +123,18 @@ const SitesTechScreen: React.FC = () => {
                     {selectedSite.type ?? "Sin tipo"}
                   </p>
                 </div>
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 md:col-span-2">
+                  <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Cliente</p>
+                  <p className="mt-1 text-sm font-semibold text-slate-900">
+                    {selectedSite.client_name ?? "Sin cliente"}
+                  </p>
+                </div>
               </div>
 
               <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
-                <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Dirección</p>
+                <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Direccion</p>
                 <p className="mt-2 text-sm text-slate-800">
-                  {selectedSite.address ?? "Sin dirección"}
+                  {selectedSite.address ?? "Sin direccion"}
                 </p>
               </div>
 
@@ -141,4 +151,3 @@ const SitesTechScreen: React.FC = () => {
 };
 
 export default SitesTechScreen;
-

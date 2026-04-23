@@ -1,36 +1,37 @@
 import { useEffect, useState } from "react";
-import { fetchSuperAdminAudit } from "../../../service/service";
+import { fetchSuperAdminProfile } from "../../../service/service";
 import { useAppSelector } from "../../../hooks/use-store-hook";
+import type { ProfileActivity } from "../../../types/superAdmin.types";
 
 export function useSuperAdminProfile() {
   const { profile, session, user } = useAppSelector((state) => state.auth);
-  const [activity, setActivity] = useState<
-    Array<{ a: string; c: string; t: string }>
-  >([]);
+  const [activity, setActivity] = useState<ProfileActivity[]>([]);
+  const [email, setEmail] = useState("No disponible");
+  const [role, setRole] = useState("superAdmin");
+  const [username, setUsername] = useState("Super Admin");
+  const [phone, setPhone] = useState("No disponible");
+  const [createdAt, setCreatedAt] = useState<string | null>(null);
 
   useEffect(() => {
     let mounted = true;
 
     const loadActivity = async () => {
       try {
-        const audit = await fetchSuperAdminAudit();
+        const profileData = await fetchSuperAdminProfile();
         if (!mounted) return;
 
-        setActivity(
-          audit.entries.slice(0, 6).map((entry) => ({
-            a: entry.accion,
-            c:
-              entry.tipo === "critical"
-                ? "#ef4444"
-                : entry.tipo === "warn"
-                  ? "#f59e0b"
-                  : "#22d3ee",
-            t: entry.tiempo,
-          })),
-        );
+        setActivity(profileData.activity);
+        setEmail(profileData.email || "No disponible");
+        setRole(profileData.role || "superAdmin");
+        setUsername(profileData.username || "Super Admin");
+        setPhone(profileData.phone || "No disponible");
+        setCreatedAt(profileData.createdAt);
       } catch {
         if (!mounted) return;
         setActivity([]);
+        setEmail(user?.email ?? "No disponible");
+        setRole(user?.rolename ?? profile?.rolename ?? "superAdmin");
+        setUsername(profile?.username ?? user?.username ?? "Super Admin");
       }
     };
 
@@ -54,13 +55,19 @@ export function useSuperAdminProfile() {
       ok: true,
       when: user?.email ?? "Sin email",
     },
+    {
+      device: "Perfil backend",
+      ip: phone,
+      ok: true,
+      when: createdAt ? new Date(createdAt).toLocaleDateString("es-DO") : "Sin fecha",
+    },
   ];
 
   return {
     activity,
-    email: user?.email ?? "No disponible",
-    role: user?.rolename ?? profile?.rolename ?? "superAdmin",
+    email,
+    role,
     sessions,
-    username: profile?.username ?? user?.username ?? "Super Admin",
+    username,
   };
 }

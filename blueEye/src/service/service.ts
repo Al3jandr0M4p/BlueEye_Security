@@ -21,6 +21,7 @@ import type {
   AdminUserUpdatePayload,
   CreateInventoryMovementPayload,
   CreateInventoryProductPayload,
+  UpdateInventoryProductPayload,
   ApiResponse,
   TicketsBody,
 } from "../types/types";
@@ -39,7 +40,16 @@ import type {
   AuditLogEntry,
   Company,
   GrowthDataPoint,
+  SuperAdminBillingCompanyRow,
+  SuperAdminBillingPoint,
+  SuperAdminBillingSummary,
   PlanDataPoint,
+  SuperAdminPlanRow,
+  SuperAdminProfileOverview,
+  SuperAdminSettingsFeature,
+  SuperAdminSettingsRoute,
+  SuperAdminSupportRow,
+  SuperAdminUserRow,
   TipoLog,
   TipoPlan,
 } from "../types/superAdmin.types";
@@ -48,14 +58,19 @@ import type { TechNotification } from "../types/tech.types";
 interface AdminTicketApiRecord {
   id?: string | number;
   site?: string;
+  img?: string | null;
   tickets_status?: string;
   assigned_to?: string | null;
+  assigned_to_name?: string | null;
+  requester_name?: string | null;
   summary?: string | null;
   content_description?: string | null;
   priority?: string | null;
   created_at?: string;
+  equipment?: string | null;
   sla_due?: string | null;
   requested_by?: string | null;
+  planner_name?: string | null;
   user_id?: string | null;
   devices?: Array<{ name?: string; quantity?: number; status?: string }> | null;
   tags?: string[] | null;
@@ -81,20 +96,26 @@ interface AdminUserApiRecord {
 function mapAdminTicket(record: AdminTicketApiRecord): AdminTicket {
   return {
     id: String(record.id ?? ""),
-    site: record.site ?? "Sitio no especificado",
+    site: record.site ?? record.equipment ?? "Sitio no especificado",
     status: record.tickets_status ?? "iniciado",
     assignedTo:
       record.technician?.username ??
+      record.assigned_to_name ??
       record.assigned_to ??
       "Sin asignar",
     summary:
       record.summary ??
       record.content_description ??
+      record.equipment ??
       "Sin descripcion",
     priority: record.priority ?? "media",
     createdAt: record.created_at ?? new Date().toISOString(),
     slaDue: record.sla_due ?? "",
-    requestedBy: record.requested_by ?? record.user_id ?? "cliente",
+    requestedBy:
+      record.requester_name ??
+      record.requested_by ??
+      record.user_id ??
+      "cliente",
     devices:
       record.devices?.map((device, index) => ({
         name: device.name ?? `Equipo ${index + 1}`,
@@ -103,6 +124,7 @@ function mapAdminTicket(record: AdminTicketApiRecord): AdminTicket {
       })) ?? [],
     tags: record.tags ?? [],
     scheduledDate: record.scheduled_date ?? undefined,
+    image: record.img ?? undefined,
   };
 }
 
@@ -338,9 +360,12 @@ export async function planAdminTicketService(
   ticketId: string,
   payload: { scheduledDate: string; technicianId: string },
 ) {
-  const { data } = await api.post(`/api/admin/v1/tickets/${ticketId}/plan`, payload);
+  const { data } = await api.post<ApiResponse<AdminTicketApiRecord>>(
+    `/api/admin/v1/tickets/${ticketId}/plan`,
+    payload,
+  );
 
-  return data;
+  return data.data ? mapAdminTicket(data.data) : null;
 }
 
 type AdminOverviewResponse<T> = { success: boolean; data: T };
@@ -509,6 +534,14 @@ export async function fetchTechSitesService() {
   return data.data ?? [];
 }
 
+export async function fetchTechCatalogProductsService() {
+  const { data } = await api.get<{ success: boolean; data: unknown[] }>(
+    "/api/tech/v1/catalog/products",
+  );
+
+  return data.data ?? [];
+}
+
 export async function fetchTechNotificationsService() {
   const { data } = await api.get<{
     success: boolean;
@@ -536,7 +569,8 @@ export async function fetchTechSurveysService(params?: { siteId?: string }) {
 }
 
 export async function createTechSurveyService(payload: {
-  siteId: string;
+  siteId?: string;
+  ticketId?: string;
   title?: string;
 }) {
   const { data } = await api.post<{ success: boolean; data: unknown }>(
@@ -558,6 +592,9 @@ export async function fetchTechSurveyByIdService(surveyId: string) {
 export async function updateTechSurveyService(
   surveyId: string,
   payload: {
+    clientId?: string;
+    siteId?: string;
+    ticketId?: string;
     title?: string;
     status?: "draft" | "submitted";
     objectives?: string;
@@ -596,6 +633,57 @@ export async function createTechSurveyPointService(
 ) {
   const { data } = await api.post<{ success: boolean; data: unknown }>(
     `/api/tech/v1/surveys/${surveyId}/points`,
+    payload,
+  );
+
+  return data.data;
+}
+
+export async function fetchTechSurveyUpdatesService(surveyId: string) {
+  const { data } = await api.get<{ success: boolean; data: unknown[] }>(
+    `/api/tech/v1/surveys/${surveyId}/updates`,
+  );
+
+  return data.data ?? [];
+}
+
+export async function createTechSurveyUpdateService(
+  surveyId: string,
+  payload: {
+    status?: string;
+    title: string;
+    details?: string;
+  },
+) {
+  const { data } = await api.post<{ success: boolean; data: unknown }>(
+    `/api/tech/v1/surveys/${surveyId}/updates`,
+    payload,
+  );
+
+  return data.data;
+}
+
+export async function fetchTechSurveyRequirementsService(surveyId: string) {
+  const { data } = await api.get<{ success: boolean; data: unknown[] }>(
+    `/api/tech/v1/surveys/${surveyId}/requirements`,
+  );
+
+  return data.data ?? [];
+}
+
+export async function createTechSurveyRequirementService(
+  surveyId: string,
+  payload: {
+    category?: string;
+    itemName: string;
+    quantity?: number;
+    unitPrice?: number;
+    installArea?: string;
+    notes?: string;
+  },
+) {
+  const { data } = await api.post<{ success: boolean; data: unknown }>(
+    `/api/tech/v1/surveys/${surveyId}/requirements`,
     payload,
   );
 
@@ -666,6 +754,26 @@ export async function createAdminInventoryProduct(
   return data;
 }
 
+export async function updateAdminInventoryProduct(
+  productId: string,
+  payload: UpdateInventoryProductPayload,
+) {
+  const { data } = await api.put<{ success: boolean }>(
+    `/api/admin/v1/inventory/products/${productId}`,
+    payload,
+  );
+
+  return data;
+}
+
+export async function deleteAdminInventoryProduct(productId: string) {
+  const { data } = await api.delete<{ success: boolean }>(
+    `/api/admin/v1/inventory/products/${productId}`,
+  );
+
+  return data;
+}
+
 export async function createAdminInventoryMovement(
   productId: string,
   payload: CreateInventoryMovementPayload,
@@ -689,11 +797,16 @@ export async function fetchAdminReportsOverview() {
 type DashboardResponse = {
   success: boolean;
   data: {
+    audit?: Array<Record<string, unknown>>;
     businesses?: Array<{
       adminName?: string | null;
       businessName?: string;
+      createdAt?: string;
       id: string;
+      plan?: string;
       state?: string;
+      updatedAt?: string;
+      usage?: number;
     }>;
     growth?: Array<{
       business?: number;
@@ -708,8 +821,11 @@ type DashboardResponse = {
       openTickets?: number;
       pendingInvoices?: number;
       pendingPayment?: number;
+      totalBusinesses?: number;
+      totalUsers?: number;
       unAssignedTickets?: number;
     };
+    plans?: Array<Record<string, unknown>>;
   };
 };
 
@@ -718,6 +834,22 @@ type PaginatedResponse = {
   data: {
     data: Array<Record<string, unknown>>;
     page: number;
+    total: number;
+    totalPages: number;
+  };
+};
+
+type SupportPaginatedResponse = {
+  success: boolean;
+  data: {
+    data: Array<Record<string, unknown>>;
+    page: number;
+    summary: {
+      avgResponseMinutes?: number;
+      open?: number;
+      slaRisk?: number;
+      urgent?: number;
+    };
     total: number;
     totalPages: number;
   };
@@ -865,6 +997,10 @@ function mapDashboardAudit(row: AuditLogEntry): AuditEntry {
 
 function mapCompanyRow(row: Record<string, unknown>): Company & {
   mrr: number;
+  pendingInvoices: number;
+  pendingPayments: number;
+  totalUsers: number;
+  openTickets: number;
   ultimaActividad: string;
 } {
   return {
@@ -881,62 +1017,49 @@ function mapCompanyRow(row: Record<string, unknown>): Company & {
           ? row.monthly_revenue
           : 0,
     name: String(row.name ?? row.businessName ?? "Empresa sin nombre"),
+    openTickets: Number(row.openTickets ?? 0),
+    pendingInvoices: Number(row.pendingInvoices ?? 0),
+    pendingPayments: Number(row.pendingPayments ?? 0),
     plan: mapPlan(String(row.plan ?? "")),
+    totalUsers: Number(row.totalUsers ?? row.activeUsers ?? 0),
     ultimaActividad: formatRelativeDate(
-      String(row.updated_at ?? row.last_activity_at ?? row.created_at ?? ""),
+      String(
+        row.lastActivityAt ??
+          row.updated_at ??
+          row.last_activity_at ??
+          row.created_at ??
+          "",
+      ),
     ),
-    uso: 0,
+    uso: Number(row.usage ?? 0),
   };
 }
 
 export async function fetchSuperAdminDashboard(): Promise<DashboardPayload> {
-  const [{ data: dashboard }, { data: companies }, { data: audit }] =
-    await Promise.all([
-      api.get<DashboardResponse>("/api/super/admin/dashboard"),
-      api.get<PaginatedResponse>("/api/super/admin/companies", {
-        params: { page: 1, limit: 100 },
-      }),
-      api.get<PaginatedResponse>("/api/super/admin/audit", {
-        params: { page: 1, limit: 5 },
-      }),
-    ]);
-
-  const companyList = companies.data.data.map((row) => mapCompanyRow(row));
-  const companyMap = new Map(
-    companyList.map((company) => [String(company.id), company]),
+  const { data: dashboard } = await api.get<DashboardResponse>(
+    "/api/super/admin/dashboard",
   );
 
-  const recentCompanies = (dashboard.data.businesses ?? []).map((item) => {
-    const company = companyMap.get(String(item.id));
+  const recentCompanies = (dashboard.data.businesses ?? []).map((item) => ({
+    admin: item.adminName ?? "No disponible",
+    estado: mapStatus(item.state),
+    fecha: formatRelativeDate(item.createdAt),
+    id: item.id,
+    name: item.businessName ?? "Empresa sin nombre",
+    plan: mapPlan(item.plan),
+    uso: Number(item.usage ?? 0),
+  }));
 
-    return {
-      admin: item.adminName ?? company?.admin ?? "No disponible",
-      estado: mapStatus(item.state ?? company?.estado),
-      fecha: company?.fecha ?? "No disponible",
-      id: item.id,
-      name: item.businessName ?? company?.name ?? "Empresa sin nombre",
-      plan: company?.plan ?? "Free",
-      uso: company?.uso ?? 0,
-    } satisfies Company;
-  });
-
-  const planCounts = companyList.reduce<Record<TipoPlan, number>>(
-    (accumulator, company) => {
-      accumulator[company.plan] += 1;
-      return accumulator;
-    },
-    { Enterprise: 0, Free: 0, Pro: 0, Starter: 0 },
-  );
-
-  const planData: PlanDataPoint[] = [
-    { color: "#334155", name: "Free", value: planCounts.Free },
-    { color: "#0ea5e9", name: "Starter", value: planCounts.Starter },
-    { color: "#06b6d4", name: "Pro", value: planCounts.Pro },
-    { color: "#22d3ee", name: "Enterprise", value: planCounts.Enterprise },
-  ];
+  const planData: PlanDataPoint[] = (dashboard.data.plans ?? []).map((plan) => ({
+    color: String(plan.accent ?? "#0ea5e9"),
+    name: String(plan.name ?? "Plan"),
+    value: Number(plan.adoption ?? 0),
+  }));
 
   return {
-    auditLog: audit.data.data.map((row) => mapDashboardAudit(mapAuditRow(row))),
+    auditLog: (dashboard.data.audit ?? []).map((row) =>
+      mapDashboardAudit(mapAuditRow(row)),
+    ),
     growthData: (dashboard.data.growth ?? []).map((point) => ({
       empresas: point.business ?? 0,
       ingresos: point.income ?? 0,
@@ -979,6 +1102,17 @@ export async function suspendSuperAdminCompany(companyId: string) {
   await api.patch(`/api/super/admin/companies/${companyId}/suspend`);
 }
 
+export async function activateSuperAdminCompany(companyId: string) {
+  await api.patch(`/api/super/admin/companies/${companyId}/activate`);
+}
+
+export async function updateSuperAdminCompanyPlan(
+  companyId: string,
+  plan: "free" | "starter" | "pro" | "enterprise",
+) {
+  await api.patch(`/api/super/admin/companies/${companyId}/plan`, { plan });
+}
+
 export async function fetchSuperAdminAudit() {
   const { data } = await api.get<PaginatedResponse>("/api/super/admin/audit", {
     params: { page: 1, limit: 100 },
@@ -987,6 +1121,209 @@ export async function fetchSuperAdminAudit() {
   return {
     entries: data.data.data.map((row) => mapAuditRow(row)),
     total: data.data.total,
+  };
+}
+
+function normalizePlanId(value?: string | null): SuperAdminPlanRow["id"] {
+  switch ((value ?? "").toLowerCase()) {
+    case "starter":
+      return "starter";
+    case "pro":
+      return "pro";
+    case "enterprise":
+      return "enterprise";
+    default:
+      return "free";
+  }
+}
+
+export async function fetchSuperAdminPlans(): Promise<SuperAdminPlanRow[]> {
+  const { data } = await api.get<{ success: boolean; data: Array<Record<string, unknown>> }>(
+    "/api/super/admin/plans",
+  );
+
+  return (data.data ?? []).map((row) => ({
+    accent: String(row.accent ?? "#0ea5e9"),
+    activeCompanies: Number(row.activeCompanies ?? 0),
+    adoption: Number(row.adoption ?? 0),
+    description: String(row.description ?? ""),
+    id: normalizePlanId(String(row.id ?? "")),
+    maxBusinesses: Number(row.maxBusinesses ?? 0),
+    maxSites: Number(row.maxSites ?? 0),
+    maxTickets: Number(row.maxTickets ?? 0),
+    maxUsers: Number(row.maxUsers ?? 0),
+    monthlyRevenue: Number(row.monthlyRevenue ?? 0),
+    name: String(row.name ?? "Plan"),
+    price: Number(row.price ?? 0),
+  }));
+}
+
+export async function updateSuperAdminPlan(
+  planId: SuperAdminPlanRow["id"],
+  payload: {
+    accent: string;
+    description: string;
+    maxBusinesses: number;
+    maxSites: number;
+    maxTickets: number;
+    maxUsers: number;
+    name: string;
+    price: number;
+  },
+) {
+  const { data } = await api.patch<{ success: boolean; data: Record<string, unknown> }>(
+    `/api/super/admin/plans/${planId}`,
+    payload,
+  );
+
+  return data.data;
+}
+
+export async function fetchSuperAdminUsers(search = "") {
+  const { data } = await api.get<PaginatedResponse>("/api/super/admin/users", {
+    params: {
+      page: 1,
+      limit: 100,
+      ...(search ? { search } : {}),
+    },
+  });
+
+  return {
+    rows: (data.data.data ?? []).map((row) => ({
+      company: String(row.company ?? "Sin empresa"),
+      createdAt: String(row.createdAt ?? ""),
+      email: String(row.email ?? ""),
+      id: String(row.id ?? ""),
+      phone: String(row.phone ?? ""),
+      role: String(row.role ?? "usuario") as SuperAdminUserRow["role"],
+      status: String(row.status ?? "active") as SuperAdminUserRow["status"],
+      username: String(row.username ?? "Usuario"),
+    })),
+    total: data.data.total,
+  };
+}
+
+export async function fetchSuperAdminSupport(search = "") {
+  const { data } = await api.get<SupportPaginatedResponse>(
+    "/api/super/admin/support",
+    {
+      params: {
+        page: 1,
+        limit: 100,
+        ...(search ? { search } : {}),
+      },
+    },
+  );
+
+  return {
+    rows: (data.data.data ?? []).map((row) => ({
+      company: String(row.company ?? "Sin empresa"),
+      createdAt: String(row.createdAt ?? ""),
+      id: String(row.id ?? ""),
+      planningStatus: String(row.planningStatus ?? "pending"),
+      priority: String(row.priority ?? "medium"),
+      status: String(row.status ?? "iniciado"),
+      subject: String(row.subject ?? "Ticket"),
+      updatedAt: String(row.updatedAt ?? ""),
+      waitingAssignment: Boolean(row.waitingAssignment),
+    })) as SuperAdminSupportRow[],
+    summary: {
+      avgResponseMinutes: Number(data.data.summary?.avgResponseMinutes ?? 0),
+      open: Number(data.data.summary?.open ?? 0),
+      slaRisk: Number(data.data.summary?.slaRisk ?? 0),
+      urgent: Number(data.data.summary?.urgent ?? 0),
+    },
+    total: data.data.total,
+  };
+}
+
+export async function fetchSuperAdminBilling() {
+  const { data } = await api.get<{
+    success: boolean;
+    data: {
+      portfolio: Array<Record<string, unknown>>;
+      revenue: Array<Record<string, unknown>>;
+      summary: Record<string, unknown>;
+    };
+  }>("/api/super/admin/billing");
+
+  const summary: SuperAdminBillingSummary = {
+    mrr: Number(data.data.summary?.mrr ?? 0),
+    paidInvoices: Number(data.data.summary?.paidInvoices ?? 0),
+    pendingInvoices: Number(data.data.summary?.pendingInvoices ?? 0),
+    pendingPayments: Number(data.data.summary?.pendingPayments ?? 0),
+    refunds: Number(data.data.summary?.refunds ?? 0),
+    totalCollected: Number(data.data.summary?.totalCollected ?? 0),
+  };
+
+  const revenue: SuperAdminBillingPoint[] = (data.data.revenue ?? []).map((row) => ({
+    collected: Number(row.collected ?? 0),
+    mes: String(row.month ?? row.mes ?? "-"),
+    mrr: Number(row.mrr ?? 0),
+    pending: Number(row.pending ?? 0),
+  }));
+
+  const portfolio: SuperAdminBillingCompanyRow[] = (data.data.portfolio ?? []).map(
+    (row) => ({
+      collected: Number(row.collected ?? 0),
+      currency: String(row.currency ?? "USD"),
+      estimatedMrr: Number(row.estimatedMrr ?? 0),
+      id: String(row.id ?? ""),
+      lastActivity: formatRelativeDate(String(row.lastActivity ?? "")),
+      name: String(row.name ?? "Empresa"),
+      pendingInvoices: Number(row.pendingInvoices ?? 0),
+      pendingPayments: Number(row.pendingPayments ?? 0),
+      plan: mapPlan(String(row.plan ?? "")),
+      status: mapStatus(String(row.status ?? "")),
+      totalInvoices: Number(row.totalInvoices ?? 0),
+    }),
+  );
+
+  return { portfolio, revenue, summary };
+}
+
+export async function fetchSuperAdminProfile(): Promise<SuperAdminProfileOverview> {
+  const { data } = await api.get<{
+    success: boolean;
+    data: {
+      activity: Array<{ action?: string; color?: string; timestamp?: string }>;
+      createdAt: string | null;
+      email: string;
+      phone: string;
+      role: string;
+      username: string;
+    };
+  }>("/api/super/admin/profile");
+
+  return {
+    activity: (data.data.activity ?? []).map((entry) => ({
+      a: String(entry.action ?? "Actividad"),
+      c: String(entry.color ?? "#22d3ee"),
+      t: String(entry.timestamp ?? "No disponible"),
+    })),
+    createdAt: data.data.createdAt ?? null,
+    email: data.data.email ?? "",
+    phone: data.data.phone ?? "",
+    role: data.data.role ?? "superAdmin",
+    username: data.data.username ?? "Super Admin",
+  };
+}
+
+export async function fetchSuperAdminSettings(): Promise<{
+  features: SuperAdminSettingsFeature[];
+  routes: SuperAdminSettingsRoute[];
+}> {
+  const { data } = await api.get<{
+    success: boolean;
+    data: {
+      features: SuperAdminSettingsFeature[];
+      routes: SuperAdminSettingsRoute[];
+    };
+  }>("/api/super/admin/settings");
+
+  return {
+    features: data.data.features ?? [],
+    routes: data.data.routes ?? [],
   };
 }
 
@@ -1303,7 +1640,7 @@ export const clientService = {
   },
 
   getMissingInvoicesMessage() {
-    return "";
+    return "Las facturas pendientes y pagadas se sincronizan desde `/api/users/v1/invoices`. Cuando el tecnico finaliza un levantamiento, el cliente debe recibir aqui la factura para pagarla.";
   },
 
   getMissingMaintenanceMessage() {

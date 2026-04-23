@@ -1,19 +1,31 @@
 import { useDeferredValue, useEffect, useState } from "react";
 import {
+  activateSuperAdminCompany,
   fetchSuperAdminCompanies,
   suspendSuperAdminCompany,
+  updateSuperAdminCompanyPlan,
 } from "../../../service/service";
 import type { Company } from "../../../types/superAdmin.types";
 
 export function useSuperAdminCompanies() {
   const [companies, setCompanies] = useState<
-    Array<Company & { mrr: number; ultimaActividad: string }>
+    Array<
+      Company & {
+        mrr: number;
+        openTickets: number;
+        pendingInvoices: number;
+        pendingPayments: number;
+        totalUsers: number;
+        ultimaActividad: string;
+      }
+    >
   >([]);
   const [search, setSearch] = useState("");
   const deferredSearch = useDeferredValue(search);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isSuspendingId, setIsSuspendingId] = useState<string | null>(null);
+  const [isSavingPlanId, setIsSavingPlanId] = useState<string | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -58,12 +70,57 @@ export function useSuperAdminCompanies() {
     }
   };
 
+  const handleActivateCompany = async (companyId: string) => {
+    try {
+      setIsSuspendingId(companyId);
+      await activateSuperAdminCompany(companyId);
+      setCompanies((current) =>
+        current.map((company) =>
+          String(company.id) === companyId
+            ? { ...company, estado: "activa" }
+            : company,
+        ),
+      );
+    } finally {
+      setIsSuspendingId(null);
+    }
+  };
+
+  const handlePlanChange = async (
+    companyId: string,
+    plan: "free" | "starter" | "pro" | "enterprise",
+  ) => {
+    const planLabelMap: Record<typeof plan, Company["plan"]> = {
+      enterprise: "Enterprise",
+      free: "Free",
+      pro: "Pro",
+      starter: "Starter",
+    };
+
+    try {
+      setIsSavingPlanId(companyId);
+      await updateSuperAdminCompanyPlan(companyId, plan);
+      setCompanies((current) =>
+        current.map((company) =>
+          String(company.id) === companyId
+            ? { ...company, plan: planLabelMap[plan] }
+            : company,
+        ),
+      );
+    } finally {
+      setIsSavingPlanId(null);
+    }
+  };
+
   return {
     activas: companies.filter((company) => company.estado === "activa").length,
     companies,
     error,
+    handleActivateCompany,
+    handlePlanChange,
     handleSuspendCompany,
     isLoading,
+    isSavingPlanId,
     isSuspendingId,
     search,
     setSearch,

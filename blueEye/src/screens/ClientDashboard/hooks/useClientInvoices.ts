@@ -11,14 +11,22 @@ export function useClientInvoices() {
 
   useEffect(() => {
     const load = async () => {
-      const [invoiceData, documentData] = await Promise.all([
-        clientService.getInvoices(),
-        clientService.getDocuments(),
-      ]);
+      try {
+        const [invoiceData, documentData] = await Promise.all([
+          clientService.getInvoices(),
+          clientService.getDocuments(),
+        ]);
 
-      setInvoices(invoiceData);
-      setDocuments(documentData);
-      setIntegrationNote(clientService.getMissingInvoicesMessage());
+        setInvoices(invoiceData);
+        setDocuments(documentData);
+        setIntegrationNote(clientService.getMissingInvoicesMessage());
+      } catch (err) {
+        setFeedback(
+          err instanceof Error
+            ? err.message
+            : "No se pudo cargar la facturacion del cliente.",
+        );
+      }
     };
 
     void load();

@@ -52,15 +52,16 @@ const AdminSupportScreen = () => {
         <PlanningModal
           isOpen={!!planning.selectedTicket}
           ticket={planning.selectedTicket}
-          date={planning.selectedCalendarDate}
           technicians={planning.technicians}
+          events={planning.events}
+          selectedDateAssignments={planning.selectedDateAssignments}
           selectedTechnicianId={planning.selectedTechnicianId}
           scheduledDate={planning.scheduledDate}
-          events={planning.events}
           onClose={planning.closePlanningModal}
           onSave={planning.handleSavePlan}
-          onSelectSlot={planning.handleSelectCalendarSlot}
-          setScheduledDate={planning.setScheduledDate}
+          onDateSelect={planning.handleDateSelect}
+          onCalendarEventSelect={planning.handleCalendarEventSelect}
+          formatScheduledDateLabel={planning.formatScheduledDateLabel}
           setSelectedTechnicianId={planning.setSelectedTechnicianId}
         />
       </div>

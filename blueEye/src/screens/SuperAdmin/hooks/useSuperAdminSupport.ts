@@ -1,25 +1,24 @@
-import { useEffect, useState } from "react";
-import {
-  fetchSuperAdminAudit,
-  fetchSuperAdminDashboard,
-} from "../../../service/service";
+import { useDeferredValue, useEffect, useState } from "react";
+import { fetchSuperAdminSupport } from "../../../service/service";
 
 type SupportActivity = {
   asunto: string;
   empresa: string;
   id: string;
+  prioridad: string;
   status: "escalated" | "open" | "pending";
   actualizado: string;
 };
 
-function inferStatus(text: string): "escalated" | "open" | "pending" {
-  const value = text.toLowerCase();
+function inferStatus(status: string, priority: string): "escalated" | "open" | "pending" {
+  const normalizedStatus = status.toLowerCase();
+  const normalizedPriority = priority.toLowerCase();
 
-  if (value.includes("critical") || value.includes("error")) {
+  if (["urgent", "high", "alta"].includes(normalizedPriority)) {
     return "escalated";
   }
 
-  if (value.includes("ticket") || value.includes("support")) {
+  if (normalizedStatus === "en progreso") {
     return "open";
   }
 
@@ -33,6 +32,9 @@ export function useSuperAdminSupport() {
   const [slaRisk, setSlaRisk] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [avgResponse, setAvgResponse] = useState("No disponible");
+  const [search, setSearch] = useState("");
+  const deferredSearch = useDeferredValue(search);
 
   useEffect(() => {
     let mounted = true;
@@ -40,29 +42,31 @@ export function useSuperAdminSupport() {
     const loadSupport = async () => {
       try {
         setIsLoading(true);
-        const [dashboard, audit] = await Promise.all([
-          fetchSuperAdminDashboard(),
-          fetchSuperAdminAudit(),
-        ]);
+        const support = await fetchSuperAdminSupport(deferredSearch.trim());
         if (!mounted) return;
 
-        const ticketEvents = audit.entries
-          .filter((entry) => /ticket|support|sla|incident/i.test(entry.accion))
-          .slice(0, 8)
-          .map((entry, index) => ({
-            asunto: entry.accion,
-            empresa: entry.empresa,
-            id: `SUP-${index + 1}`,
-            status: inferStatus(entry.accion),
-            actualizado: entry.tiempo,
-          }));
+        const rows = support.rows.map((entry) => ({
+          asunto: entry.subject,
+          empresa: entry.company,
+          id: entry.id,
+          prioridad: entry.priority,
+          status: inferStatus(entry.status, entry.priority),
+          actualizado: entry.updatedAt
+            ? new Date(entry.updatedAt).toLocaleDateString("es-DO")
+            : "No disponible",
+        }));
 
-        setTickets(ticketEvents);
-        setOpen(dashboard.stats.openTickets);
-        setUrgent(ticketEvents.filter((ticket) => ticket.status === "escalated").length);
-        setSlaRisk(dashboard.stats.unAssignedTickets);
+        setTickets(rows);
+        setOpen(support.summary.open);
+        setUrgent(support.summary.urgent);
+        setSlaRisk(support.summary.slaRisk);
+        setAvgResponse(
+          support.summary.avgResponseMinutes > 0
+            ? `${support.summary.avgResponseMinutes} min`
+            : "No disponible",
+        );
         setError(null);
-      } catch (err) {
+      } catch {
         if (!mounted) return;
         setError("No se pudo cargar la vista de soporte.");
       } finally {
@@ -76,14 +80,16 @@ export function useSuperAdminSupport() {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [deferredSearch]);
 
   return {
-    avgResponse: "No disponible",
+    avgResponse,
     error,
-    integrationNote: "El backend aun no expone GET /api/super/admin/support o listado global de tickets detallados.",
+    integrationNote: "Listado global de tickets conectado a `GET /api/super/admin/support`.",
     isLoading,
     open,
+    search,
+    setSearch,
     slaRisk,
     tickets,
     urgent,

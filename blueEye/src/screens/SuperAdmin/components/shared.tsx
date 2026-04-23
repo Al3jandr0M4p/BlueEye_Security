@@ -1,5 +1,6 @@
 import type React from "react";
 import { NavLink } from "react-router-dom";
+import { useAppSelector } from "../../../hooks/use-store-hook";
 import type {
   AuditLogType,
   EstadoEmpresa,
@@ -25,6 +26,15 @@ export function SuperAdminSidebar({
 }: {
   navItems: SuperAdminNavItem[];
 }) {
+  const { profile, user } = useAppSelector((state) => state.auth);
+  const accountName =
+    profile?.username?.trim() ||
+    user?.username?.trim() ||
+    user?.email?.split("@")[0] ||
+    "Admin";
+  const accountEmail = user?.email || "Sin correo";
+  const initials = accountName.slice(0, 2).toUpperCase();
+
   return (
     <aside
       style={{
@@ -153,7 +163,7 @@ export function SuperAdminSidebar({
               fontWeight: 700,
             }}
           >
-            SA
+            {initials}
           </div>
           <div style={{ minWidth: 0 }}>
             <div
@@ -164,10 +174,10 @@ export function SuperAdminSidebar({
                 lineHeight: 1.1,
               }}
             >
-              Super Admin
+              {accountName}
             </div>
             <div style={{ color: "#64748b", fontSize: 10, marginTop: 2 }}>
-              admin@blueeye.io
+              {accountEmail}
             </div>
           </div>
         </div>

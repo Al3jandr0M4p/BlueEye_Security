@@ -1,71 +1,176 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   fetchTechNotificationsService,
   markTechNotificationAsReadService,
 } from "../service/service";
 import type { TechNotification } from "../types/tech.types";
 
-const REFRESH_MS = 15000;
+const REFRESH_MS = 60000;
+const MIN_REFRESH_GAP_MS = 15000;
+
+type TechNotificationsState = {
+  error: string | null;
+  isLoading: boolean;
+  notifications: TechNotification[];
+};
+
+const store: TechNotificationsState = {
+  error: null,
+  isLoading: true,
+  notifications: [],
+};
+
+const listeners = new Set<(state: TechNotificationsState) => void>();
+let intervalId: number | null = null;
+let inFlightRequest: Promise<void> | null = null;
+let hasLoadedOnce = false;
+let lastLoadAt = 0;
+let visibilityListenerAttached = false;
+
+function getErrorMessage(err: unknown) {
+  const fallback = "No se pudieron cargar las notificaciones.";
+
+  if (!(err instanceof Error)) {
+    return fallback;
+  }
+
+  if (err.message.includes("429")) {
+    return "Hay demasiadas solicitudes seguidas. Reintentaremos en unos segundos.";
+  }
+
+  return err.message;
+}
+
+function emit() {
+  const snapshot = {
+    error: store.error,
+    isLoading: store.isLoading,
+    notifications: store.notifications,
+  };
+
+  listeners.forEach((listener) => listener(snapshot));
+}
+
+async function loadShared(force = false) {
+  if (inFlightRequest && !force) {
+    return inFlightRequest;
+  }
+
+  if (typeof document !== "undefined" && document.hidden && hasLoadedOnce && !force) {
+    return;
+  }
+
+  const now = Date.now();
+  if (!force && hasLoadedOnce && now - lastLoadAt < MIN_REFRESH_GAP_MS) {
+    return;
+  }
+
+  store.isLoading = !hasLoadedOnce;
+  if (!hasLoadedOnce) {
+    store.error = null;
+  }
+  emit();
+
+  inFlightRequest = (async () => {
+    try {
+      const data = await fetchTechNotificationsService();
+      store.notifications = [...data].sort((left, right) =>
+        (right.created_at ?? "").localeCompare(left.created_at ?? ""),
+      );
+      store.error = null;
+      hasLoadedOnce = true;
+      lastLoadAt = Date.now();
+    } catch (err) {
+      store.error = getErrorMessage(err);
+    } finally {
+      store.isLoading = false;
+      emit();
+      inFlightRequest = null;
+    }
+  })();
+
+  return inFlightRequest;
+}
+
+function ensurePolling() {
+  if (intervalId !== null || typeof window === "undefined") return;
+
+  intervalId = window.setInterval(() => {
+    void loadShared();
+  }, REFRESH_MS);
+}
+
+function ensureVisibilityListener() {
+  if (visibilityListenerAttached || typeof document === "undefined") return;
+
+  document.addEventListener("visibilitychange", handleSharedVisibilityChange);
+  visibilityListenerAttached = true;
+}
+
+function removeVisibilityListenerIfUnused() {
+  if (!visibilityListenerAttached || listeners.size > 0 || typeof document === "undefined") {
+    return;
+  }
+
+  document.removeEventListener("visibilitychange", handleSharedVisibilityChange);
+  visibilityListenerAttached = false;
+}
+
+function stopPollingIfUnused() {
+  if (listeners.size > 0 || intervalId === null || typeof window === "undefined") return;
+  window.clearInterval(intervalId);
+  intervalId = null;
+}
+
+function handleSharedVisibilityChange() {
+  if (!document.hidden) {
+    void loadShared();
+  }
+}
 
 export function useTechNotifications() {
-  const [notifications, setNotifications] = useState<TechNotification[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const load = useCallback(async () => {
-    try {
-      setError(null);
-      const data = await fetchTechNotificationsService();
-      setNotifications(
-        [...data].sort((left, right) =>
-          (right.created_at ?? "").localeCompare(left.created_at ?? ""),
-        ),
-      );
-    } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "No se pudieron cargar las notificaciones.",
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+  const [state, setState] = useState<TechNotificationsState>(store);
 
   useEffect(() => {
-    void load();
+    listeners.add(setState);
+    emit();
 
-    const intervalId = window.setInterval(() => {
-      void load();
-    }, REFRESH_MS);
+    void loadShared();
+    ensurePolling();
+    ensureVisibilityListener();
 
-    return () => window.clearInterval(intervalId);
-  }, [load]);
+    return () => {
+      listeners.delete(setState);
+      stopPollingIfUnused();
+      removeVisibilityListenerIfUnused();
+    };
+  }, []);
 
-  const markAsRead = useCallback(
-    async (notificationId: string) => {
-      await markTechNotificationAsReadService(notificationId);
-      setNotifications((current) =>
-        current.map((notification) =>
-          notification.id === notificationId
-            ? { ...notification, read: true }
-            : notification,
-        ),
-      );
-    },
-    [],
+  const load = useCallback(async () => {
+    await loadShared(true);
+  }, []);
+
+  const markAsRead = useCallback(async (notificationId: string) => {
+    await markTechNotificationAsReadService(notificationId);
+    store.notifications = store.notifications.map((notification) =>
+      notification.id === notificationId
+        ? { ...notification, read: true }
+        : notification,
+    );
+    emit();
+  }, []);
+
+  const unreadCount = useMemo(
+    () => state.notifications.filter((notification) => !notification.read).length,
+    [state.notifications],
   );
 
-  const unreadCount = notifications.filter(
-    (notification) => !notification.read,
-  ).length;
-
   return {
-    error,
-    isLoading,
+    error: state.error,
+    isLoading: state.isLoading,
     load,
     markAsRead,
-    notifications,
+    notifications: state.notifications,
     unreadCount,
   };
 }
