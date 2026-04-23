@@ -3,6 +3,17 @@ import { useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "./use-store-hook";
 import { loginThunk } from "../reduxjs/store/thunks/thunks";
 
+function resolveRole(
+  userRole?: string | null,
+  profileRole?: string | null,
+) {
+  if (userRole === "superAdmin" || profileRole === "superAdmin") {
+    return "superAdmin";
+  }
+
+  return profileRole ?? userRole ?? null;
+}
+
 export function useLoginHook() {
   const dispatch = useAppDispatch();
   const { loading, error, profile } = useAppSelector((state) => state.auth);
@@ -21,12 +32,15 @@ export function useLoginHook() {
     console.log(`Loading: ${loading} Error: ${error} Profile: ${profile}`);
 
     if (loginThunk.fulfilled.match(resultAction)) {
-      const rolename = resultAction.payload?.profile?.rolename;
+      const rolename = resolveRole(
+        resultAction.payload?.user?.rolename,
+        resultAction.payload?.profile?.rolename,
+      );
 
-      if (rolename === "usuario") navigate("/clientDashbord");
+      if (rolename === "usuario") navigate("/clientDashboard");
       else if (rolename === "tecnico") navigate("/techDashboard");
       else if (rolename === "admin") navigate("/adminDashboard");
-      else if (rolename === "superAdmin") navigate("/super/admin/dashboard");
+      else if (rolename === "superAdmin") navigate("/super/admin/dashboard", { replace: true });
       else navigate("/login");
     } else {
       console.log("Login failed:", resultAction.payload);

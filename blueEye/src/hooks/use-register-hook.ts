@@ -1,23 +1,29 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { registerUserService } from "../service/auth.service";
+import { registerUserService } from "../service/service";
 import type { CountryOption, RestCountry } from "../types/types";
 
 export function useRegisterHook() {
   const navigate = useNavigate();
+
   const [step, setStep] = useState<1 | 2>(1);
-  const [email, setEmail] = useState<string>("");
-  const [taxId, setTaxId] = useState<string>("");
-  const [phone, setPhone] = useState<string>("");
-  const [country, setCountry] = useState<string>("");
+  const [email, setEmail] = useState("");
+  const [taxId, setTaxId] = useState("");
+  const [phone, setPhone] = useState("");
+  const [country, setCountry] = useState("");
+  const [password, setPassword] = useState("");
+  const [currency, setCurrency] = useState("");
+  const [username, setUsername] = useState("");
+  const [dialCode, setDialCode] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const [logo, setLogo] = useState<File | null>(null);
-  const [password, setPassword] = useState<string>("");
-  const [currency, setCurrency] = useState<string>("");
-  const [username, setUsername] = useState<string>("");
-  const [dialCode, setDialCode] = useState<string>("");
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [businessName, setBusinessName] = useState("");
+
+  const [isOnline, setIsOnline] = useState(true);
+  const [showOfflineModal, setShowOfflineModal] = useState(false);
+  const [hasShownOffline, setHasShownOffline] = useState(false);
+
   const [currencies, setCurrencies] = useState<string[]>([]);
-  const [businessName, setBusinessName] = useState<string>("");
   const [countries, setCountries] = useState<CountryOption[]>([]);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [availableDialCodes, setAvailableDialCodes] = useState<string[]>([]);
@@ -32,23 +38,55 @@ export function useRegisterHook() {
     !taxId ||
     !phone;
 
-  const isDisabledSubmit =
-    !email ||
-    !password ||
-    !username ||
-    !businessName ||
-    !country ||
-    !currency ||
-    !taxId ||
-    !phone ||
-    !logo;
+  const isDisabledSubmit = isDisabledFirst || !logo || !isOnline;
 
   const isValidTaxId = (taxId: string) => /^\d{9}$|^\d{11}$/.test(taxId);
+
   const taxIdError = useMemo(() => {
     if (!taxId) return "";
     if (!isValidTaxId(taxId)) return "RNC invalido (9 o 11 dígitos)";
     return "";
   }, [taxId]);
+
+  useEffect(() => {
+    const checkRealConnection = async () => {
+      try {
+        await fetch("http://localhost:3000/api/", { cache: "no-store" });
+        setIsOnline(true);
+      } catch {
+        setIsOnline(false);
+      }
+    };
+
+    const handleOnline = () => {
+      checkRealConnection();
+    };
+
+    const handleOffline = () => {
+      setIsOnline(false);
+    };
+
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+
+    checkRealConnection();
+
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!isOnline && !hasShownOffline) {
+      setShowOfflineModal(true);
+      setHasShownOffline(true);
+    }
+
+    if (isOnline) {
+      setHasShownOffline(false);
+    }
+  }, [isOnline, hasShownOffline]);
 
   useEffect(() => {
     async function loadCountries() {
@@ -59,38 +97,50 @@ export function useRegisterHook() {
 
         const data: RestCountry[] = await res.json();
 
-        const currencySet = new Set<string>();
+        localStorage.setItem("countries_cache", JSON.stringify(data));
+        processData(data);
+      } catch (err) {
+        const cached = localStorage.getItem("countries_cache");
 
-        const formatted: CountryOption[] = data
-          .map((c) => {
-            const root = c.idd?.root ?? "";
-            const suffixes = c.idd?.suffixes ?? [];
+        if (cached) {
+          const data: RestCountry[] = JSON.parse(cached);
+          processData(data);
+        } else {
+          console.error("No hay datos disponibles");
+        }
 
-            const dialCodes: string[] =
-              root && suffixes.length > 0
-                ? suffixes.map((s) => `${root}${s}`)
-                : [];
+        console.error(err);
+      }
+    }
 
-            const currencyCodes: string[] = c.currencies
-              ? Object.keys(c.currencies)
+    function processData(data: RestCountry[]) {
+      const currencySet = new Set<string>();
+
+      const formatted: CountryOption[] = data
+        .map((c) => {
+          const root = c.idd?.root ?? "";
+          const suffixes = c.idd?.suffixes ?? [];
+
+          const dialCodes =
+            root && suffixes.length > 0
+              ? suffixes.map((s) => `${root}${s}`)
               : [];
 
-            currencyCodes.forEach((code) => currencySet.add(code));
+          const currencyCodes = c.currencies ? Object.keys(c.currencies) : [];
 
-            return {
-              name: c.name.common,
-              code: c.cca2,
-              dialCodes,
-              currencies: currencyCodes,
-            };
-          })
-          .sort((a, b) => a.name.localeCompare(b.name));
+          currencyCodes.forEach((code) => currencySet.add(code));
 
-        setCountries(formatted);
-        setCurrencies(Array.from(currencySet).sort());
-      } catch (err) {
-        console.error("Error loading countries", err);
-      }
+          return {
+            name: c.name.common,
+            code: c.cca2,
+            dialCodes,
+            currencies: currencyCodes,
+          };
+        })
+        .sort((a, b) => a.name.localeCompare(b.name));
+
+      setCountries(formatted);
+      setCurrencies(Array.from(currencySet).sort());
     }
 
     loadCountries();
@@ -101,9 +151,7 @@ export function useRegisterHook() {
 
     if (selected) {
       setAvailableDialCodes(selected.dialCodes);
-
-      const first = selected.dialCodes[0] ?? "";
-      setDialCode(first);
+      setDialCode(selected.dialCodes[0] ?? "");
       setPhone("");
     }
   }, [country, countries]);
@@ -114,12 +162,10 @@ export function useRegisterHook() {
       return;
     }
 
-    const objectUrl = URL.createObjectURL(logo);
-    setLogoPreview(objectUrl);
+    const url = URL.createObjectURL(logo);
+    setLogoPreview(url);
 
-    return () => {
-      URL.revokeObjectURL(objectUrl);
-    };
+    return () => URL.revokeObjectURL(url);
   }, [logo]);
 
   const countryOptions = countries.map((c) => ({
@@ -127,35 +173,30 @@ export function useRegisterHook() {
     label: c.name,
   }));
 
-  const currencyOptions = currencies.map((cur) => ({
-    value: cur,
-    label: cur,
+  const currencyOptions = currencies.map((c) => ({
+    value: c,
+    label: c,
   }));
 
-  const dialCodeOptions = availableDialCodes.map((code) => ({
-    value: code,
-    label: code,
+  const dialCodeOptions = availableDialCodes.map((c) => ({
+    value: c,
+    label: c,
   }));
 
   const handlePhoneChange = (value: string) => {
-    if (/^\d*$/.test(value)) {
-      setPhone(value);
-    }
+    if (/^\d*$/.test(value)) setPhone(value);
   };
 
   const handleLogoChange = (file: File | null) => {
-    if (!file) return;
-    setLogo(file);
+    if (file) setLogo(file);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (!isOnline || !logo) return;
+
     setIsLoading(true);
-
-    const fullPhone = dialCode + phone;
-
-    if (!logo) return;
 
     try {
       const result = await registerUserService({
@@ -166,17 +207,14 @@ export function useRegisterHook() {
         country,
         currency,
         taxId,
-        phone: fullPhone,
+        phone: dialCode + phone,
         logo,
       });
 
-      console.log(`Result ${result.data}`);
-
-      navigate("/login");
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        console.log(err);
-      }
+      console.log(result);
+      navigate(`/verify-email?email=${encodeURIComponent(email)}`);
+    } catch (err) {
+      console.error(err);
     } finally {
       setIsLoading(false);
     }
@@ -205,6 +243,9 @@ export function useRegisterHook() {
     logo,
     logoPreview,
     step,
+    isOnline,
+    showOfflineModal,
+    setShowOfflineModal,
     setStep,
     handleLogoChange,
     setEmail,

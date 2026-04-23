@@ -1,0 +1,164 @@
+.planning-calendar {
+  --fc-border-color: #e2e8f0;
+  --fc-page-bg-color: transparent;
+  --fc-neutral-bg-color: #f8fafc;
+  --fc-today-bg-color: #eff6ff;
+  --fc-event-bg-color: transparent;
+  --fc-event-border-color: transparent;
+  --fc-button-bg-color: #ffffff;
+  --fc-button-border-color: #cbd5e1;
+  --fc-button-text-color: #0f172a;
+  --fc-button-hover-bg-color: #dbeafe;
+  --fc-button-hover-border-color: #93c5fd;
+  --fc-button-active-bg-color: #0f172a;
+  --fc-button-active-border-color: #0f172a;
+  --fc-button-active-text-color: #ffffff;
+}
+
+.planning-calendar .fc {
+  border-radius: 24px;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  padding: 0.4rem;
+}
+
+.planning-calendar .fc-toolbar.fc-header-toolbar {
+  margin-bottom: 1rem;
+  padding: 0.4rem;
+  gap: 0.75rem;
+}
+
+.planning-calendar .fc-toolbar-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.planning-calendar .fc-button {
+  border-radius: 999px !important;
+  box-shadow: none !important;
+  font-size: 0.82rem !important;
+  font-weight: 700 !important;
+  text-transform: capitalize !important;
+  padding: 0.5rem 0.9rem !important;
+}
+
+.planning-calendar .fc-scrollgrid,
+.planning-calendar .fc-theme-standard td,
+.planning-calendar .fc-theme-standard th {
+  border-color: #e2e8f0;
+}
+
+.planning-calendar .fc-col-header-cell {
+  background: #f8fafc;
+}
+
+.planning-calendar .fc-col-header-cell-cushion {
+  padding: 0.9rem 0.3rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.planning-calendar .fc-daygrid-day-top {
+  justify-content: flex-end;
+  padding: 0.45rem 0.45rem 0;
+}
+
+.planning-calendar .fc-daygrid-day-number {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #334155;
+}
+
+.planning-calendar .fc-daygrid-day {
+  transition: background-color 160ms ease;
+}
+
+.planning-calendar .fc-day-other {
+  background: #f8fafc;
+}
+
+.planning-calendar .planning-day-selected {
+  background: linear-gradient(180deg, rgba(14, 165, 233, 0.14) 0%, rgba(219, 234, 254, 0.55) 100%);
+}
+
+.planning-calendar .planning-day-disabled {
+  opacity: 0.6;
+}
+
+.planning-calendar .fc-daygrid-day-frame {
+  min-height: 8rem;
+}
+
+.planning-calendar .fc-daygrid-event {
+  margin: 0.18rem 0.35rem;
+  border-radius: 14px;
+}
+
+.planning-calendar .planning-event-planned .planning-event-chip,
+.planning-calendar .planning-event-current .planning-event-chip {
+  display: grid;
+  gap: 0.05rem;
+  border-radius: 14px;
+  padding: 0.45rem 0.6rem;
+  color: #ffffff;
+}
+
+.planning-calendar .planning-event-planned .planning-event-chip {
+  background: linear-gradient(135deg, #0f172a 0%, #334155 100%);
+}
+
+.planning-calendar .planning-event-current .planning-event-chip {
+  background: linear-gradient(135deg, #0284c7 0%, #38bdf8 100%);
+}
+
+.planning-calendar .planning-event-chip strong {
+  font-size: 0.74rem;
+  line-height: 1.1;
+}
+
+.planning-calendar .planning-event-chip span {
+  font-size: 0.68rem;
+  opacity: 0.9;
+  line-height: 1.1;
+}
+
+.planning-calendar .fc-daygrid-more-link {
+  color: #0284c7;
+  font-weight: 700;
+}
+
+@media (max-width: 768px) {
+  .planning-calendar .fc-toolbar.fc-header-toolbar {
+    align-items: flex-start;
+  }
+
+  .planning-calendar .fc-toolbar-title {
+    font-size: 1rem;
+  }
+
+  .planning-calendar .fc-col-header-cell-cushion {
+    font-size: 0.62rem;
+    padding: 0.55rem 0.2rem;
+  }
+
+  .planning-calendar .fc-daygrid-day-number {
+    font-size: 0.78rem;
+  }
+
+  .planning-calendar .fc-daygrid-day-frame {
+    min-height: 6rem;
+  }
+
+  .planning-calendar .planning-event-chip strong {
+    font-size: 0.67rem;
+  }
+
+  .planning-calendar .planning-event-chip span {
+    font-size: 0.6rem;
+  }
+}

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { resetPasswordService } from "../service/auth.service";
+import { resetPasswordService } from "../service/service";
 import { sileo } from "sileo";
 import { useNavigate } from "react-router-dom";
 
@@ -48,13 +48,13 @@ export function useResetPassword() {
       sileo.success({
         title: "Contraseña restablecida",
         description: "Tu contraseña ha sido restablecida exitosamente",
-      })
+      });
 
       console.log("Informacion recibida:", data);
 
       setTimeout(() => {
         navigate("/login");
-      }, 300)
+      }, 300);
     } catch (err) {
       console.log("Error al enviar el codigo de recuperacion:", err);
     } finally {

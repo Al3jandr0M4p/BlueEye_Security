@@ -1,6 +1,12 @@
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
 import authReducer from "./slices/auth.slice";
 import {
+  setAccessTokenGetter,
+  setLogoutHandler,
+  setRefreshTokenGetter,
+  setSessionUpdateHandler,
+} from "../../api/api";
+import {
   FLUSH,
   PAUSE,
   PERSIST,
@@ -11,7 +17,7 @@ import {
   persistReducer,
   type PersistConfig,
 } from "redux-persist";
-// import storage from "redux-persist/lib/storage";
+import { logout, setSession } from "./slices/auth.slice";
 
 const storageWrapper = {
   getItem: (key: string) => {
@@ -40,7 +46,6 @@ const persistConfig: PersistConfig<ReturnType<typeof rootReducer>> = {
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
 
-// ─── Store ────────────────────────────────────────────────────────────────────
 export const store = configureStore({
   reducer: persistedReducer,
   middleware: (getDefaultMiddleware) =>
@@ -50,6 +55,22 @@ export const store = configureStore({
       },
     }),
   devTools: true,
+});
+
+setAccessTokenGetter(() => store.getState().auth.session?.access_token);
+setRefreshTokenGetter(() => store.getState().auth.session?.refresh_token);
+setSessionUpdateHandler(({ profile, session, user }) => {
+  store.dispatch(
+    setSession({
+      user,
+      session,
+      profile,
+    }),
+  );
+});
+setLogoutHandler(async () => {
+  store.dispatch(logout());
+  await persistor.purge();
 });
 
 export const persistor = persistStore(store);

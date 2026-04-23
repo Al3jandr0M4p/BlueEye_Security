@@ -5,20 +5,21 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBars, faTimes, faBell } from "@fortawesome/free-solid-svg-icons";
 
 import { useDashboardTech } from "../../hooks/use-dashboard-tech";
-import { NotificationsPanel } from "../NotificationsPanels/NotificationsPanel";
+import { useTechNotifications } from "../../hooks/use-tech-notifications";
 import { AnimatedLink } from "../AnimatedLink/AnimatedLink";
 import { AppNavbar } from "../Navbar/Navbar";
+import { TechNotificationsDrawer } from "../techNotifications/TechNotificationsDrawer";
 
 export const Menu: React.FC = () => {
   const {
     openSideBar,
     showNav,
-    isPricing,
     showNotificationsPanel,
     setShowNotificationsPanel,
     setOpenSideBar,
     handleLogOut,
   } = useDashboardTech();
+  const notifications = useTechNotifications();
 
   return (
     <>
@@ -46,15 +47,6 @@ export const Menu: React.FC = () => {
         }
         right={
           <>
-            {!isPricing && (
-              <Link
-                to="/techDashboard/pricing"
-                className="px-6 py-2 rounded-full bg-gray-950 text-white font-medium hover:bg-black transition"
-              >
-                Get Pro
-              </Link>
-            )}
-
             {/* NOTIFICATIONS ICON */}
             <div className="relative cursor-pointer">
               <FontAwesomeIcon
@@ -66,8 +58,14 @@ export const Menu: React.FC = () => {
                 }}
               />
 
-              <span className="absolute -top-2 -right-2 w-4 h-4 bg-red-500 rounded-full animate-ping"></span>
-              <span className="absolute -top-2 -right-2 w-4 h-4 bg-red-500 rounded-full"></span>
+              {notifications.unreadCount > 0 && (
+                <>
+                  <span className="absolute -top-2 -right-2 h-4 w-4 rounded-full bg-red-500 animate-ping"></span>
+                  <span className="absolute -top-2 -right-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
+                    {notifications.unreadCount > 9 ? "9+" : notifications.unreadCount}
+                  </span>
+                </>
+              )}
             </div>
 
             {/* USER DROPDOWN */}
@@ -96,16 +94,24 @@ export const Menu: React.FC = () => {
         }
       >
         {showNotificationsPanel && (
-          <NotificationsPanel
-            openNotificationsPanel={showNotificationsPanel}
-            setOpenNotificationsPanel={setShowNotificationsPanel}
+          <TechNotificationsDrawer
+            isOpen={showNotificationsPanel}
+            notifications={notifications.notifications}
+            unreadCount={notifications.unreadCount}
+            isLoading={notifications.isLoading}
+            onClose={() => setShowNotificationsPanel(false)}
+            onMarkAsRead={(notificationId) => {
+              void notifications.markAsRead(notificationId);
+            }}
           />
         )}
       </AppNavbar>
 
       {/* OVERLAY */}
       {openSideBar && (
-        <div
+        <button
+          type="button"
+          aria-label="Cerrar menú lateral"
           className="fixed inset-0 bg-black/50 z-40 transition-opacity duration-500 opacity-100"
           onClick={() => setOpenSideBar(false)}
         />
@@ -141,6 +147,22 @@ export const Menu: React.FC = () => {
             closeSideBar={() => setOpenSideBar(false)}
           >
             Tickets
+          </AnimatedLink>
+
+          <AnimatedLink
+            to="/techDashboard/levantamientos"
+            className="block w-full hover:bg-gray-200 p-2 rounded"
+            closeSideBar={() => setOpenSideBar(false)}
+          >
+            Levantamientos
+          </AnimatedLink>
+
+          <AnimatedLink
+            to="/techDashboard/sitios"
+            className="block w-full hover:bg-gray-200 p-2 rounded"
+            closeSideBar={() => setOpenSideBar(false)}
+          >
+            Sitios
           </AnimatedLink>
 
           <button onClick={handleLogOut}>Cerrar sesion</button>

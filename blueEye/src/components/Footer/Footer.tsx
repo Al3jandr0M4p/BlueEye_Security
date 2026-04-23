@@ -4,223 +4,322 @@ import {
   faXTwitter,
   faLinkedinIn,
   faInstagram,
+  type IconDefinition,
 } from "@fortawesome/free-brands-svg-icons";
-import React from "react";
+import React, { useState } from "react";
+
+// ─── BlueEye brand tokens ──────────────────────────────────────────────────────
+const T = {
+  white:      "#FFFFFF",
+  green:      "#4CAF82",
+  greenDark:  "#2E8B5E",
+  greenSft:   "#EAF7F1",
+  greenMid:   "#A8DBBE",
+  navy:       "#1A2332",
+  navyMid:    "#243044",
+  navyLight:  "#2E3D55",
+  tWhiteDim:  "rgba(255,255,255,0.5)",
+  borderDark: "rgba(255,255,255,0.1)",
+  sans:       "'Plus Jakarta Sans', 'DM Sans', system-ui, sans-serif",
+};
 
 export const Footer: React.FC = () => {
+  const cols = [
+    {
+      title: "Empresa",
+      links: ["Acerca de", "Carreras", "Blog", "Contacto", "Prensa"],
+    },
+    {
+      title: "Servicios",
+      links: [
+        "Monitoreo en tiempo real",
+        "Gestión de infraestructura",
+        "Seguridad avanzada",
+        "Soporte 24/7",
+        "Integraciones",
+      ],
+    },
+    {
+      title: "Recursos",
+      links: ["Documentación", "API", "Casos de éxito", "Webinars", "FAQ"],
+    },
+  ];
+
   return (
-    <>
-      <footer className="relative bg-gray-900 text-white pt-34 pb-22 overflow-hidden">
-        <span
-          className="absolute text-gray-800 text-[14rem] font-bold opacity-30 top-40 left-1/2 -translate-x-1/2 select-none pointer-events-none"
-          style={{ fontFamily: "Google Sans" }}
-        >
-          BlueEye
-        </span>
+    <footer
+      style={{
+        position: "relative",
+        background: T.navy,
+        color: T.white,
+        paddingTop: 80,
+        paddingBottom: 40,
+        overflow: "hidden",
+        fontFamily: T.sans,
+      }}
+    >
+      {/* Watermark — igual que el original */}
+      <span
+        style={{
+          position: "absolute",
+          color: T.navyMid,
+          fontSize: "13rem",
+          fontWeight: 700,
+          opacity: 0.35,
+          top: "40%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+          userSelect: "none",
+          pointerEvents: "none",
+          whiteSpace: "nowrap",
+          fontFamily: T.sans,
+        }}
+      >
+        BlueEye
+      </span>
 
-        <div className="relative max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 grid grid-cols-1 md:grid-cols-5 gap-16 z-10">
-          <div className="flex flex-col gap-6">
-            <h3
-              className="text-3xl font-bold"
-              style={{ fontFamily: "Google Sans" }}
+      <div
+        style={{
+          position: "relative",
+          zIndex: 10,
+          maxWidth: 1200,
+          margin: "0 auto",
+          padding: "0 32px",
+          display: "grid",
+          gridTemplateColumns: "1.8fr 1fr 1fr 1fr 1.4fr",
+          gap: 48,
+          marginBottom: 48,
+          paddingBottom: 48,
+          borderBottom: `1px solid ${T.borderDark}`,
+        }}
+      >
+        {/* Brand column */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          {/* Logo */}
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <div
+              style={{
+                width: 34,
+                height: 34,
+                borderRadius: 9,
+                background: T.navyLight,
+                border: `1px solid ${T.borderDark}`,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
             >
-              BlueEye Security
-            </h3>
-            <p
-              className="text-gray-400 text-sm md:text-base"
-              style={{ fontFamily: "Google Sans" }}
-            >
-              Monitoreo y gestión de infraestructuras de seguridad desde una
-              sola plataforma. Diseñada para empresas que exigen control total y
-              eficiencia.
-            </p>
-            <div className="flex gap-6 mt-4 text-2xl">
-              <a href="#" className="hover:text-green-300 transition-colors">
-                <FontAwesomeIcon icon={faFacebookF} />
-              </a>
-              <a href="#" className="hover:text-green-300 transition-colors">
-                <FontAwesomeIcon icon={faXTwitter} />
-              </a>
-              <a href="#" className="hover:text-green-300 transition-colors">
-                <FontAwesomeIcon icon={faLinkedinIn} />
-              </a>
-              <a href="#" className="hover:text-green-300 transition-colors">
-                <FontAwesomeIcon icon={faInstagram} />
-              </a>
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                <ellipse
+                  cx="9" cy="9" rx="8" ry="5.5"
+                  stroke={T.green} strokeWidth="1.5"
+                />
+                <circle cx="9" cy="9" r="2.5" fill={T.green} />
+                <circle cx="9" cy="9" r="1" fill={T.white} />
+              </svg>
             </div>
+            <span
+              style={{
+                fontSize: 15,
+                fontWeight: 800,
+                color: T.white,
+                letterSpacing: "-0.02em",
+              }}
+            >
+              BlueEye{" "}
+              <span style={{ color: T.green }}>Security</span>
+            </span>
           </div>
 
-          <div className="flex flex-col gap-4">
-            <h4
-              className="font-semibold text-lg mb-2"
-              style={{ fontFamily: "Google Sans" }}
-            >
-              Empresa
-            </h4>
-            <a
-              href="#"
-              style={{ fontFamily: "Google Sans" }}
-              className="text-gray-400 hover:text-green-300 transition-colors"
-            >
-              Acerca de
-            </a>
-            <a
-              href="#"
-              style={{ fontFamily: "Google Sans" }}
-              className="text-gray-400 hover:text-green-300 transition-colors"
-            >
-              Carreras
-            </a>
-            <a
-              href="#"
-              style={{ fontFamily: "Google Sans" }}
-              className="text-gray-400 hover:text-green-300 transition-colors"
-            >
-              Blog
-            </a>
-            <a
-              href="#"
-              style={{ fontFamily: "Google Sans" }}
-              className="text-gray-400 hover:text-green-300 transition-colors"
-            >
-              Contacto
-            </a>
-            <a
-              href="#"
-              style={{ fontFamily: "Google Sans" }}
-              className="text-gray-400 hover:text-green-300 transition-colors"
-            >
-              Prensa
-            </a>
-          </div>
+          <p
+            style={{
+              fontSize: 13,
+              color: T.tWhiteDim,
+              lineHeight: 1.75,
+              margin: 0,
+            }}
+          >
+            Monitoreo y gestión de infraestructuras de seguridad desde una sola
+            plataforma. Diseñada para empresas que exigen control total y
+            eficiencia.
+          </p>
 
-          <div className="flex flex-col gap-4">
-            <h4
-              className="font-semibold text-lg mb-2"
-              style={{ fontFamily: "Google Sans" }}
-            >
-              Servicios
-            </h4>
-            <a
-              href="#"
-              style={{ fontFamily: "Google Sans" }}
-              className="text-gray-400 hover:text-green-300 transition-colors"
-            >
-              Monitoreo en tiempo real
-            </a>
-            <a
-              href="#"
-              style={{ fontFamily: "Google Sans" }}
-              className="text-gray-400 hover:text-green-300 transition-colors"
-            >
-              Gestión de infraestructura
-            </a>
-            <a
-              href="#"
-              style={{ fontFamily: "Google Sans" }}
-              className="text-gray-400 hover:text-green-300 transition-colors"
-            >
-              Seguridad avanzada
-            </a>
-            <a
-              href="#"
-              style={{ fontFamily: "Google Sans" }}
-              className="text-gray-400 hover:text-green-300 transition-colors"
-            >
-              Soporte 24/7
-            </a>
-            <a
-              href="#"
-              style={{ fontFamily: "Google Sans" }}
-              className="text-gray-400 hover:text-green-300 transition-colors"
-            >
-              Integraciones
-            </a>
-          </div>
-
-          <div className="flex flex-col gap-4">
-            <h4
-              className="font-semibold text-lg mb-2"
-              style={{ fontFamily: "Google Sans" }}
-            >
-              Recursos
-            </h4>
-            <a
-              href="#"
-              style={{ fontFamily: "Google Sans" }}
-              className="text-gray-400 hover:text-green-300 transition-colors"
-            >
-              Documentación
-            </a>
-            <a
-              href="#"
-              style={{ fontFamily: "Google Sans" }}
-              className="text-gray-400 hover:text-green-300 transition-colors"
-            >
-              API
-            </a>
-            <a
-              href="#"
-              style={{ fontFamily: "Google Sans" }}
-              className="text-gray-400 hover:text-green-300 transition-colors"
-            >
-              Casos de éxito
-            </a>
-            <a
-              href="#"
-              style={{ fontFamily: "Google Sans" }}
-              className="text-gray-400 hover:text-green-300 transition-colors"
-            >
-              Webinars
-            </a>
-            <a
-              href="#"
-              style={{ fontFamily: "Google Sans" }}
-              className="text-gray-400 hover:text-green-300 transition-colors"
-            >
-              FAQ
-            </a>
-          </div>
-
-          <div className="flex flex-col gap-4">
-            <h4
-              className="font-semibold text-lg mb-2"
-              style={{ fontFamily: "Google Sans" }}
-            >
-              Suscríbete
-            </h4>
-            <p
-              className="text-gray-400 text-sm"
-              style={{ fontFamily: "Google Sans" }}
-            >
-              Recibe novedades, actualizaciones y consejos de seguridad
-              directamente en tu correo.
-            </p>
-            <form className="flex flex-col gap-3 mt-2">
-              <input
-                type="email"
-                placeholder="Email"
-                style={{ fontFamily: "Google Sans" }}
-                className="px-4 py-2 border-2 border-white placeholder:text-white outline-none rounded-2xl text-gray-900 w-full sm:w-auto flex-1"
-              />
-              <button
-                type="submit"
-                style={{ fontFamily: "Google Sans" }}
-                className="px-6 py-2 bg-green-300 rounded-2xl font-semibold hover:bg-green-400 transition-colors"
-              >
-                Suscribirse
-              </button>
-            </form>
+          {/* Social icons */}
+          <div style={{ display: "flex", gap: 10, marginTop: 4 }}>
+            {[
+              { icon: faFacebookF },
+              { icon: faXTwitter },
+              { icon: faLinkedinIn },
+              { icon: faInstagram },
+            ].map((s, i) => (
+              <SocialIcon key={i} icon={s.icon} />
+            ))}
           </div>
         </div>
 
-        <div
-          className="border-t border-gray-700 mt-20 pt-8 text-center text-gray-500 text-sm relative z-10"
-          style={{ fontFamily: "Google Sans" }}
-        >
+        {/* Link columns */}
+        {cols.map((col) => (
+          <div key={col.title} style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+            <div
+              style={{
+                fontSize: 12,
+                fontWeight: 700,
+                color: T.white,
+                letterSpacing: "0.08em",
+                textTransform: "uppercase",
+                marginBottom: 16,
+              }}
+            >
+              {col.title}
+            </div>
+            {col.links.map((link) => (
+              <FooterLink key={link}>{link}</FooterLink>
+            ))}
+          </div>
+        ))}
+
+        {/* Newsletter */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          <div
+            style={{
+              fontSize: 12,
+              fontWeight: 700,
+              color: T.white,
+              letterSpacing: "0.08em",
+              textTransform: "uppercase",
+              marginBottom: 4,
+            }}
+          >
+            Suscríbete
+          </div>
+          <p style={{ fontSize: 13, color: T.tWhiteDim, lineHeight: 1.6, margin: 0 }}>
+            Recibe novedades, actualizaciones y consejos de seguridad
+            directamente en tu correo.
+          </p>
+          <form
+            style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 4 }}
+            onSubmit={(e) => e.preventDefault()}
+          >
+            <input
+              type="email"
+              placeholder="Email"
+              style={{
+                padding: "10px 14px",
+                background: T.navyLight,
+                border: `1.5px solid ${T.borderDark}`,
+                borderRadius: 10,
+                fontFamily: T.sans,
+                fontSize: 13,
+                color: T.white,
+                outline: "none",
+                width: "100%",
+                boxSizing: "border-box",
+              }}
+            />
+            <button
+              type="submit"
+              style={{
+                padding: "10px 16px",
+                background: T.green,
+                color: T.white,
+                border: "none",
+                borderRadius: 10,
+                fontFamily: T.sans,
+                fontSize: 13,
+                fontWeight: 700,
+                cursor: "pointer",
+              }}
+            >
+              Suscribirse
+            </button>
+          </form>
+        </div>
+      </div>
+
+      {/* Bottom bar */}
+      <div
+        style={{
+          position: "relative",
+          zIndex: 10,
+          maxWidth: 1200,
+          margin: "0 auto",
+          padding: "0 32px",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        <span style={{ fontSize: 12, color: T.tWhiteDim }}>
           © 2026 BlueEye Security. Todos los derechos reservados.
+        </span>
+        <div style={{ display: "flex", gap: 20 }}>
+          {["Privacidad", "Términos", "Cookies"].map((link) => (
+            <a
+              key={link}
+              href="#"
+              style={{
+                fontSize: 12,
+                color: T.tWhiteDim,
+                textDecoration: "none",
+                fontFamily: T.sans,
+              }}
+            >
+              {link}
+            </a>
+          ))}
         </div>
-      </footer>
-    </>
+      </div>
+    </footer>
+  );
+};
+
+// ─── Helpers ───────────────────────────────────────────────────────────────────
+
+const FooterLink: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [hov, setHov] = useState(false);
+  return (
+    <a
+      href="#"
+      onMouseEnter={() => setHov(true)}
+      onMouseLeave={() => setHov(false)}
+      style={{
+        display: "block",
+        fontSize: 13,
+        fontWeight: 500,
+        color: hov ? "#4CAF82" : "rgba(255,255,255,0.5)",
+        textDecoration: "none",
+        marginBottom: 10,
+        transition: "color 0.15s",
+        fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
+      }}
+    >
+      {children}
+    </a>
+  );
+};
+
+const SocialIcon: React.FC<{ icon: IconDefinition }> = ({ icon }) => {
+  const [hov, setHov] = useState(false);
+  return (
+    <a
+      href="#"
+      onMouseEnter={() => setHov(true)}
+      onMouseLeave={() => setHov(false)}
+      style={{
+        width: 34,
+        height: 34,
+        borderRadius: 9,
+        background: hov ? "#4CAF82" : "#2E3D55",
+        border: "1px solid rgba(255,255,255,0.1)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        color: hov ? "#FFFFFF" : "rgba(255,255,255,0.5)",
+        fontSize: 14,
+        textDecoration: "none",
+        transition: "all 0.15s",
+      }}
+    >
+      <FontAwesomeIcon icon={icon} />
+    </a>
   );
 };

@@ -46,6 +46,7 @@ const ResetPassword: React.FC = () => {
               <Input
                 type="password"
                 text="Nueva Contraseña"
+                variant="default"
                 value={newPassword}
                 onValueChange={setNewPassword}
                 translationKey={"Nueva Contraseña"}

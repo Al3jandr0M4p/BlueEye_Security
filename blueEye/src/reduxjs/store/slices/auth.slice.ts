@@ -7,40 +7,25 @@ import type {
 } from "../../../types/types";
 import { loginGoogleThunk, loginThunk } from "../thunks/thunks";
 
-const storedAuth = localStorage.getItem("auth");
+function resolveEffectiveRole(
+  userRole?: DecodedJWT["rolename"] | null,
+  profileRole?: UserProfile["rolename"] | null,
+) {
+  if (userRole === "superAdmin" || profileRole === "superAdmin") {
+    return "superAdmin" as const;
+  }
 
-const initialState: AuthState = storedAuth
-  ? (() => {
-      try {
-        const parsed = JSON.parse(storedAuth);
-        return {
-          user: parsed.user,
-          session: parsed.session,
-          profile: parsed.profile,
-          isAuthenticated: parsed.isAuthenticated,
-          loading: false,
-          error: null,
-        };
-      } catch {
-        localStorage.removeItem("auth");
-        return {
-          user: null,
-          session: null,
-          profile: null,
-          isAuthenticated: false,
-          loading: false,
-          error: null,
-        };
-      }
-    })()
-  : {
-      user: null,
-      session: null,
-      profile: null,
-      isAuthenticated: false,
-      loading: false,
-      error: null,
-    };
+  return profileRole ?? userRole ?? null;
+}
+
+const initialState: AuthState = {
+  user: null,
+  session: null,
+  profile: null,
+  isAuthenticated: false,
+  loading: false,
+  error: null,
+};
 
 const authSlice = createSlice({
   name: "auth",
@@ -52,8 +37,6 @@ const authSlice = createSlice({
       state.profile = null;
       state.isAuthenticated = false;
       state.error = null;
-      localStorage.removeItem("auth");
-      localStorage.removeItem("accessToken");
     },
     setSession: (
       state,
@@ -63,11 +46,18 @@ const authSlice = createSlice({
         profile: UserProfile;
       }>,
     ) => {
+      const effectiveRole = resolveEffectiveRole(
+        action.payload.user?.rolename,
+        action.payload.profile?.rolename,
+      );
+
       state.user = action.payload.user;
       state.session = action.payload.session;
-      state.profile = action.payload.profile;
+      state.profile = {
+        ...action.payload.profile,
+        rolename: effectiveRole ?? action.payload.profile.rolename,
+      };
       state.isAuthenticated = true;
-      localStorage.setItem("accessToken", action.payload.session.access_token);
     },
   },
   extraReducers: (builder) => {
@@ -77,20 +67,21 @@ const authSlice = createSlice({
         state.error = null;
       })
       .addCase(loginThunk.fulfilled, (state, action) => {
+        const effectiveRole = resolveEffectiveRole(
+          action.payload?.user?.rolename ?? null,
+          action.payload?.profile?.rolename ?? null,
+        );
+
         state.loading = false;
         state.user = action.payload?.user ?? null;
         state.session = action.payload?.session ?? null;
-        state.profile = action.payload?.profile ?? null;
+        state.profile = action.payload?.profile
+          ? {
+              ...action.payload.profile,
+              rolename: effectiveRole ?? action.payload.profile.rolename,
+            }
+          : null;
         state.isAuthenticated = true;
-        localStorage.setItem(
-          "auth",
-          JSON.stringify({
-            user: state.user,
-            session: state.session,
-            profile: state.profile,
-            isAuthenticated: state.isAuthenticated,
-          }),
-        );
       })
       .addCase(loginThunk.rejected, (state, action) => {
         state.loading = false;
@@ -101,15 +92,21 @@ const authSlice = createSlice({
         state.error = null;
       })
       .addCase(loginGoogleThunk.fulfilled, (state, action) => {
+        const effectiveRole = resolveEffectiveRole(
+          action.payload?.user?.rolename ?? null,
+          action.payload?.profile?.rolename ?? null,
+        );
+
         state.loading = false;
         state.user = action.payload?.user ?? null;
         state.session = action.payload?.session ?? null;
-        state.profile = action.payload?.profile ?? null;
+        state.profile = action.payload?.profile
+          ? {
+              ...action.payload.profile,
+              rolename: effectiveRole ?? action.payload.profile.rolename,
+            }
+          : null;
         state.isAuthenticated = true;
-        localStorage.setItem(
-          "accessToken",
-          action.payload?.session.access_token,
-        );
       })
       .addCase(loginGoogleThunk.rejected, (state, action) => {
         state.loading = false;

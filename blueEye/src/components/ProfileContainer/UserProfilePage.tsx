@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import {
   Bell,
   CheckCircle2,
@@ -16,6 +16,7 @@ import { useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../hooks/use-store-hook";
 import { logout } from "../../reduxjs/store/slices/auth.slice";
 import { persistor } from "../../reduxjs/store/store";
+import { signOut } from "../../service/service";
 import type { Role } from "../../types/types";
 import "./profile-page.css";
 
@@ -80,9 +81,7 @@ const createInitials = (value: string): string => {
     .map((token) => token.trim())
     .filter(Boolean);
 
-  if (!tokens.length) {
-    return "US";
-  }
+  if (!tokens.length) return "US";
 
   return tokens
     .slice(0, 2)
@@ -91,9 +90,7 @@ const createInitials = (value: string): string => {
 };
 
 const formatSessionDate = (unixTimestamp?: number): string => {
-  if (!unixTimestamp) {
-    return "No disponible";
-  }
+  if (!unixTimestamp) return "No disponible";
 
   return new Date(unixTimestamp * 1000).toLocaleString("es-DO", {
     dateStyle: "medium",
@@ -112,13 +109,18 @@ const UserProfilePage: React.FC = () => {
   const preferredUsername = profile?.username ?? user?.username ?? "Usuario";
   const preferredEmail = user?.email ?? "";
 
-  const [savedProfile, setSavedProfile] = useState<EditableProfile>({
+  // -----------------------
+  // Inicializar estados
+  // -----------------------
+  const initialProfile: EditableProfile = {
     username: preferredUsername,
-    email: preferredEmail,
+    email: preferredEmail || "",
     phone: DEFAULT_PHONE,
     organization: DEFAULT_ORGANIZATION,
-  });
-  const [draftProfile, setDraftProfile] = useState<EditableProfile>(savedProfile);
+  };
+
+  const [savedProfile, setSavedProfile] = useState<EditableProfile>(initialProfile);
+  const [draftProfile, setDraftProfile] = useState<EditableProfile>(initialProfile);
   const [isEditing, setIsEditing] = useState(false);
   const [preferences, setPreferences] = useState<PreferencesState>({
     emailAlerts: true,
@@ -126,71 +128,51 @@ const UserProfilePage: React.FC = () => {
     weeklyReport: false,
   });
 
-  useEffect(() => {
-    setSavedProfile((current) => ({
-      ...current,
-      username: preferredUsername,
-      email: preferredEmail || current.email,
-    }));
-
-    setDraftProfile((current) => ({
-      ...current,
-      username: preferredUsername,
-      email: preferredEmail || current.email,
-    }));
-  }, [preferredEmail, preferredUsername]);
-
-  const initials = useMemo(
-    () => createInitials(savedProfile.username),
-    [savedProfile.username],
-  );
+  // -----------------------
+  // Memorizaciones
+  // -----------------------
+  const initials = useMemo(() => createInitials(savedProfile.username), [savedProfile.username]);
 
   const activityFeed = useMemo(
     () => [
       { title: "Sesion iniciada", detail: formatSessionDate(user?.iat) },
-      {
-        title: "Rol activo",
-        detail: `Perfil ${roleMeta.label.toLowerCase()} habilitado`,
-      },
-      {
-        title: "Sesion expira",
-        detail: formatSessionDate(user?.exp),
-      },
+      { title: "Rol activo", detail: `Perfil ${roleMeta.label.toLowerCase()} habilitado` },
+      { title: "Sesion expira", detail: formatSessionDate(user?.exp) },
     ],
-    [roleMeta.label, user?.exp, user?.iat],
+    [roleMeta.label, user?.exp, user?.iat]
   );
 
-  const handleInputChange = (
-    field: keyof EditableProfile,
-    value: string,
-  ): void => {
-    setDraftProfile((current) => ({
-      ...current,
-      [field]: value,
-    }));
+  // -----------------------
+  // Handlers
+  // -----------------------
+  const handleInputChange = (field: keyof EditableProfile, value: string) => {
+    setDraftProfile((current) => ({ ...current, [field]: value }));
   };
 
-  const handleSave = (): void => {
+  const handleSave = () => {
     setSavedProfile(draftProfile);
     setIsEditing(false);
   };
 
-  const handleCancel = (): void => {
+  const handleCancel = () => {
     setDraftProfile(savedProfile);
     setIsEditing(false);
   };
 
-  const togglePreference = (field: keyof PreferencesState): void => {
-    setPreferences((current) => ({
-      ...current,
-      [field]: !current[field],
-    }));
+  const togglePreference = (field: keyof PreferencesState) => {
+    setPreferences((current) => ({ ...current, [field]: !current[field] }));
   };
 
-  const handleLogout = async (): Promise<void> => {
-    dispatch(logout());
-    await persistor.purge();
-    navigate("/login", { replace: true });
+  const handleLogout = async () => {
+    try {
+      await signOut();
+    } catch (error) {
+      console.error("Logout Error:", error);
+    } finally {
+      dispatch(logout());
+      await persistor.purge();
+      navigate("/login", { replace: true });
+    }
   };
 
   return (
